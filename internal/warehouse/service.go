@@ -5,7 +5,7 @@ type Service interface {
 	Create(id int, address, telephone, warehouse_code string, minimum_capacity, minimum_temperature int) (Warehouse, error)
 	GetByID(id int) (Warehouse, error)                                                                                      // GET
 	Update(id int, address, telephone, warehouse_code string, minimum_capacity, minimum_temperature int) (Warehouse, error) // PATCH
-	// DeleteWarehouse(id int)                                                                                                          // DELETE
+	Delete(id int) error                                                                                                    // DELETE
 }
 
 type service struct {
@@ -53,4 +53,12 @@ func (s *service) GetByID(id int) (Warehouse, error) {
 		return Warehouse{}, err
 	}
 	return warehouse, nil
+}
+
+func (s *service) Delete(id int) error {
+	err := s.repository.Delete(id)
+	if err != nil {
+		return err
+	}
+	return nil
 }

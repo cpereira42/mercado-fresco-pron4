@@ -19,5 +19,6 @@ func main() {
 	wr.POST("/", w.Create)
 	wr.PUT("/:id", w.Update)
 	wr.GET("/:id", w.GetByID)
+	wr.DELETE("/:id", w.Delete)
 	router.Run()
 }

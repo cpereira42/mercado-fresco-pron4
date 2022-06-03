@@ -8,7 +8,7 @@ type Repository interface {
 	LastID() (int, error)                                                                                                   // CONTADOR
 	Update(id int, address, telephone, warehouse_code string, minimum_capacity, minimum_temperature int) (Warehouse, error) // PATCH
 	GetByID(id int) (Warehouse, error)                                                                                      // GET
-	// DeleteWarehouse(id int)                                                                                                          // DELETE
+	Delete(id int) error                                                                                                    // DELETE
 }
 
 var wr []Warehouse
@@ -70,18 +70,18 @@ func (r *repository) GetByID(id int) (Warehouse, error) {
 
 }
 
-// func (r *repository) Delete(id int) error {
-// 	delete := false
-// 	var index int
-// 	for i := range wr {
-// 		if wr[i].ID == id {
-// 			delete = true
-// 			index = i
-// 		}
-// 	}
-// 	if !delete {
-// 		return errors.New("Warehouse not found")
-// 	}
-// 	wr = append(wr[:index], wr[index+1:]...)
-// 	return nil
-// }
+func (r *repository) Delete(id int) error {
+	delete := false
+	var index int
+	for i := range wr {
+		if wr[i].ID == id {
+			delete = true
+			index = i
+		}
+	}
+	if !delete {
+		return errors.New("Warehouse not found")
+	}
+	wr = append(wr[:index], wr[index+1:]...)
+	return nil
+}

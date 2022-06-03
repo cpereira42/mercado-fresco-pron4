@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -99,4 +100,18 @@ func (c *Warehouse) GetByID(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, w)
+}
+
+func (c *Warehouse) Delete(ctx *gin.Context) {
+	id, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		return
+	}
+	err = c.service.Delete(id)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, fmt.Sprintf(" The warehouse with id %d was deleted", id))
 }
