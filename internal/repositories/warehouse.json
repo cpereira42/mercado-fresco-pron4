@@ -1,0 +1,26 @@
+[
+ {
+  "id": 0,
+  "adress": "Rua da Onça Pedra Furada",
+  "telephone": "557778888",
+  "warehouse_code": "DAMC",
+  "minimum_capacity": 20,
+  "minimum_temperature": 20
+ },
+ {
+  "id": 1,
+  "adress": "Rua da Onça Pedra Furada",
+  "telephone": "557778888",
+  "warehouse_code": "DAMC",
+  "minimum_capacity": 20,
+  "minimum_temperature": 500
+ },
+ {
+  "id": 2,
+  "adress": "Rua da Onça Pedra Furada",
+  "telephone": "557778888",
+  "warehouse_code": "DAMC",
+  "minimum_capacity": 20,
+  "minimum_temperature": 500
+ }
+]
