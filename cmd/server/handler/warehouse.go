@@ -13,7 +13,7 @@ type Warehouse struct {
 	service warehouse.Service
 }
 type request struct {
-	ID                  int    `json:"id" binding:"required"`
+	ID                  int    `json:"id"`
 	Address             string `json:"adress" binding:"required"`
 	Telephone           string `json:"telephone" binding:"required"`
 	Warehouse_code      string `json:"warehouse_code" binding:"required"`
@@ -40,7 +40,9 @@ func (c *Warehouse) GetAll(ctx *gin.Context) {
 func (c *Warehouse) Create(ctx *gin.Context) {
 	var r request
 	if err := ctx.ShouldBindJSON(&r); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ctx.AbortWithStatusJSON(http.StatusUnprocessableEntity, gin.H{
+			"error": err.Error()})
+		return
 	}
 	w, err := c.service.Create(r.ID, r.Address, r.Telephone, r.Warehouse_code, r.Minimum_capacity, r.Minimum_temperature)
 	if err != nil {

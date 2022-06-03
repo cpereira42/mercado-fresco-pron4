@@ -1,13 +1,5 @@
 [
  {
-  "id": 0,
-  "adress": "Rua da Onça Pedra Furada",
-  "telephone": "557778888",
-  "warehouse_code": "DAMC",
-  "minimum_capacity": 20,
-  "minimum_temperature": 20
- },
- {
   "id": 1,
   "adress": "Rua da Onça Pedra Furada",
   "telephone": "557778888",
@@ -18,6 +10,22 @@
  {
   "id": 2,
   "adress": "Rua da Onça Pedra Furada",
+  "telephone": "557778888",
+  "warehouse_code": "DAMC",
+  "minimum_capacity": 20,
+  "minimum_temperature": 500
+ },
+ {
+  "id": 4,
+  "adress": "Rua da Onça Pedra Furada",
+  "telephone": "3333",
+  "warehouse_code": "Denver",
+  "minimum_capacity": 20,
+  "minimum_temperature": 300
+ },
+ {
+  "id": 5,
+  "adress": "Rua do bihco",
   "telephone": "557778888",
   "warehouse_code": "DAMC",
   "minimum_capacity": 20,

@@ -119,5 +119,8 @@ func (r *repository) Delete(id int) error {
 		return errors.New("Warehouse not found")
 	}
 	wr = append(wr[:index], wr[index+1:]...)
+	if err := r.db.Write(&wr); err != nil {
+		return err
+	}
 	return nil
 }
