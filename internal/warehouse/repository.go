@@ -1,11 +1,13 @@
 package warehouse
 
+import "errors"
+
 type Repository interface {
 	GetAll() ([]Warehouse, error)                                                                                           // GET
 	Create(id int, address, telephone, warehouse_code string, minimum_capacity, minimum_temperature int) (Warehouse, error) // POST
 	LastID() (int, error)                                                                                                   // CONTADOR
-	// GetIdWarehouse(id int) (Warehouse, error)                                                                                        // GET
-	// UpdateWarehouse(id int, address, telephone, warehouse_code string, minimum_capacity, minimum_temperature int) (Warehouse, error) // PATCH
+	Update(id int, address, telephone, warehouse_code string, minimum_capacity, minimum_temperature int) (Warehouse, error) // PATCH
+	GetByID(id int) (Warehouse, error)                                                                                      // GET
 	// DeleteWarehouse(id int)                                                                                                          // DELETE
 }
 
@@ -35,21 +37,38 @@ func (r *repository) Create(id int, address, telephone, warehouse_code string, m
 
 }
 
-// func (r *repository) UpdateWarehouse(id int, address, telephone, warehouse_code string, minimum_capacity, minimum_temperature int) (Warehouse, error) {
-// 	w := Warehouse{id, address, telephone, warehouse_code, minimum_capacity, minimum_temperature}
-// 	update := false
-// 	for i := range wr {
-// 		if wr[i].ID == id {
-// 			w.ID = id
-// 			wr[i] = w
-// 			update = true
-// 		}
-// 	}
-// 	if update == false {
-// 		return Warehouse{}, errors.New("Warehouse not found")
-// 	}
-// 	return w, nil
-// }
+func (r *repository) Update(id int, address, telephone, warehouse_code string, minimum_capacity, minimum_temperature int) (Warehouse, error) {
+	w := Warehouse{id, address, telephone, warehouse_code, minimum_capacity, minimum_temperature}
+	update := false
+	for i := range wr {
+		if wr[i].ID == id {
+			w.ID = id
+			wr[i] = w
+			update = true
+		}
+	}
+	if !update {
+		return Warehouse{}, errors.New("Warehouse not found")
+	}
+	return w, nil
+}
+
+func (r *repository) GetByID(id int) (Warehouse, error) {
+	var w Warehouse
+	exists := false
+	for i := range wr {
+		if wr[i].ID == id {
+			w = wr[i]
+			exists = true
+		}
+
+	}
+	if !exists {
+		return Warehouse{}, errors.New("Warehouse not found")
+	}
+	return w, nil
+
+}
 
 // func (r *repository) Delete(id int) error {
 // 	delete := false

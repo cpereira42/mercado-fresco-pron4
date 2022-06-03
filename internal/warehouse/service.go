@@ -3,8 +3,8 @@ package warehouse
 type Service interface {
 	GetAll() ([]Warehouse, error)
 	Create(id int, address, telephone, warehouse_code string, minimum_capacity, minimum_temperature int) (Warehouse, error)
-	// GetIdWarehouse(id int) (Warehouse, error)                                                                                        // GET
-	// UpdateWarehouse(id int, address, telephone, warehouse_code string, minimum_capacity, minimum_temperature int) (Warehouse, error) // PATCH
+	GetByID(id int) (Warehouse, error)                                                                                      // GET
+	Update(id int, address, telephone, warehouse_code string, minimum_capacity, minimum_temperature int) (Warehouse, error) // PATCH
 	// DeleteWarehouse(id int)                                                                                                          // DELETE
 }
 
@@ -37,4 +37,20 @@ func (s *service) Create(id int, address, telephone, warehouse_code string, mini
 
 	return warehouse, nil
 
+}
+
+func (s *service) Update(id int, address, telephone, warehouse_code string, minimum_capacity, minimum_temperature int) (Warehouse, error) {
+	warehouse, err := s.repository.Update(id, address, telephone, warehouse_code, minimum_capacity, minimum_temperature)
+	if err != nil {
+		return Warehouse{}, err
+	}
+	return warehouse, nil
+}
+
+func (s *service) GetByID(id int) (Warehouse, error) {
+	warehouse, err := s.repository.GetByID(id)
+	if err != nil {
+		return Warehouse{}, err
+	}
+	return warehouse, nil
 }
