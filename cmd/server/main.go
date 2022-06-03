@@ -24,9 +24,10 @@ func main() {
 	pr := r.Group("/api/v1/products")
 	pr.GET("/", p.GetAll())
 	pr.GET("/:id", p.GetId())
-	/*pr.POST("/", p.Store())
-	pr.PATCH("/:id", p.UpdateName())
-	pr.DELETE("/:id", p.Delete())*/
+	pr.DELETE("/:id", p.Delete())
+	pr.POST("/", p.Store())
+	pr.PUT("/:id", p.Update())
+	pr.PATCH("/:id", p.UpdatePatch())
 
 	//pr.PUT("/:id", p.Update())
 
