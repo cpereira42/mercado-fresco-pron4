@@ -69,6 +69,7 @@ func (r *repository) Create(id int, cardNumberID, firstName, lastName string, wa
 	return employee, nil
 }
 func (r *repository) Update(id int, cardNumberID, firstName, lastName string, warehouseID int) (Employee, error) {
+	fmt.Println("id no repository", id)
 	if err := r.db.Read(&employees); err != nil {
 		return Employee{}, err
 	}
@@ -76,11 +77,12 @@ func (r *repository) Update(id int, cardNumberID, firstName, lastName string, wa
 	updated := false
 	for i := range employees {
 		if employees[i].ID == id {
-			employees[i].ID = id
+			employee.ID = id
 			employees[i] = employee
 			updated = true
 		}
 	}
+	fmt.Println("id employee no repository", employee.ID)
 	if !updated {
 		return Employee{}, fmt.Errorf("user with id %d not found", id)
 	}
