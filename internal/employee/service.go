@@ -4,7 +4,6 @@ type Service interface {
 	GetAll() ([]Employee, error)
 	GetByID(id int) (Employee, error)
 	Create(cardNumberID, firstName, lastName string, warehouseID int) (Employee, error)
-	LastID() (int, error)
 	Update(id int, cardNumberID, firstName, lastName string, warehouseID int) (Employee, error)
 	Delete(id int) error
 }
