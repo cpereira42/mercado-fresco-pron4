@@ -1,0 +1,40 @@
+package warehouse
+
+type Service interface {
+	GetAll() ([]Warehouse, error)
+	Create(id int, address, telephone, warehouse_code string, minimum_capacity, minimum_temperature int) (Warehouse, error)
+	// GetIdWarehouse(id int) (Warehouse, error)                                                                                        // GET
+	// UpdateWarehouse(id int, address, telephone, warehouse_code string, minimum_capacity, minimum_temperature int) (Warehouse, error) // PATCH
+	// DeleteWarehouse(id int)                                                                                                          // DELETE
+}
+
+type service struct {
+	repository Repository
+}
+
+func NewService(r Repository) Service {
+	return &service{
+		repository: r,
+	}
+}
+
+func (s *service) GetAll() ([]Warehouse, error) {
+	return s.repository.GetAll()
+}
+
+func (s *service) Create(id int, address, telephone, warehouse_code string, minimum_capacity, minimum_temperature int) (Warehouse, error) {
+	lastID, err := s.repository.LastID()
+	if err != nil {
+		return Warehouse{}, err
+	}
+
+	lastID++
+
+	warehouse, err := s.repository.Create(lastID, address, telephone, warehouse_code, minimum_capacity, minimum_temperature)
+	if err != nil {
+		return Warehouse{}, err
+	}
+
+	return warehouse, nil
+
+}
