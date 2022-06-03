@@ -2,7 +2,7 @@ package employee
 
 import "fmt"
 
-var emps []Employee = []Employee{}
+var employees []Employee = []Employee{}
 
 var lastID int
 
@@ -18,7 +18,7 @@ type Repository interface {
 type repository struct{}
 
 func (repository) GetAll() ([]Employee, error) {
-	return emps, nil
+	return employees, nil
 }
 
 func (repository) LastID() (int, error) {
@@ -26,48 +26,48 @@ func (repository) LastID() (int, error) {
 }
 
 func (repository) GetByID(id int) (Employee, error) {
-	var emp Employee
+	var employee Employee
 	exists := false
-	for i := range emps {
-		if emps[i].ID == id {
-			emp = emps[i]
+	for i := range employees {
+		if employees[i].ID == id {
+			employee = employees[i]
 			exists = true
 		}
 	}
 	if !exists {
 		return Employee{}, fmt.Errorf("User with id %d not found", id)
 	}
-	return emp, nil
+	return employee, nil
 }
 
 func (repository) Create(id int, cardNumberID, firstName, lastName string, warehouseID int) (Employee, error) {
-	emp := Employee{id, cardNumberID, firstName, lastName, warehouseID}
-	emps = append(emps, emp)
-	lastID = emp.ID
+	employee := Employee{id, cardNumberID, firstName, lastName, warehouseID}
+	employees = append(employees, employee)
+	lastID = employee.ID
 
-	return emp, nil
+	return employee, nil
 }
 func (repository) Update(id int, cardNumberID, firstName, lastName string, warehouseID int) (Employee, error) {
-	emp := Employee{CardNumberID: cardNumberID, FirstName: firstName, LastName: lastName, WarehouseID: warehouseID}
+	employee := Employee{CardNumberID: cardNumberID, FirstName: firstName, LastName: lastName, WarehouseID: warehouseID}
 	updated := false
-	for i := range emps {
-		if emps[i].ID == id {
-			emps[i].ID = id
-			emps[i] = emp
+	for i := range employees {
+		if employees[i].ID == id {
+			employees[i].ID = id
+			employees[i] = employee
 			updated = true
 		}
 	}
 	if !updated {
 		return Employee{}, fmt.Errorf("User with id %d not found", id)
 	}
-	return emp, nil
+	return employee, nil
 }
 
 func (repository) Delete(id int) error {
 	deleted := false
 	var index int
-	for i := range emps {
-		if emps[i].ID == id {
+	for i := range employees {
+		if employees[i].ID == id {
 			index = i
 			deleted = true
 		}
@@ -75,7 +75,7 @@ func (repository) Delete(id int) error {
 	if !deleted {
 		return fmt.Errorf("User with id %d not found", id)
 	}
-	emps = append(emps[:index], emps[index+1:]...)
+	employees = append(employees[:index], employees[index+1:]...)
 	return nil
 }
 
