@@ -114,6 +114,8 @@ func (r *repository) Delete(id int) error {
 	return nil
 }
 
-func NewRepository() Repository {
-	return &repository{}
+func NewRepository(db store.Store) Repository {
+	return &repository{
+		db: db,
+	}
 }

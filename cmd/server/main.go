@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/cpereira42/mercado-fresco-pron4/cmd/server/handler"
+	"github.com/cpereira42/mercado-fresco-pron4/internal/employee"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/products"
 	"github.com/cpereira42/mercado-fresco-pron4/pkg/store"
 	"github.com/gin-gonic/gin"
@@ -19,7 +20,21 @@ func main() {
 
 	p := handler.NewProduct(service)
 
+	dbEmployees := store.New(store.FileType, "./internal/repositories/employees.json")
+	repositoryEmployees := employee.NewRepository(dbEmployees)
+	serviceEmployees := employee.NewService(repositoryEmployees)
+	handlerEmployees := handler.NewEmployee(serviceEmployees)
+
 	r := gin.Default()
+
+	routesEmployees := r.Group("/api/v1/employees")
+	{
+		routesEmployees.GET("/", handlerEmployees.GetAll())
+		routesEmployees.GET("/:id", handlerEmployees.GetByID())
+		routesEmployees.POST("/", handlerEmployees.Create())
+		routesEmployees.PUT("/:id", handlerEmployees.Update())
+		routesEmployees.DELETE("/:id", handlerEmployees.Delete())
+	}
 
 	pr := r.Group("/api/v1/products")
 	// pr.GET("/", p.GetAll())

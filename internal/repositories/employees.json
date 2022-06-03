@@ -1,0 +1,16 @@
+[
+ {
+  "id": 1,
+  "card_number_id": "121214",
+  "first_name": "Eduardo",
+  "last_name": "Araújo",
+  "warehouse_id": 1
+ },
+ {
+  "id": 2,
+  "card_number_id": "33133",
+  "first_name": "Guilherme",
+  "last_name": "Gomes",
+  "warehouse_id": 2
+ }
+]
