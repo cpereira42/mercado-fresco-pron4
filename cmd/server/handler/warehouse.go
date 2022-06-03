@@ -84,3 +84,19 @@ func (c *Warehouse) Update(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, w)
 }
+
+func (c *Warehouse) GetByID(ctx *gin.Context) {
+	id, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		return
+	}
+
+	w, err := c.service.GetByID(id)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, w)
+}
