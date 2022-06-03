@@ -32,6 +32,7 @@ func errorHandler(fe validator.FieldError) string {
 }
 
 func CheckIfErrorRequestExists(ctx *gin.Context, err error) bool {
+
 	var ve validator.ValidationErrors
 	if errors.As(err, &ve) {
 		out := make([]ErrorMsg, len(ve))
@@ -48,7 +49,7 @@ func CheckIfErrorRequestExists(ctx *gin.Context, err error) bool {
 
 }
 
-func CheckIfErrorBindJsonExists(ctx *gin.Context, req any) bool {
+func CheckIfErrorBindJsonExists(ctx *gin.Context, req *request) bool {
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		if CheckIfErrorRequestExists(ctx, err) {
 			return true
@@ -151,7 +152,11 @@ func (c *EmployeeController) Update() gin.HandlerFunc {
 			return
 		}
 
+		fmt.Println("id param", id)
+
 		employee, err := c.service.Update(id, request.CardNumberID, request.FirstName, request.LastName, request.WarehouseID)
+
+		fmt.Println("id employee", employee.ID)
 
 		if err != nil {
 			ctx.JSON(http.StatusNotFound, gin.H{
