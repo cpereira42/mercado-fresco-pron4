@@ -9,6 +9,7 @@ import (
 
 func main() {
 	dbSeller := store.New(store.FileType, "/Users/josmoura/Study/Projects/mercado-fresco-pron4/internal/repositories/sellers.json")
+	//"/Users/josmoura/Study/Projects/mercado-fresco-pron4/internal/repositories/sellers.json"
 	repo := seller.NewRepositorySeller(dbSeller)
 	service := seller.NewService(repo)
 
@@ -19,8 +20,8 @@ func main() {
 	sellers := r.Group("/api/v1/sellers")
 	sellers.GET("/", s.GetAll())
 	sellers.GET("/:id", s.GetId())
-	/*pr.POST("/", p.Store())
-	pr.PATCH("/:id", p.UpdateName())
+	sellers.POST("/", s.Create())
+	/*pr.PATCH("/:id", p.UpdateName())
 	pr.DELETE("/:id", p.Delete())*/
 
 	//pr.PUT("/:id", p.Update())
