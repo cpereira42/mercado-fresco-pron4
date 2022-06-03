@@ -1,10 +1,13 @@
 package employee
 
-import "fmt"
+import (
+	"fmt"
 
-var employees []Employee = []Employee{}
+	"github.com/cpereira42/mercado-fresco-pron4/pkg/store"
+)
 
-var lastID int
+var employees []Employee
+var employee Employee
 
 type Repository interface {
 	GetAll() ([]Employee, error)
@@ -15,18 +18,32 @@ type Repository interface {
 	Delete(id int) error
 }
 
-type repository struct{}
+type repository struct {
+	db store.Store
+}
 
-func (repository) GetAll() ([]Employee, error) {
+func (r *repository) GetAll() ([]Employee, error) {
+	if err := r.db.Read(&employees); err != nil {
+		return []Employee{}, nil
+	}
 	return employees, nil
 }
 
-func (repository) LastID() (int, error) {
-	return lastID, nil
+func (r *repository) LastID() (int, error) {
+	if err := r.db.Read(&employees); err != nil {
+		return 0, err
+	}
+	if len(employees) == 0 {
+		return 0, nil
+	}
+
+	return employees[len(employees)-1].ID, nil
 }
 
-func (repository) GetByID(id int) (Employee, error) {
-	var employee Employee
+func (r *repository) GetByID(id int) (Employee, error) {
+	if err := r.db.Read(&employees); err != nil {
+		return Employee{}, err
+	}
 	exists := false
 	for i := range employees {
 		if employees[i].ID == id {
@@ -40,15 +57,22 @@ func (repository) GetByID(id int) (Employee, error) {
 	return employee, nil
 }
 
-func (repository) Create(id int, cardNumberID, firstName, lastName string, warehouseID int) (Employee, error) {
-	employee := Employee{id, cardNumberID, firstName, lastName, warehouseID}
+func (r *repository) Create(id int, cardNumberID, firstName, lastName string, warehouseID int) (Employee, error) {
+	if err := r.db.Read(&employees); err != nil {
+		return Employee{}, err
+	}
+	employee = Employee{id, cardNumberID, firstName, lastName, warehouseID}
 	employees = append(employees, employee)
-	lastID = employee.ID
-
+	if err := r.db.Write(employees); err != nil {
+		return Employee{}, err
+	}
 	return employee, nil
 }
-func (repository) Update(id int, cardNumberID, firstName, lastName string, warehouseID int) (Employee, error) {
-	employee := Employee{CardNumberID: cardNumberID, FirstName: firstName, LastName: lastName, WarehouseID: warehouseID}
+func (r *repository) Update(id int, cardNumberID, firstName, lastName string, warehouseID int) (Employee, error) {
+	if err := r.db.Read(&employees); err != nil {
+		return Employee{}, err
+	}
+	employee = Employee{CardNumberID: cardNumberID, FirstName: firstName, LastName: lastName, WarehouseID: warehouseID}
 	updated := false
 	for i := range employees {
 		if employees[i].ID == id {
@@ -58,12 +82,19 @@ func (repository) Update(id int, cardNumberID, firstName, lastName string, wareh
 		}
 	}
 	if !updated {
-		return Employee{}, fmt.Errorf("User with id %d not found", id)
+		return Employee{}, fmt.Errorf("user with id %d not found", id)
 	}
+	if err := r.db.Write(employees); err != nil {
+		return Employee{}, err
+	}
+
 	return employee, nil
 }
 
-func (repository) Delete(id int) error {
+func (r *repository) Delete(id int) error {
+	if err := r.db.Read(&employees); err != nil {
+		return err
+	}
 	deleted := false
 	var index int
 	for i := range employees {
@@ -73,9 +104,13 @@ func (repository) Delete(id int) error {
 		}
 	}
 	if !deleted {
-		return fmt.Errorf("User with id %d not found", id)
+		return fmt.Errorf("user with id %d not found", id)
 	}
 	employees = append(employees[:index], employees[index+1:]...)
+	if err := r.db.Write(employees); err != nil {
+		return err
+	}
+
 	return nil
 }
 
