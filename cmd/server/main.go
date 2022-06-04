@@ -21,10 +21,8 @@ func main() {
 	sellers.GET("/", s.GetAll())
 	sellers.GET("/:id", s.GetId())
 	sellers.POST("/", s.Create())
-	/*pr.PATCH("/:id", p.UpdateName())
-	pr.DELETE("/:id", p.Delete())*/
-
-	//pr.PUT("/:id", p.Update())
+	sellers.PATCH("/:id", s.Update())
+	// pr.DELETE("/:id", p.Delete())
 
 	r.Run()
 }

@@ -8,14 +8,21 @@
  },
  {
   "id": 2,
-  "cid": 2,
-  "company_name": "MELI",
-  "address": "Cali 555",
-  "telephone": "13550000"
+  "cid": 5,
+  "company_name": "Digital Farm",
+  "address": "Andromeda 870",
+  "telephone": "123123123"
  },
  {
   "id": 3,
   "cid": 3,
+  "company_name": "Digital Farm",
+  "address": "Andromeda 860",
+  "telephone": "123123123"
+ },
+ {
+  "id": 4,
+  "cid": 4,
   "company_name": "Digital Farm",
   "address": "Andromeda 860",
   "telephone": "123123123"

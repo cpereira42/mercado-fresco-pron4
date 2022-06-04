@@ -10,7 +10,9 @@ type repositorySeller struct {
 	db store.Store
 }
 
-func NewRepositorySeller(db store.Store) Repository {
+var ps []Seller
+
+func NewRepositorySeller(db store.Store) *repositorySeller {
 	return &repositorySeller{
 		db: db,
 	}
@@ -57,4 +59,25 @@ func (r *repositorySeller) GetId(id int) (Seller, error) {
 		}
 	}
 	return Seller{}, fmt.Errorf("vendedor %d não encontrado", id)
+}
+
+func (r *repositorySeller) Update(id, cid int, company, adress, telephone string) (Seller, error) {
+	var ps []Seller
+	r.db.Read(&ps)
+	seller := Seller{id, cid, company, adress, telephone}
+	updated := false
+	for i := range ps {
+		if ps[i].Id == id {
+			seller.Id = id
+			ps[i] = seller
+			updated = true
+		}
+	}
+	if !updated {
+		return Seller{}, fmt.Errorf("produto %d não encontrado", id)
+	}
+	if err := r.db.Write(ps); err != nil {
+		return Seller{}, err
+	}
+	return seller, nil
 }

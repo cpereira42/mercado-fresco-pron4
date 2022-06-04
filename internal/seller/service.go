@@ -5,16 +5,16 @@ type Service interface {
 	GetId(id int) (Seller, error)
 	Create(cid int, company, adress, telephone string) (Seller, error)
 	CheckCid(cid int) bool
-	//Update(id int, name, tipo string, count int, price float64) (Seller, error)
+	Update(id, cid int, company, adress, telephone string) (Seller, error)
 	//UpdateName(id int, name string) (Seller, error)
 	//Delete(id int) error
 }
 
 type service struct {
-	repository Repository
+	repository RepositorySeller
 }
 
-func NewService(r Repository) Service {
+func NewService(r RepositorySeller) Service {
 	return &service{
 		repository: r,
 	}
@@ -66,4 +66,12 @@ func (s *service) GetId(id int) (Seller, error) {
 		return Seller{}, err
 	}
 	return ps, nil
+}
+
+func (s *service) Update(id, cid int, company, adress, telephone string) (Seller, error) {
+	seller, err := s.repository.Update(id, cid, company, adress, telephone)
+	if err != nil {
+		return Seller{}, err
+	}
+	return seller, err
 }
