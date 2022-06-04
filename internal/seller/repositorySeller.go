@@ -81,3 +81,25 @@ func (r *repositorySeller) Update(id, cid int, company, adress, telephone string
 	}
 	return seller, nil
 }
+
+func (r *repositorySeller) Delete(id int) error {
+	var ps []Seller
+	r.db.Read(&ps)
+	deleted := false
+	var index int
+	for i := range ps {
+		if ps[i].Id == id {
+			index = i
+			deleted = true
+		}
+	}
+	if !deleted {
+		return fmt.Errorf("produto %d nao encontrado", id)
+	}
+
+	ps = append(ps[:index], ps[index+1:]...)
+	if err := r.db.Write(ps); err != nil {
+		return err
+	}
+	return nil
+}

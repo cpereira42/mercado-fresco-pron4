@@ -14,5 +14,5 @@ type RepositorySeller interface {
 	Create(id, cid int, company, adress, telephone string) (Seller, error)
 	LastID() (int, error)
 	Update(id, cid int, company, adress, telephone string) (Seller, error)
-	//Delete(id int) error
+	Delete(id int) error
 }

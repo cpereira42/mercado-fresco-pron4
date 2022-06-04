@@ -22,7 +22,7 @@ func main() {
 	sellers.GET("/:id", s.GetId())
 	sellers.POST("/", s.Create())
 	sellers.PATCH("/:id", s.Update())
-	// pr.DELETE("/:id", p.Delete())
+	sellers.DELETE("/:id", s.Delete())
 
 	r.Run()
 }

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -168,6 +169,24 @@ func (s *Seller) Update() gin.HandlerFunc {
 			return
 		}
 		ctx.JSON(http.StatusOK, web.NewResponse(http.StatusBadRequest, seller, ""))
+	}
+}
+
+func (s *Seller) Delete() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		id, err := strconv.Atoi(ctx.Param("id"))
+		if err != nil {
+			ctx.JSON(400, gin.H{"error": "invalid ID"})
+			return
+		}
+
+		err = s.service.Delete(int(id))
+		if err != nil {
+			ctx.JSON(404, gin.H{"error": err.Error()})
+			return
+		}
+
+		ctx.JSON(200, gin.H{"data": fmt.Sprintf("O produto %d foi removido", id)})
 	}
 }
 

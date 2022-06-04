@@ -6,8 +6,7 @@ type Service interface {
 	Create(cid int, company, adress, telephone string) (Seller, error)
 	CheckCid(cid int) bool
 	Update(id, cid int, company, adress, telephone string) (Seller, error)
-	//UpdateName(id int, name string) (Seller, error)
-	//Delete(id int) error
+	Delete(id int) error
 }
 
 type service struct {
@@ -74,4 +73,11 @@ func (s *service) Update(id, cid int, company, adress, telephone string) (Seller
 		return Seller{}, err
 	}
 	return seller, err
+}
+
+func (s *service) Delete(id int) error {
+	if err := s.repository.Delete(id); err != nil {
+		return err
+	}
+	return nil
 }
