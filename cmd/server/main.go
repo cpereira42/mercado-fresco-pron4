@@ -8,8 +8,7 @@ import (
 )
 
 func main() {
-	dbSeller := store.New(store.FileType, "/Users/josmoura/Study/Projects/mercado-fresco-pron4/internal/repositories/sellers.json")
-	//"/Users/josmoura/Study/Projects/mercado-fresco-pron4/internal/repositories/sellers.json"
+	dbSeller := store.New(store.FileType, "../mercado-fresco-pron4/internal/repositories/sellers.json")
 	repo := seller.NewRepositorySeller(dbSeller)
 	service := seller.NewService(repo)
 
