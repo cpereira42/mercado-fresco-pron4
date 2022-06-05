@@ -42,8 +42,9 @@ func (s service) Create(cardNumberID, firstName, lastName string, warehouseID in
 	lastID++
 
 	employee, err := s.repository.Create(lastID, cardNumberID, firstName, lastName, warehouseID)
+
 	if err != nil {
-		return Employee{}, nil
+		return Employee{}, err
 	}
 
 	return employee, nil

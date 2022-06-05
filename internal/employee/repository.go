@@ -16,6 +16,7 @@ type Repository interface {
 	LastID() (int, error)
 	Update(id int, cardNumberID, firstName, lastName string, warehouseID int) (Employee, error)
 	Delete(id int) error
+	UpdateWarehouseID(id int, warehouseID int) (Employee, error)
 }
 
 type repository struct {
@@ -62,6 +63,15 @@ func (r *repository) Create(id int, cardNumberID, firstName, lastName string, wa
 		return Employee{}, err
 	}
 	employee = Employee{id, cardNumberID, firstName, lastName, warehouseID}
+	exists := false
+	for i := range employees {
+		if employees[i].CardNumberID == cardNumberID {
+			exists = true
+		}
+	}
+	if exists {
+		return Employee{}, fmt.Errorf("user with this card number id %s exists", cardNumberID)
+	}
 	employees = append(employees, employee)
 	if err := r.db.Write(employees); err != nil {
 		return Employee{}, err
@@ -69,7 +79,7 @@ func (r *repository) Create(id int, cardNumberID, firstName, lastName string, wa
 	return employee, nil
 }
 func (r *repository) Update(id int, cardNumberID, firstName, lastName string, warehouseID int) (Employee, error) {
-	fmt.Println("id no repository", id)
+
 	if err := r.db.Read(&employees); err != nil {
 		return Employee{}, err
 	}
@@ -82,7 +92,7 @@ func (r *repository) Update(id int, cardNumberID, firstName, lastName string, wa
 			updated = true
 		}
 	}
-	fmt.Println("id employee no repository", employee.ID)
+
 	if !updated {
 		return Employee{}, fmt.Errorf("user with id %d not found", id)
 	}
@@ -114,6 +124,31 @@ func (r *repository) Delete(id int) error {
 	}
 
 	return nil
+}
+
+func (r *repository) UpdateWarehouseID(id int, warehouseID int) (Employee, error) {
+
+	if err := r.db.Read(&employees); err != nil {
+		return Employee{}, err
+	}
+
+	updated := false
+	for i := range employees {
+		if employees[i].ID == id {
+			employees[i].WarehouseID = warehouseID
+			employee = employees[i]
+			updated = true
+		}
+	}
+
+	if !updated {
+		return Employee{}, fmt.Errorf("user with id %d not found", id)
+	}
+	if err := r.db.Write(employees); err != nil {
+		return Employee{}, err
+	}
+
+	return employee, nil
 }
 
 func NewRepository(db store.Store) Repository {
