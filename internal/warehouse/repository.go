@@ -52,6 +52,16 @@ func (r *repository) Create(id int, address, telephone, warehouse_code string, m
 		return Warehouse{}, err
 	}
 	w := Warehouse{id, address, telephone, warehouse_code, minimum_capacity, minimum_temperature}
+	exists := false
+	for i := range wr {
+		if wr[i].Warehouse_code == warehouse_code {
+			exists = true
+		}
+	}
+	if exists {
+		return Warehouse{}, errors.New("Warehouse already exists")
+	}
+
 	wr = append(wr, w)
 	if err := r.db.Write(&wr); err != nil {
 		return Warehouse{}, err

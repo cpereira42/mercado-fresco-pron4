@@ -30,5 +30,13 @@
   "warehouse_code": "DAMC",
   "minimum_capacity": 20,
   "minimum_temperature": 500
+ },
+ {
+  "id": 6,
+  "adress": "Rua da Onça Pedra Furada",
+  "telephone": "3333",
+  "warehouse_code": "DAMC1",
+  "minimum_capacity": 20,
+  "minimum_temperature": 300
  }
 ]
