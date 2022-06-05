@@ -7,6 +7,7 @@ type Service interface {
 	Store(p Product) (Product, error)
 	Update(id int, p Product) (Product, error)
 	UpdatePatch(id int, p Product) (Product, error)
+	CheckCode(code string) error
 }
 
 type service struct {
@@ -37,6 +38,10 @@ func (s *service) GetId(id int) (Product, error) {
 
 func (s *service) Delete(id int) error {
 	return s.repository.Delete(id)
+}
+
+func (s *service) CheckCode(code string) error {
+	return s.repository.CheckCode(code)
 }
 
 func (s *service) Store(p Product) (Product, error) {

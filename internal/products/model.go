@@ -7,7 +7,7 @@ type Product struct {
 	Width                          float64 `json:"width"`
 	Length                         float64 `json:"length"`
 	Height                         float64 `json:"height"`
-	NetHeight                      float64 `json:"net_height"`
+	NetWeight                      float64 `json:"net_weight"`
 	ExpirationRate                 string  `json:"expiration_rate"`
 	RecommendedFreezingTemperature float64 `json:"recommended_freezing_temperature"`
 	FreezingRate                   float64 `json:"freezing_rate"`
@@ -23,4 +23,5 @@ type Repository interface {
 	Store(p Product) (Product, error)
 	Update(id int, prod Product) (Product, error)
 	UpdatePatch(id int, prod Product) (Product, error)
+	CheckCode(code string) error
 }
