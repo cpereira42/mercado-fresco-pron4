@@ -1,0 +1,42 @@
+[
+ {
+  "id": 6,
+  "adress": "Rua da Onça Pintada",
+  "telephone": "3333",
+  "warehouse_code": "DAMC1",
+  "minimum_capacity": 20,
+  "minimum_temperature": 300
+ },
+ {
+  "id": 7,
+  "adress": "Rua do Elefante",
+  "telephone": "557778888",
+  "warehouse_code": "D",
+  "minimum_capacity": 20,
+  "minimum_temperature": 500
+ },
+ {
+  "id": 8,
+  "adress": "Rua do Leao",
+  "telephone": "557778888",
+  "warehouse_code": "DCDS",
+  "minimum_capacity": 500,
+  "minimum_temperature": 500
+ },
+ {
+  "id": 9,
+  "adress": "Rua do Cachorro",
+  "telephone": "557778888",
+  "warehouse_code": "DCdDS",
+  "minimum_capacity": 500,
+  "minimum_temperature": 500
+ },
+ {
+  "id": 10,
+  "adress": "Rua do Passarinho",
+  "telephone": "557778888",
+  "warehouse_code": "DCXD",
+  "minimum_capacity": 500,
+  "minimum_temperature": 500
+ }
+]
