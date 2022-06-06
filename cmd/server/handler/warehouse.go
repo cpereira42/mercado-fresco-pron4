@@ -20,9 +20,6 @@ type request struct {
 	Minimum_capacity    int    `json:"minimum_capacity" binding:"required"`
 	Minimum_temperature int    `json:"minimum_temperature" binding:"required"`
 }
-type requestUpdateAddress struct {
-	Address string `json:"address" binding:"required"`
-}
 
 func NewWarehouse(w warehouse.Service) *Warehouse {
 	return &Warehouse{

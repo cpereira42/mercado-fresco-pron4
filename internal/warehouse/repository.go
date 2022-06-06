@@ -74,6 +74,16 @@ func (r *repository) Update(id int, address, telephone, warehouse_code string, m
 	}
 	w := Warehouse{id, address, telephone, warehouse_code, minimum_capacity, minimum_temperature}
 	update := false
+	exists := false
+	for i := range wr {
+		if wr[i].Warehouse_code == warehouse_code {
+			exists = true
+		}
+	}
+	if exists {
+		return Warehouse{}, errors.New("Warehouse already exists")
+	}
+
 	for i := range wr {
 		if wr[i].ID == id {
 			w.ID = id

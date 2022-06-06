@@ -3,7 +3,7 @@
   "id": 4,
   "adress": "Rua da Arvore",
   "telephone": "5577788988",
-  "warehouse_code": "Denver",
+  "warehouse_code": "Denverr",
   "minimum_capacity": 150,
   "minimum_temperature": 300
  },
@@ -36,6 +36,14 @@
   "adress": "Rua do Cachorro",
   "telephone": "557778888",
   "warehouse_code": "DCdDS",
+  "minimum_capacity": 500,
+  "minimum_temperature": 500
+ },
+ {
+  "id": 10,
+  "adress": "Rua do Passarinho",
+  "telephone": "557778888",
+  "warehouse_code": "DCXD",
   "minimum_capacity": 500,
   "minimum_temperature": 500
  }
