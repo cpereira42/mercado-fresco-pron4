@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/cpereira42/mercado-fresco-pron4/cmd/server/handler"
+	"github.com/cpereira42/mercado-fresco-pron4/internal/buyer"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/employee"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/products"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/section"
@@ -13,7 +14,12 @@ import (
 
 func main() {
 
-	dbProd := store.New(store.FileType, "../../internal/repositories/products.json")
+	dbBuyers := store.New(store.FileType, "./internal/repositories/buyer.json")
+	repositoryBuyers := buyer.NewRepository(dbBuyers)
+	serviceBuyers := buyer.NewService(repositoryBuyers)
+	hdBuyers := handler.NewBuyer(serviceBuyers)
+
+	dbProd := store.New(store.FileType, "./internal/repositories/products.json")
 	repoProd := products.NewRepositoryProducts(dbProd)
 	serviceProd := products.NewService(repoProd)
 
@@ -78,6 +84,13 @@ func main() {
 	wr.PATCH("/:id", w.Update)
 	wr.GET("/:id", w.GetByID)
 	wr.DELETE("/:id", w.Delete)
+
+	buyers := r.Group("/api/v1/buyers")
+	buyers.GET("/", hdBuyers.GetAll())
+	buyers.GET("/:id", hdBuyers.GetID())
+	buyers.POST("/", hdBuyers.Create())
+	buyers.PATCH("/:id", hdBuyers.Update())
+	buyers.DELETE("/:id", hdBuyers.Delete())
 
 	r.Run()
 }
