@@ -15,7 +15,7 @@ func (r repository) CreateSection(newSection Section) (Section, error) {
 
 	for index := range sectionsList {
 		if sectionsList[index].SectionNumber == newSection.SectionNumber {
-			return newSection, fmt.Errorf("section invalida, o campo section_number deve ser único")
+			return newSection, fmt.Errorf("section invalid, section_number field must be unique")
 		}
 	}
 
@@ -50,7 +50,7 @@ func (r repository) ListarSectionOne(id int) (Section, error) {
 			return section, nil
 		}
 	}
- 	return Section{}, fmt.Errorf("Section não esta registrado")
+ 	return Section{}, fmt.Errorf("Section is not registered")
 }
 
 
@@ -62,7 +62,7 @@ func (r repository) UpdateSection(id int, sectionUp Section) (Section, error) {
 	
 	for index := range sectionList {
 		if sectionList[index].Id != id && sectionList[index].SectionNumber  == sectionUp.SectionNumber {
-			return Section{}, fmt.Errorf("esta section %d ja está registrada", sectionUp.SectionNumber)
+			return Section{}, fmt.Errorf("this section %d is already registered", sectionUp.SectionNumber)
 		}
 	}
 	var updated, sectionEncontrado = false, false
@@ -75,7 +75,7 @@ func (r repository) UpdateSection(id int, sectionUp Section) (Section, error) {
 		strSection2 := structs.Map(sectionList[index])		  
 		for  _, value := range field {
 			if strSection2["Id"] == id {
-				sectionEncontrado = true // section encontrado
+				sectionEncontrado = true 
 				if strSection[value] != 0 && strSection2[value] != strSection[value] {
 					updated= true 
 					strSection2[value] = strSection[value]
@@ -105,7 +105,7 @@ func (r repository) UpdateSection(id int, sectionUp Section) (Section, error) {
 		sectionUp.Id = id
 		return sectionUp, nil
 	}
-	return Section{}, fmt.Errorf("não foi possivel atualizar section")
+	return Section{}, fmt.Errorf("unable to update section")
 }
 
 
@@ -156,5 +156,5 @@ func iterateAboutSectionList(rep repository, sections []Section, id int) (error)
 			return nil
 		}
 	}
-	return fmt.Errorf("section não esta registrado")
+	return fmt.Errorf("section is not registered")
 }

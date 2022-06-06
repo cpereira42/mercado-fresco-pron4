@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	dbSection := store.FileStore{FileName: "sections.json"}
+	dbSection := store.FileStore{FileName: "./internal/repositories/sections.json"}
 
 	repSection := section.NewRepository(dbSection)
 
@@ -18,11 +18,13 @@ func main() {
 
 	r := gin.Default()
 	section := r.Group("/api/v1/sections")
-	section.GET("/", sectionController.ListarSectionAll()) 	// lista todos recursos
-	section.GET("/:id", sectionController.ListarSectionOne()) // buscar recurso por id
-	section.POST("/", sectionController.CreateSection()) 		// cria um novo recurso
-	section.PATCH("/:id", sectionController.UpdateSection()) 	// modifica recursos
-	section.DELETE("/:id", sectionController.DeleteSection()) // remove recursos
+	{
+		section.GET("/", sectionController.ListarSectionAll()) 		// lista todos recursos
+		section.GET("/:id", sectionController.ListarSectionOne()) 	// buscar recurso por id
+		section.POST("/", sectionController.CreateSection()) 		// cria um novo recurso
+		section.PATCH("/:id", sectionController.UpdateSection()) 	// modifica recursos
+		section.DELETE("/:id", sectionController.DeleteSection()) 	// remove recursos
+	}
 
 	r.Run()
 }

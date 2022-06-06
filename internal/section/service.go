@@ -37,7 +37,7 @@ func (s service) CreateSection(newSection Section) (Section, error) {
 	mapSection := structs.Map(newSection)
 	for _, value := range fields {
 		if mapSection[value] == 0 {
-			return Section{}, fmt.Errorf("o campo %s é obrigatório", value)
+			return Section{}, fmt.Errorf("field %s is required", value)
 		}
 	} 
 
