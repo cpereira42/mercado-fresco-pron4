@@ -105,18 +105,20 @@ func (r *repositoryProduct) UpdatePatch(id int, p Product) (Product, error) {
 	list := []string{"Product_code", "Description", "Width", "Length", "Height", "NetHeight", "ExpirationRate", "RecommendedFreezingTemperature", "FreezingRate", "ProductTypeId", "SellerId"}
 
 	for i := range ps {
-		if ps[i].Product_code == p.Product_code {
+		if ps[i].Product_code == p.Product_code && ps[i].Id != id {
 			return Product{}, fmt.Errorf("codigo do produto %s já cadastrado", p.Product_code)
 		}
 	}
 
 	m1 := structs.Map(p)
+	update, encontrado := false, false
 	for z := 0; z < len(ps); z++ {
-		update := false
+
 		m2 := structs.Map(ps[z])
 		for i := 0; i < len(list); i++ {
 			if m2["Id"] == id {
-				if m2[list[i]] != m1[list[i]] && m1[list[i]] != "" && m1[list[i]] != 0.0 {
+				encontrado = true
+				if m2[list[i]] != m1[list[i]] && m1[list[i]] != "" && m1[list[i]] != nil {
 					update = true
 					m2[list[i]] = m1[list[i]]
 				}
@@ -185,5 +187,8 @@ func (r *repositoryProduct) UpdatePatch(id int, p Product) (Product, error) {
 				return p, nil
 			}
 		}*/
+	if encontrado {
+		return p, fmt.Errorf("não houve alteração", id)
+	}
 	return Product{}, fmt.Errorf("produto %d não encontrado", id)
 }

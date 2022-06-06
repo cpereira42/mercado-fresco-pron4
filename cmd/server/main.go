@@ -14,10 +14,10 @@ import (
 func main() {
 
 	dbProd := store.New(store.FileType, "../../internal/repositories/products.json")
-	repo := products.NewRepositoryProducts(dbProd)
-	service := products.NewService(repo)
+	repoProd := products.NewRepositoryProducts(dbProd)
+	serviceProd := products.NewService(repoProd)
 
-	p := handler.NewProduct(service)
+	p := handler.NewProduct(serviceProd)
 
 	r := gin.Default()
 
