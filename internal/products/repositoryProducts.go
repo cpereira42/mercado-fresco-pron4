@@ -31,7 +31,7 @@ func (r *repositoryProduct) GetId(id int) (Product, error) {
 			return ps[i], nil
 		}
 	}
-	return Product{}, fmt.Errorf("produto %d não encontrado", id)
+	return Product{}, fmt.Errorf("Product %d not found", id)
 }
 
 func (r *repositoryProduct) CheckCode(code string) error {
@@ -39,7 +39,7 @@ func (r *repositoryProduct) CheckCode(code string) error {
 	r.db.Read(&ps)
 	for i := range ps {
 		if ps[i].Product_code == code {
-			return fmt.Errorf("codigo do produto %s já cadastrado", code)
+			return fmt.Errorf("Product Code %s already registered", code)
 		}
 	}
 	return nil
@@ -59,7 +59,7 @@ func (r *repositoryProduct) Delete(id int) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("produto não encontrado")
+	return fmt.Errorf("Product %d not found", id)
 }
 
 func (r *repositoryProduct) Store(p Product) (Product, error) {
@@ -96,7 +96,7 @@ func (r *repositoryProduct) Update(id int, p Product) (Product, error) {
 			return p, nil
 		}
 	}
-	return Product{}, fmt.Errorf("produto %d não encontrado", id)
+	return Product{}, fmt.Errorf("Product %d not found", id)
 }
 
 func (r *repositoryProduct) UpdatePatch(id int, p Product) (Product, error) {
@@ -111,14 +111,13 @@ func (r *repositoryProduct) UpdatePatch(id int, p Product) (Product, error) {
 	}
 
 	m1 := structs.Map(p)
-	fmt.Println("teste ", m1)
-	update, founded := false, false
+	update, found := false, false
 	for z := 0; z < len(ps); z++ {
 
 		m2 := structs.Map(ps[z])
 		for i := 0; i < len(list); i++ {
 			if m2["Id"] == id {
-				founded = true
+				found = true
 				if m2[list[i]] != m1[list[i]] && m1[list[i]] != "" && m1[list[i]] != nil {
 					update = true
 					m2[list[i]] = m1[list[i]]
@@ -145,51 +144,8 @@ func (r *repositoryProduct) UpdatePatch(id int, p Product) (Product, error) {
 		}
 	}
 
-	/*
-		for i, p := range ps {
-			if ps[i].Id == id {
-				if p.Product_code != "" {
-					ps[i].Product_code = p.Product_code
-				}
-				if p.Description != "" {
-					ps[i].Description = p.Description
-				}
-				if p.Width != 0 {
-					ps[i].Width = p.Width
-				}
-				if p.Height != 0 {
-					ps[i].Height = p.Height
-				}
-				if p.Length != 0 {
-					ps[i].Length = p.Length
-				}
-				if p.NetHeight != 0 {
-					ps[i].NetHeight = p.NetHeight
-				}
-				if p.ExpirationRate != "" {
-					ps[i].ExpirationRate = p.ExpirationRate
-				}
-				if p.RecommendedFreezingTemperature != 0 {
-					ps[i].RecommendedFreezingTemperature = p.RecommendedFreezingTemperature
-				}
-				if p.FreezingRate != 0 {
-					ps[i].FreezingRate = p.FreezingRate
-				}
-				if p.ProductType_Id != 0 {
-					ps[i].ProductType_Id = p.ProductType_Id
-				}
-				if p.SellerId != 0 {
-					ps[i].SellerId = p.SellerId
-				}
-				p := ps[i]
-				if err := r.db.Write(ps); err != nil {
-					return Product{}, err
-				}
-				return p, nil
-			}
-		}*/
-	if founded {
-		return p, fmt.Errorf("não houve alteração")
+	if found {
+		return p, fmt.Errorf("there was no change")
 	}
-	return Product{}, fmt.Errorf("produto %d não encontrado", id)
+	return Product{}, fmt.Errorf("Product %d not found", id)
 }

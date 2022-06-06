@@ -2,7 +2,6 @@ package handler
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 
 	"github.com/cpereira42/mercado-fresco-pron4/internal/products"
@@ -20,12 +19,6 @@ func NewProduct(p products.Service) *Product {
 
 func (c *Product) GetAll() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		token := ctx.Request.Header.Get("token")
-
-		if token != os.Getenv("TOKEN") {
-			ctx.JSON(401, web.NewResponse(401, nil, "token inválido"))
-			return
-		}
 		p, err := c.service.GetAll()
 		if err != nil {
 			ctx.JSON(401, web.NewResponse(401, nil, err.Error()))
@@ -37,14 +30,9 @@ func (c *Product) GetAll() gin.HandlerFunc {
 
 func (c *Product) GetId() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		token := ctx.Request.Header.Get("token")
-		if token != os.Getenv("TOKEN") {
-			ctx.JSON(401, web.NewResponse(401, nil, "token inválido"))
-			return
-		}
 		id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 		if err != nil {
-			ctx.JSON(401, web.NewResponse(401, nil, "ID inválido"))
+			ctx.JSON(401, web.NewResponse(401, nil, "Invalid ID"))
 			return
 		}
 		p, err := c.service.GetId(int(id))
@@ -58,15 +46,9 @@ func (c *Product) GetId() gin.HandlerFunc {
 
 func (c *Product) Delete() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		token := ctx.GetHeader("token")
-
-		if token != os.Getenv("TOKEN") {
-			ctx.JSON(401, web.NewResponse(401, nil, "token inválido"))
-			return
-		}
 		id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 		if err != nil {
-			ctx.JSON(401, web.NewResponse(401, nil, "ID inválido"))
+			ctx.JSON(401, web.NewResponse(401, nil, "Invalid ID"))
 			return
 		}
 
@@ -75,67 +57,62 @@ func (c *Product) Delete() gin.HandlerFunc {
 			ctx.JSON(404, web.NewResponse(401, nil, err.Error()))
 			return
 		}
-		ctx.JSON(204, web.NewResponse(204, fmt.Sprintf("O produto %d foi removido", id), ""))
+		ctx.JSON(204, web.NewResponse(204, fmt.Sprintf("product %d was deleted", id), ""))
 	}
 }
 
 func checkFields(p products.Product) error {
 
 	if p.Description == "" {
-		return fmt.Errorf("o campo descrição é obrigatório")
+		return fmt.Errorf("description is mandatory")
 	}
 
 	if p.Width <= 0.0 {
-		return fmt.Errorf("o campo width é obrigatório e não pode ser menor que 0")
+		return fmt.Errorf("width is mandatory and cannot be less than 0")
 	}
 
 	if p.Length <= 0.0 {
-		return fmt.Errorf("o campo Length é obrigatório e não pode ser menor que 0")
+		return fmt.Errorf("Length is mandatory and cannot be less than 0")
 	}
 
 	if p.Height <= 0.0 {
-		return fmt.Errorf("o campo Height é obrigatório e não pode ser menor que 0")
+		return fmt.Errorf("Height is mandatory and cannot be less than 0")
 	}
 	if p.NetWeight <= 0.0 {
-		return fmt.Errorf("o campo NetWeight é obrigatório e não pode ser menor que 0")
+		return fmt.Errorf("NetWeight is mandatory and cannot be less than 0")
 	}
 
 	if p.NetWeight <= 0.0 {
-		return fmt.Errorf("o campo NetWeight é obrigatório e não pode ser menor que 0")
+		return fmt.Errorf("NetWeight is mandatory and cannot be less than 0")
 	}
 	if p.RecommendedFreezingTemperature <= 0.0 {
-		return fmt.Errorf("o campo RecommendedFreezingTemperature é obrigatório e não pode ser menor que 0")
+		return fmt.Errorf("RecommendedFreezingTemperature is mandatory and cannot be less than 0")
 	}
 
 	if p.FreezingRate <= 0.0 {
-		return fmt.Errorf("o campo FreezingRate é obrigatório e não pode ser menor que 0")
+		return fmt.Errorf("FreezingRate is mandatory and cannot be less than 0")
 	}
 
 	if p.ExpirationRate <= 0.0 {
-		return fmt.Errorf("o campo ExpirationRate é obrigatório")
+		return fmt.Errorf("ExpirationRate é obrigatório")
 	}
 
 	if p.ProductType_Id <= 0 {
-		return fmt.Errorf("o campo ProductType_Id é obrigatório e não pode ser menor que 0")
+		return fmt.Errorf("ProductType_Id is mandatory and cannot be less than 0")
 	}
 
 	if p.SellerId <= 0 {
-		return fmt.Errorf("o campo SellerId é obrigatório e não pode ser menor que 0")
+		return fmt.Errorf("SellerId is mandatory and cannot be less than 0")
 	}
 
 	if p.Product_code <= "" {
-		return fmt.Errorf("o campo Product_code é obrigatório")
+		return fmt.Errorf("Product_code é obrigatório")
 	}
 	return nil
 }
 
 func (c *Product) Store() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		token := ctx.Request.Header.Get("token")
-		if token != os.Getenv("TOKEN") {
-			ctx.JSON(401, web.NewResponse(401, nil, "token inválido"))
-			return
-		}
 		var prod products.Product
 		if err := ctx.Bind(&prod); err != nil {
 			ctx.JSON(401, web.NewResponse(401, nil, err.Error()))
@@ -162,14 +139,9 @@ func (c *Product) Store() gin.HandlerFunc {
 
 func (c *Product) Update() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		token := ctx.GetHeader("token")
-		if token != os.Getenv("TOKEN") {
-			ctx.JSON(401, web.NewResponse(401, nil, "token inválido"))
-			return
-		}
 		id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 		if err != nil {
-			ctx.JSON(401, web.NewResponse(401, nil, "ID inválido"))
+			ctx.JSON(401, web.NewResponse(401, nil, "Invali ID"))
 			return
 		}
 		var prod products.Product
@@ -199,14 +171,9 @@ func (c *Product) Update() gin.HandlerFunc {
 func (c *Product) UpdatePatch() gin.HandlerFunc {
 
 	return func(ctx *gin.Context) {
-		token := ctx.GetHeader("token")
-		if token != os.Getenv("TOKEN") {
-			ctx.JSON(401, web.NewResponse(401, nil, "token inválido"))
-			return
-		}
 		id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 		if err != nil {
-			ctx.JSON(401, web.NewResponse(401, nil, "ID inválido"))
+			ctx.JSON(401, web.NewResponse(401, nil, "Invalid ID"))
 			return
 		}
 
