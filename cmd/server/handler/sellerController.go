@@ -23,7 +23,7 @@ func (s *Seller) Create() gin.HandlerFunc {
 		var req request
 		if err := ctx.ShouldBindJSON(&req); err != nil {
 			ctx.JSON(http.StatusNotFound, web.NewResponse(
-				http.StatusNotFound, nil, "Falha ao criar seller"),
+				http.StatusNotFound, nil, "Failed to create new Seller"),
 			)
 			return
 		}
@@ -31,7 +31,7 @@ func (s *Seller) Create() gin.HandlerFunc {
 		if !s.service.CheckCid(req.Cid) {
 			ctx.JSON(
 				http.StatusConflict,
-				web.NewResponse(http.StatusConflict, nil, "Cid já cadastrado"),
+				web.NewResponse(http.StatusConflict, nil, "Cid already registered"),
 			)
 			return
 		}
@@ -39,7 +39,7 @@ func (s *Seller) Create() gin.HandlerFunc {
 		if req.Cid == 0 {
 			ctx.JSON(
 				http.StatusUnprocessableEntity,
-				web.NewResponse(http.StatusUnprocessableEntity, nil, "O Cid é obrigatório"),
+				web.NewResponse(http.StatusUnprocessableEntity, nil, "Cid is required"),
 			)
 			return
 		}
@@ -47,7 +47,7 @@ func (s *Seller) Create() gin.HandlerFunc {
 		if req.CompanyName == "" {
 			ctx.JSON(
 				http.StatusUnprocessableEntity,
-				web.NewResponse(http.StatusUnprocessableEntity, nil, "Necessário informar nome da empresa"),
+				web.NewResponse(http.StatusUnprocessableEntity, nil, "Company name is required"),
 			)
 			return
 		}
@@ -55,7 +55,7 @@ func (s *Seller) Create() gin.HandlerFunc {
 		if req.Adress == "" {
 			ctx.JSON(
 				http.StatusUnprocessableEntity,
-				web.NewResponse(http.StatusUnprocessableEntity, nil, "Necessário informar endereço"),
+				web.NewResponse(http.StatusUnprocessableEntity, nil, "Adress is required"),
 			)
 			return
 		}
@@ -63,7 +63,7 @@ func (s *Seller) Create() gin.HandlerFunc {
 		if req.Telephone == "" {
 			ctx.JSON(
 				http.StatusUnprocessableEntity,
-				web.NewResponse(http.StatusUnprocessableEntity, nil, "Necessário informar telefone"),
+				web.NewResponse(http.StatusUnprocessableEntity, nil, "Telephone is required"),
 			)
 			return
 		}
@@ -78,7 +78,7 @@ func (s *Seller) Create() gin.HandlerFunc {
 
 		ctx.JSON(
 			http.StatusCreated,
-			web.NewResponse(http.StatusCreated, seller, ""),
+			web.NewResponse(http.StatusCreated, seller, "Failed to create new Seller"),
 		)
 	}
 }
@@ -91,10 +91,7 @@ func (s *Seller) GetAll() gin.HandlerFunc {
 			return
 		}
 		if len(sellers) == 0 {
-			ctx.JSON(http.StatusBadRequest, gin.H{
-				"message": "Sellers nao retornou nada",
-				"data":    sellers,
-			})
+			ctx.JSON(http.StatusBadRequest, web.NewResponse(http.StatusBadRequest, sellers, "Sellers is empty"))
 			return
 		}
 		ctx.JSON(http.StatusOK, web.NewResponse(http.StatusOK, sellers, ""))
@@ -105,7 +102,7 @@ func (s *Seller) GetId() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id, err := strconv.Atoi(ctx.Param("id"))
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, web.NewResponse(http.StatusBadRequest, nil, "ID inválido"))
+			ctx.JSON(http.StatusBadRequest, web.NewResponse(http.StatusBadRequest, nil, "Invalid ID"))
 			return
 		}
 
@@ -122,7 +119,7 @@ func (s *Seller) Update() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id, err := strconv.Atoi(ctx.Param("id"))
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, web.NewResponse(http.StatusBadRequest, nil, "Id inválido"))
+			ctx.JSON(http.StatusBadRequest, web.NewResponse(http.StatusBadRequest, nil, "Invalid ID"))
 			return
 		}
 
@@ -134,7 +131,7 @@ func (s *Seller) Update() gin.HandlerFunc {
 
 		seller, err := s.service.Update(int(id), req.Cid, req.CompanyName, req.Adress, req.Telephone)
 		if err != nil {
-			ctx.JSON(404, gin.H{"error": err.Error()})
+			ctx.JSON(http.StatusNotFound, web.NewResponse(http.StatusBadRequest, nil, err.Error()))
 			return
 		}
 		ctx.JSON(http.StatusOK, web.NewResponse(http.StatusOK, seller, ""))
@@ -155,7 +152,7 @@ func (s *Seller) Delete() gin.HandlerFunc {
 			return
 		}
 
-		ctx.JSON(http.StatusNoContent, web.NewResponse(http.StatusNoContent, nil, "Vendedor deletado com sucesso"))
+		ctx.JSON(http.StatusNoContent, web.NewResponse(http.StatusNoContent, nil, "Seller sucessfully removed"))
 	}
 }
 
