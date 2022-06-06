@@ -12,6 +12,10 @@ import (
 
 func main() {
 
+	dbProd := store.New(store.FileType, "../../internal/repositories/products.json")
+	repoProd := products.NewRepositoryProducts(dbProd)
+	serviceProd := products.NewService(repoProd)
+
 	dbWarehouse := store.New(store.FileType, "./internal/repositories/warehouse.json")
 	repoWarehouse := warehouse.NewRepository(dbWarehouse)
 	svcWarehouse := warehouse.NewService(repoWarehouse)
@@ -33,7 +37,15 @@ func main() {
 
 	s := handler.NewSeller(serviceSeller)
 
+	p := handler.NewProduct(serviceProd)
 	r := gin.Default()
+	pr := r.Group("/api/v1/products")
+	pr.GET("/", p.GetAll())
+	pr.GET("/:id", p.GetId())
+	pr.DELETE("/:id", p.Delete())
+	pr.POST("/", p.Store())
+	pr.PUT("/:id", p.Update())
+	pr.PATCH("/:id", p.UpdatePatch())
 
 	sellers := r.Group("/api/v1/sellers")
 	sellers.GET("/", s.GetAll())
