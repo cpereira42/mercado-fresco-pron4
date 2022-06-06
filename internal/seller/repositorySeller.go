@@ -1,6 +1,7 @@
 package seller
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/cpereira42/mercado-fresco-pron4/pkg/store"
@@ -66,6 +67,12 @@ func (r *repositorySeller) Update(id, cid int, company, adress, telephone string
 	r.db.Read(&ps)
 	seller := Seller{id, cid, company, adress, telephone}
 	updated := false
+	for i := range ps {
+		if ps[i].Id != id && ps[i].Cid == cid {
+			return Seller{}, errors.New("Cid já cadastrado")
+		}
+	}
+
 	for i := range ps {
 		if ps[i].Id == id {
 			seller.Id = id
