@@ -34,7 +34,7 @@ func (c *BuyerController) GetID() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id, err := strconv.Atoi(ctx.Param("id"))
 		if err != nil {
-			ctx.JSON(400, gin.H{"error": "invalid ID"})
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "invalid ID"})
 			return
 		}
 
@@ -51,14 +51,14 @@ func (c *BuyerController) Create() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var request buyerRequest
 		if err := ctx.ShouldBindJSON(&request); err != nil {
-			ctx.JSON(400, gin.H{"error": err.Error()})
+			ctx.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
 			return
 		}
 
 		buyer, err := c.service.Create(request.Card_number_ID, request.First_name, request.Last_name)
 
 		if err != nil {
-			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			ctx.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
 			return
 		}
 
@@ -71,26 +71,26 @@ func (c *BuyerController) Update() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id, err := strconv.Atoi(ctx.Param("id"))
 		if err != nil {
-			ctx.JSON(400, gin.H{"error": "invalid ID"})
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "invalid ID"})
 			return
 		}
 
 		var request buyerRequest
 		if err := ctx.ShouldBindJSON(&request); err != nil {
-			ctx.JSON(400, gin.H{"error": err.Error()})
+			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 			return
 		}
 
 		if request.Card_number_ID == "" {
-			ctx.JSON(400, gin.H{"error": "Buyer's ID is mandatory"})
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Buyer's ID is mandatory"})
 			return
 		}
 		if request.First_name == "" {
-			ctx.JSON(400, gin.H{"error": "Buyer's name is mandatory"})
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Buyer's name is mandatory"})
 			return
 		}
 		if request.Last_name == "" {
-			ctx.JSON(400, gin.H{"error": "Buyer's lastname is mandatory"})
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Buyer's lastname is mandatory"})
 			return
 		}
 
@@ -107,15 +107,13 @@ func (c *BuyerController) Delete() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id, err := strconv.Atoi(ctx.Param("id"))
 		if err != nil {
-			ctx.JSON(400, gin.H{"error": "invalid ID"})
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "invalid ID"})
 			return
 		}
 
 		err = c.service.Delete(int(id))
 		if err != nil {
-			ctx.JSON(http.StatusNotFound, gin.H{
-				"error": err.Error(),
-			})
+			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 			return
 		}
 
