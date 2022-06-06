@@ -22,9 +22,9 @@ func (s *Seller) Create() gin.HandlerFunc {
 
 		var req request
 		if err := ctx.ShouldBindJSON(&req); err != nil {
-			ctx.JSON(http.StatusNotFound, gin.H{
-				"error": err.Error(),
-			})
+			ctx.JSON(http.StatusNotFound, web.NewResponse(
+				http.StatusNotFound, nil, "Falha ao criar seller"),
+			)
 			return
 		}
 
@@ -70,7 +70,9 @@ func (s *Seller) Create() gin.HandlerFunc {
 
 		seller, err := s.service.Create(req.Cid, req.CompanyName, req.Adress, req.Telephone)
 		if err != nil {
-			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			ctx.JSON(http.StatusNotFound, web.NewResponse(
+				http.StatusNotFound, nil, "Falha ao criar seller"),
+			)
 			return
 		}
 
@@ -143,7 +145,7 @@ func (s *Seller) Delete() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id, err := strconv.Atoi(ctx.Param("id"))
 		if err != nil {
-			ctx.JSON(400, gin.H{"error": "invalid ID"})
+			ctx.JSON(http.StatusBadRequest, web.NewResponse(http.StatusBadRequest, nil, "invalid ID"))
 			return
 		}
 
