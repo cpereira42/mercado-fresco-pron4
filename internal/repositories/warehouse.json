@@ -1,13 +1,5 @@
 [
  {
-  "id": 4,
-  "adress": "Rua da Arvore",
-  "telephone": "5577788988",
-  "warehouse_code": "Denverr",
-  "minimum_capacity": 150,
-  "minimum_temperature": 300
- },
- {
   "id": 6,
   "adress": "Rua da Onça Pintada",
   "telephone": "3333",
