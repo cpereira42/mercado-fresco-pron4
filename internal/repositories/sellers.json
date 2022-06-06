@@ -1,0 +1,16 @@
+[
+ {
+  "id": 1,
+  "cid": 1,
+  "company_name": "Digital House",
+  "address": "Monroe 123",
+  "telephone": "77733"
+ },
+ {
+  "id": 2,
+  "cid": 2,
+  "company_name": "Meli",
+  "address": "Andromeda 860",
+  "telephone": "444555"
+ }
+]
