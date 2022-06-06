@@ -5,14 +5,19 @@ import (
 	"github.com/cpereira42/mercado-fresco-pron4/internal/employee"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/section"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/seller"
+	"github.com/cpereira42/mercado-fresco-pron4/internal/warehouse"
 	"github.com/cpereira42/mercado-fresco-pron4/pkg/store"
 	"github.com/gin-gonic/gin"
 )
 
- 
-  
 func main() {
-	dbSection := store.FileStore{FileName: "./internal/repositories/sections.json"}
+
+	dbWarehouse := store.New(store.FileType, "./internal/repositories/warehouse.json")
+	repoWarehouse := warehouse.NewRepository(dbWarehouse)
+	svcWarehouse := warehouse.NewService(repoWarehouse)
+	w := handler.NewWarehouse(svcWarehouse)
+
+	dbSection := store.New(store.FileType, "./internal/repositories/sections.json")
 	repSection := section.NewRepository(dbSection)
 	serviceSection := section.NewService(repSection)
 	sectionController := handler.NewSectionController(serviceSection)
@@ -48,12 +53,18 @@ func main() {
 
 	section := r.Group("/api/v1/sections")
 	{
-		section.GET("/", sectionController.ListarSectionAll()) 		// lista todos recursos
-		section.GET("/:id", sectionController.ListarSectionOne()) 	// buscar recurso por id
-		section.POST("/", sectionController.CreateSection()) 		// cria um novo recurso
-		section.PATCH("/:id", sectionController.UpdateSection()) 	// modifica recursos
-		section.DELETE("/:id", sectionController.DeleteSection()) 	// remove recursos
+		section.GET("/", sectionController.ListarSectionAll())    // lista todos recursos
+		section.GET("/:id", sectionController.ListarSectionOne()) // buscar recurso por id
+		section.POST("/", sectionController.CreateSection())      // cria um novo recurso
+		section.PATCH("/:id", sectionController.UpdateSection())  // modifica recursos
+		section.DELETE("/:id", sectionController.DeleteSection()) // remove recursos
 	}
+	wr := r.Group("api/v1/warehouse")
+	wr.GET("/", w.GetAll)
+	wr.POST("/", w.Create)
+	wr.PATCH("/:id", w.Update)
+	wr.GET("/:id", w.GetByID)
+	wr.DELETE("/:id", w.Delete)
 
 	r.Run()
 }

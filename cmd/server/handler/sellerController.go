@@ -20,7 +20,7 @@ func NewSeller(s seller.Service) *Seller {
 func (s *Seller) Create() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
-		var req request
+		var req sellerRequest
 		if err := ctx.ShouldBindJSON(&req); err != nil {
 			ctx.JSON(http.StatusNotFound, web.NewResponse(
 				http.StatusNotFound, nil, "Failed to create new Seller"),
@@ -123,7 +123,7 @@ func (s *Seller) Update() gin.HandlerFunc {
 			return
 		}
 
-		var req request
+		var req sellerRequest
 		if err := ctx.ShouldBindJSON(&req); err != nil {
 			ctx.JSON(http.StatusBadRequest, web.NewResponse(http.StatusBadRequest, nil, err.Error()))
 			return
@@ -156,7 +156,7 @@ func (s *Seller) Delete() gin.HandlerFunc {
 	}
 }
 
-type request struct {
+type sellerRequest struct {
 	Cid         int    `json:"cid"`
 	CompanyName string `json:"company_name"`
 	Adress      string `json:"address"`
