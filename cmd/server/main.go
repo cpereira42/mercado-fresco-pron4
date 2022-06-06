@@ -7,29 +7,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-
 func main() {
-	store := store.FileStore{FileName: "sections.json"}
+	dbSection := store.FileStore{FileName: "sections.json"}
 
-	rep := section.NewRepository(store)
+	repSection := section.NewRepository(dbSection)
 
-	service := section.NewService(rep)
+	serviceSection := section.NewService(repSection)
 
-	sectionController := handler.NewSectionController(service)
+	sectionController := handler.NewSectionController(serviceSection)
 
-	router := gin.Default()
-	group := router.Group("/api/v1/")
-	{
-		section := group.Group("/sections")
-		{
-			section.GET("/", sectionController.ListarSectionAll()) 	// lista todos recursos
-			section.GET("/:id", sectionController.ListarSectionOne()) // buscar recurso por id
-			section.POST("/", sectionController.CreateSection()) 		// cria um novo recurso
-			section.PUT("/:id", sectionController.UpdateSection()) 	// modifica recursos
-			section.PATCH("/:id", sectionController.ModifyParcial()) 	// modifica recursos
-			section.DELETE("/:id", sectionController.DeleteSection()) // remove recursos
-		}
-	}
+	r := gin.Default()
+	section := r.Group("/api/v1/sections")
+	section.GET("/", sectionController.ListarSectionAll()) 	// lista todos recursos
+	section.GET("/:id", sectionController.ListarSectionOne()) // buscar recurso por id
+	section.POST("/", sectionController.CreateSection()) 		// cria um novo recurso
+	section.PATCH("/:id", sectionController.UpdateSection()) 	// modifica recursos
+	section.DELETE("/:id", sectionController.DeleteSection()) // remove recursos
 
-	router.Run()
+	r.Run()
 }

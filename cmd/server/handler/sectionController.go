@@ -155,37 +155,4 @@ func (controller *SectionController) DeleteSection() gin.HandlerFunc {
 			http.StatusNoContent, 
 			web.NewResponse(http.StatusNoContent, paramId, ""))
 	}
-}
-func (controller *SectionController) ModifyParcial() gin.HandlerFunc {
-	return func(context *gin.Context) {
-		/*token := context.Request.Header.Get("token")
-		if token != os.Getenv("TOKEN") {
-			erro := fmt.Errorf("error: você não tem permissão para fazer essa solicitação")
-			context.JSON(http.StatusUnauthorized, 
-				web.NewResponse(http.StatusUnauthorized, nil, erro.Error()))
-			return
-		}*/
-
-		id := context.Param("id")		
-		paramId, err := strconv.Atoi(id)
-		if err != nil {
-			context.JSON(http.StatusNotFound, 
-				web.NewResponse(http.StatusNotFound, nil, err.Error()))
-			return
-		}		
-		var mps section.ModifyParcial
-		if err := context.ShouldBindJSON(&mps); err != nil {
-			context.JSON(http.StatusNotFound, 
-				web.NewResponse(http.StatusNotFound, nil, err.Error()))
-			return 
-		}
-		sectionModify, err := controller.service.ModifyParcial(paramId, &mps)
-		if err != nil {
-			context.JSON(http.StatusNotFound, 
-				web.NewResponse(http.StatusNotFound, nil, err.Error()))
-			return 
-		}
-		context.JSON(http.StatusOK, 
-			web.NewResponse(http.StatusOK, sectionModify, ""))
-	}
-}
+} 
