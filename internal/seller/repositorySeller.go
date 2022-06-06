@@ -59,7 +59,7 @@ func (r *repositorySeller) GetId(id int) (Seller, error) {
 			return ps[i], nil
 		}
 	}
-	return Seller{}, fmt.Errorf("vendedor %d não encontrado", id)
+	return Seller{}, fmt.Errorf("Seller %d not found", id)
 }
 
 func (r *repositorySeller) Update(id, cid int, company, adress, telephone string) (Seller, error) {
@@ -69,7 +69,7 @@ func (r *repositorySeller) Update(id, cid int, company, adress, telephone string
 	updated := false
 	for i := range ps {
 		if ps[i].Id != id && ps[i].Cid == cid {
-			return Seller{}, errors.New("Cid já cadastrado")
+			return Seller{}, errors.New("Cid already registered")
 		}
 	}
 
@@ -93,7 +93,7 @@ func (r *repositorySeller) Update(id, cid int, company, adress, telephone string
 		}
 	}
 	if !updated {
-		return Seller{}, fmt.Errorf("Vendedor %d não encontrado", id)
+		return Seller{}, fmt.Errorf("Seller %d not found", id)
 	}
 	if err := r.db.Write(ps); err != nil {
 		return Seller{}, err
@@ -113,7 +113,7 @@ func (r *repositorySeller) Delete(id int) error {
 		}
 	}
 	if !deleted {
-		return fmt.Errorf("Vendedor %d nao encontrado", id)
+		return fmt.Errorf("Seller %d not found", id)
 	}
 
 	ps = append(ps[:index], ps[index+1:]...)
