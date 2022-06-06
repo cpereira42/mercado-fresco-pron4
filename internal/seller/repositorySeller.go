@@ -94,7 +94,7 @@ func (r *repositorySeller) Delete(id int) error {
 		}
 	}
 	if !deleted {
-		return fmt.Errorf("produto %d nao encontrado", id)
+		return fmt.Errorf("Vendedor %d nao encontrado", id)
 	}
 
 	ps = append(ps[:index], ps[index+1:]...)
