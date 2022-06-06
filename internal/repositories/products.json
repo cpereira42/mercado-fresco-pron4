@@ -1,0 +1,30 @@
+[
+    {
+        "id": 1,
+        "description": "Yogurt",
+        "expiration_rate": 1,
+        "freezing_rate": 2,
+        "height": 6.4,
+        "length": 4.5,
+        "netweight": 3.4,
+        "product_code": "ssd",
+        "recommended_freezing_temperature": 1.3,
+        "width": 1.2,
+        "product_type_id": 2,
+        "sller_id": 2
+    },
+    {
+        "id":2,
+        "description": "Danone",
+        "expiration_rate": 1,
+        "freezing_rate": 2,
+        "height": 6.4,
+        "length": 4.5,
+        "netweight": 3.4,
+        "product_code": "danones",
+        "recommended_freezing_temperature": 1.3,
+        "width": 1.2,
+        "product_type_id": 2,
+        "sller_id": 2
+    }
+]
