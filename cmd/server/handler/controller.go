@@ -111,7 +111,7 @@ func checkFields(p products.Product) error {
 		return fmt.Errorf("o campo FreezingRate é obrigatório e não pode ser menor que 0")
 	}
 
-	if p.ExpirationRate <= "" {
+	if p.ExpirationRate <= 0.0 {
 		return fmt.Errorf("o campo ExpirationRate é obrigatório")
 	}
 

@@ -8,7 +8,7 @@ type Product struct {
 	Length                         float64 `json:"length"`
 	Height                         float64 `json:"height"`
 	NetWeight                      float64 `json:"net_weight"`
-	ExpirationRate                 string  `json:"expiration_rate"`
+	ExpirationRate                 float64 `json:"expiration_rate"`
 	RecommendedFreezingTemperature float64 `json:"recommended_freezing_temperature"`
 	FreezingRate                   float64 `json:"freezing_rate"`
 	ProductType_Id                 int     `json:"product_type_id"`

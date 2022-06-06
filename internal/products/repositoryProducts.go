@@ -34,7 +34,6 @@ func (r *repositoryProduct) GetId(id int) (Product, error) {
 	return Product{}, fmt.Errorf("produto %d não encontrado", id)
 }
 
-// verificar o checkcode
 func (r *repositoryProduct) CheckCode(code string) error {
 	var ps []Product
 	r.db.Read(&ps)
@@ -105,6 +104,12 @@ func (r *repositoryProduct) UpdatePatch(id int, p Product) (Product, error) {
 	r.db.Read(&ps)
 	list := []string{"Product_code", "Description", "Width", "Length", "Height", "NetHeight", "ExpirationRate", "RecommendedFreezingTemperature", "FreezingRate", "ProductTypeId", "SellerId"}
 
+	for i := range ps {
+		if ps[i].Product_code == p.Product_code {
+			return Product{}, fmt.Errorf("codigo do produto %s já cadastrado", p.Product_code)
+		}
+	}
+
 	m1 := structs.Map(p)
 	for z := 0; z < len(ps); z++ {
 		update := false
@@ -124,7 +129,7 @@ func (r *repositoryProduct) UpdatePatch(id int, p Product) (Product, error) {
 			ps[z].Length = m2["Length"].(float64)
 			ps[z].Height = m2["Height"].(float64)
 			ps[z].NetWeight = m2["NetWeight"].(float64)
-			ps[z].ExpirationRate = m2["ExpirationRate"].(string)
+			ps[z].ExpirationRate = m2["ExpirationRate"].(float64)
 			ps[z].RecommendedFreezingTemperature = m2["RecommendedFreezingTemperature"].(float64)
 			ps[z].FreezingRate = m2["FreezingRate"].(float64)
 			ps[z].ProductType_Id = m2["ProductType_Id"].(int)
@@ -135,7 +140,6 @@ func (r *repositoryProduct) UpdatePatch(id int, p Product) (Product, error) {
 			}
 			return p, nil
 		}
-
 	}
 
 	/*
