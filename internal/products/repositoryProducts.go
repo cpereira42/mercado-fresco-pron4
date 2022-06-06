@@ -111,13 +111,14 @@ func (r *repositoryProduct) UpdatePatch(id int, p Product) (Product, error) {
 	}
 
 	m1 := structs.Map(p)
-	update, encontrado := false, false
+	fmt.Println("teste ", m1)
+	update, founded := false, false
 	for z := 0; z < len(ps); z++ {
 
 		m2 := structs.Map(ps[z])
 		for i := 0; i < len(list); i++ {
 			if m2["Id"] == id {
-				encontrado = true
+				founded = true
 				if m2[list[i]] != m1[list[i]] && m1[list[i]] != "" && m1[list[i]] != nil {
 					update = true
 					m2[list[i]] = m1[list[i]]
@@ -187,8 +188,8 @@ func (r *repositoryProduct) UpdatePatch(id int, p Product) (Product, error) {
 				return p, nil
 			}
 		}*/
-	if encontrado {
-		return p, fmt.Errorf("não houve alteração", id)
+	if founded {
+		return p, fmt.Errorf("não houve alteração")
 	}
 	return Product{}, fmt.Errorf("produto %d não encontrado", id)
 }
