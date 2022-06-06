@@ -32,7 +32,7 @@ func CheckIfErrorRequest(ctx *gin.Context, req any) bool {
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		if err == io.EOF {
 			ctx.JSON(http.StatusBadRequest, gin.H{
-				"error": "body could not be empty",
+				"error": "body must have all fields",
 			})
 			return true
 		}
@@ -51,16 +51,6 @@ func CheckIfErrorRequest(ctx *gin.Context, req any) bool {
 
 type EmployeeController struct {
 	service employee.Service
-}
-
-type request struct {
-	CardNumberID string `json:"card_number_id" validate:"len=9" `
-	FirstName    string `json:"first_name" validate:"nonzero" `
-	LastName     string `json:"last_name" validate:"nonzero"`
-	WarehouseID  int    `json:"warehouse_id" validate:"nonzero"`
-}
-type updateWarehouseIDRequest struct {
-	WarehouseID int `json:"warehouse_id" validate:"nonzero"`
 }
 
 func NewEmployee(employee employee.Service) *EmployeeController {
@@ -105,7 +95,7 @@ func (c *EmployeeController) GetByID() gin.HandlerFunc {
 func (c *EmployeeController) Create() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
-		var request request
+		var request employee.Request
 		if CheckIfErrorRequest(ctx, &request) {
 			return
 		}
@@ -129,7 +119,8 @@ func (c *EmployeeController) Update() gin.HandlerFunc {
 			return
 		}
 
-		var request request
+		var request employee.Employee
+
 		if CheckIfErrorRequest(ctx, &request) {
 			return
 		}
@@ -137,34 +128,13 @@ func (c *EmployeeController) Update() gin.HandlerFunc {
 		employee, err := c.service.Update(id, request.CardNumberID, request.FirstName, request.LastName, request.WarehouseID)
 
 		if err != nil {
-			ctx.AbortWithStatus(http.StatusNotFound)
+			ctx.JSON(http.StatusNotFound, err.Error())
 			return
 		}
 		ctx.JSON(http.StatusOK, employee)
 	}
 }
 
-func (c *EmployeeController) UpdateWarehouseID() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		id, err := checkID(ctx)
-		if err != nil {
-			return
-		}
-
-		var request updateWarehouseIDRequest
-		if CheckIfErrorRequest(ctx, &request) {
-			return
-		}
-		employee, err := c.service.UpdateWarehouseID(id, request.WarehouseID)
-		if err != nil {
-			ctx.AbortWithStatus(http.StatusNotFound)
-			return
-		}
-		ctx.JSON(http.StatusOK, gin.H{
-			"data": employee,
-		})
-	}
-}
 func (c *EmployeeController) Delete() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id, err := checkID(ctx)

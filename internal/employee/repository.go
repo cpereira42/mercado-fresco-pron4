@@ -16,7 +16,6 @@ type Repository interface {
 	LastID() (int, error)
 	Update(id int, cardNumberID, firstName, lastName string, warehouseID int) (Employee, error)
 	Delete(id int) error
-	UpdateWarehouseID(id int, warehouseID int) (Employee, error)
 }
 
 type repository struct {
@@ -53,7 +52,7 @@ func (r *repository) GetByID(id int) (Employee, error) {
 		}
 	}
 	if !exists {
-		return Employee{}, fmt.Errorf("User with id %d not found", id)
+		return Employee{}, fmt.Errorf("user with id %d not found", id)
 	}
 	return employee, nil
 }
@@ -83,11 +82,33 @@ func (r *repository) Update(id int, cardNumberID, firstName, lastName string, wa
 	if err := r.db.Read(&employees); err != nil {
 		return Employee{}, err
 	}
+	exists := false
+	for i := range employees {
+		if employees[i].CardNumberID == cardNumberID {
+			exists = true
+		}
+	}
+	if exists {
+		return Employee{}, fmt.Errorf("user with this card number id %s exists", cardNumberID)
+	}
+
 	employee = Employee{CardNumberID: cardNumberID, FirstName: firstName, LastName: lastName, WarehouseID: warehouseID}
 	updated := false
 	for i := range employees {
 		if employees[i].ID == id {
 			employee.ID = id
+			if cardNumberID == "" {
+				employee.CardNumberID = employees[i].CardNumberID
+			}
+			if firstName == "" {
+				employee.FirstName = employees[i].FirstName
+			}
+			if lastName == "" {
+				employee.LastName = employees[i].LastName
+			}
+			if warehouseID == 0 {
+				employee.WarehouseID = employees[i].WarehouseID
+			}
 			employees[i] = employee
 			updated = true
 		}
@@ -124,31 +145,6 @@ func (r *repository) Delete(id int) error {
 	}
 
 	return nil
-}
-
-func (r *repository) UpdateWarehouseID(id int, warehouseID int) (Employee, error) {
-
-	if err := r.db.Read(&employees); err != nil {
-		return Employee{}, err
-	}
-
-	updated := false
-	for i := range employees {
-		if employees[i].ID == id {
-			employees[i].WarehouseID = warehouseID
-			employee = employees[i]
-			updated = true
-		}
-	}
-
-	if !updated {
-		return Employee{}, fmt.Errorf("user with id %d not found", id)
-	}
-	if err := r.db.Write(employees); err != nil {
-		return Employee{}, err
-	}
-
-	return employee, nil
 }
 
 func NewRepository(db store.Store) Repository {

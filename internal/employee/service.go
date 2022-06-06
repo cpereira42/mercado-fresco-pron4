@@ -5,7 +5,6 @@ type Service interface {
 	GetByID(id int) (Employee, error)
 	Create(cardNumberID, firstName, lastName string, warehouseID int) (Employee, error)
 	Update(id int, cardNumberID, firstName, lastName string, warehouseID int) (Employee, error)
-	UpdateWarehouseID(id int, warehouseID int) (Employee, error)
 	Delete(id int) error
 }
 
@@ -57,14 +56,6 @@ func (s service) Update(id int, cardNumberID, firstName, lastName string, wareho
 		return Employee{}, err
 	}
 
-	return employee, nil
-}
-
-func (s service) UpdateWarehouseID(id int, warehouseID int) (Employee, error) {
-	employee, err := s.repository.UpdateWarehouseID(id, warehouseID)
-	if err != nil {
-		return Employee{}, err
-	}
 	return employee, nil
 }
 
