@@ -9,10 +9,10 @@ import (
 
 func main() {
 	dbSeller := store.New(store.FileType, "../mercado-fresco-pron4/internal/repositories/sellers.json")
-	repo := seller.NewRepositorySeller(dbSeller)
-	service := seller.NewService(repo)
+	repoSeller := seller.NewRepositorySeller(dbSeller)
+	serviceSeller := seller.NewService(repoSeller)
 
-	s := handler.NewSeller(service)
+	s := handler.NewSeller(serviceSeller)
 
 	r := gin.Default()
 
