@@ -6,7 +6,7 @@ type Service interface {
 	CreateSection(newSection Section) (Section, error)
 	UpdateSection(id int, sectionUp Section) (Section, error)
 	DeleteSection(id int) error
-	ModifyParcial(id int, section ModifyParcial) (ModifyParcial, error)
+	ModifyParcial(id int, section *ModifyParcial) (*ModifyParcial, error)
 }
 
 
@@ -40,7 +40,7 @@ func (s service) DeleteSection(id int) error {
 }
 
 
-func (s service) ModifyParcial(id int, section ModifyParcial) (ModifyParcial, error) {
+func (s service) ModifyParcial(id int, section *ModifyParcial) (*ModifyParcial, error) {
 	return s.repository.ModifyParcial(id, section)
 }
 

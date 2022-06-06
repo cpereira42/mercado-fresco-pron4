@@ -3,31 +3,23 @@ package section
 import (
 	"fmt"
 	"github.com/cpereira42/mercado-fresco-pron4/pkg/store"
-)
- 
-
-type Repository interface {
-	ListarSectionAll() ([]Section, error)
-	ListarSectionOne(id int) (Section, error)
-	CreateSection(newSection Section) (Section, error) 
-	UpdateSection(id int, sectionUp Section) (Section, error)
-	DeleteSection(id int) error
-	ModifyParcial(id int, section ModifyParcial) (ModifyParcial, error)
-	lastID() (int, error)
-}
-
-type repository struct {
-	db store.Store
-} 
+) 
 
 func (r repository) CreateSection(newSection Section) (Section, error) {	
 	var sectionsList 	[]Section
 	if err := r.db.Read(&sectionsList); err != nil {
 		return Section{}, err
-	}	
+	}
+
+	for index := range sectionsList {
+		if sectionsList[index].SectionNumber == newSection.SectionNumber {
+			return newSection, fmt.Errorf("section inlidada, o campo section_number deve ser único")
+		}
+	}
+
 	lastID, _ := r.lastID()	
 	lastID ++
-	 
+
 	newSection.Id = lastID
 	sectionsList = append(sectionsList, newSection)		
 	if err := r.db.Write(&sectionsList); err != nil {
@@ -63,14 +55,15 @@ func (r repository) UpdateSection(id int, sectionUp Section) (Section, error) {
 		if err := r.db.Read(&sectionList); err != nil {
 			return Section{}, err
 		}
+		
 		for index := range sectionList {
-			if sectionList[index].Id == id {
+			if sectionList[index].Id == id { 
 				sectionUp.Id = sectionList[index].Id
 				sectionList[index] = sectionUp
 				if err := r.db.Write(&sectionList); err != nil {
 					return Section{}, err
 				}
-				return sectionUp, nil
+				return sectionUp, nil				
 			}
 		}
 	return Section{}, fmt.Errorf("section não esta registrado")
@@ -80,17 +73,17 @@ func (r repository) DeleteSection(id int) error {
 	if err := r.db.Read(&sectionsList); err != nil {
 		return err
 	} 
-	if err := iteraSobreSectionList(r, sectionsList, id); err != nil {
+	if err := iterateAboutSectionList(r, sectionsList, id); err != nil {
 		return err
 	}
 	return nil
 }
-func (r repository) ModifyParcial(id int, section ModifyParcial) (ModifyParcial, error) {
+func (r repository) ModifyParcial(id int, section *ModifyParcial) (*ModifyParcial, error) {
 	var sections []Section
 	if err := r.db.Read(&sections); err != nil {
-		return ModifyParcial{}, err
+	return &ModifyParcial{}, err
 	} 
-	upSection, err := iteraSobreSectionListModify(r, sections, section, id)	
+	upSection, err := iterateAboutSectionListModify(r, sections, section, id)	
 	if err != nil {
 		return upSection, err
 	}	
@@ -118,7 +111,7 @@ func NewRepository(db store.Store) Repository {
 // 
 // HELPERS
 //
-func iteraSobreSectionList(rep repository, sections []Section, id int) (error) {
+func iterateAboutSectionList(rep repository, sections []Section, id int) (error) {
 	for index := range sections {
 		if sections[index].Id == id {
 			if len(sections)-1 == index {
@@ -134,20 +127,20 @@ func iteraSobreSectionList(rep repository, sections []Section, id int) (error) {
 	}
 	return fmt.Errorf("section não esta registrado")
 }
-func iteraSobreSectionListModify(rep repository, sections []Section, objeto ModifyParcial, 
-	objetoId int) (ModifyParcial, error) {
+func iterateAboutSectionListModify(rep repository, sections []Section, objeto *ModifyParcial, 
+	objetoId int) (*ModifyParcial, error) {
 	for index := range sections {
 		if sections[index].Id == objetoId { 
-			sections[index].SectionNumber	= objeto.SectionNumber
-			sections[index].MaximumCapacity	= objeto.MaximumCapacity
-			sections[index].MinimumCapacity	= objeto.MinimumCapacity
-			sections[index].ProductTypeId	= objeto.ProductTypeId
-			sections[index].WareHouseId		= objeto.WareHouseId
+			sections[index].SectionNumber		= objeto.SectionNumber
+			sections[index].CurrentTemperature	= objeto.CurrentTemperature
+			sections[index].WareHouseId			= objeto.WareHouseId
+			sections[index].CurrentCapacity		= objeto.CurrentCapacity
+			sections[index].ProductTypeId		= objeto.ProductTypeId
 			if err := rep.db.Write(&sections); err != nil {
-				return ModifyParcial{}, err
+				return &ModifyParcial{}, err
 			}
  			return objeto, nil
 		}
 	}
-	return ModifyParcial{}, fmt.Errorf("produto não esta registrado")	
+	return &ModifyParcial{}, fmt.Errorf("produto não esta registrado")	
 }
