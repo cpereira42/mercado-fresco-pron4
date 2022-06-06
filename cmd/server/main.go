@@ -34,7 +34,7 @@ func main() {
 		routesEmployees.POST("/", handlerEmployees.Create())
 		routesEmployees.PUT("/:id", handlerEmployees.Update())
 		routesEmployees.DELETE("/:id", handlerEmployees.Delete())
-		// routesEmployees.PATCH("/:id", handlerEmployee.UpdateWarehouseID())
+		routesEmployees.PATCH("/:id", handlerEmployees.UpdateWarehouseID())
 	}
 
 	pr := r.Group("/api/v1/products")
