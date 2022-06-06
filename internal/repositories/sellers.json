@@ -3,14 +3,14 @@
   "id": 1,
   "cid": 1,
   "company_name": "Digital House",
-  "address": "Andromeda 870",
-  "telephone": "123123123"
+  "address": "Monroe 123",
+  "telephone": "123321"
  },
  {
   "id": 2,
   "cid": 2,
   "company_name": "Meli",
-  "address": "Andromeda 123123",
-  "telephone": "555555"
+  "address": "Andromeda 860",
+  "telephone": "444555"
  }
 ]

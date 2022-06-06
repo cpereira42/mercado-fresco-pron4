@@ -130,38 +130,6 @@ func (s *Seller) Update() gin.HandlerFunc {
 			return
 		}
 
-		if req.Cid == 0 {
-			ctx.JSON(
-				http.StatusUnprocessableEntity,
-				web.NewResponse(http.StatusUnprocessableEntity, nil, "O Cid é obrigatório"),
-			)
-			return
-		}
-
-		if req.CompanyName == "" {
-			ctx.JSON(
-				http.StatusUnprocessableEntity,
-				web.NewResponse(http.StatusUnprocessableEntity, nil, "Necessário informar nome da empresa"),
-			)
-			return
-		}
-
-		if req.Adress == "" {
-			ctx.JSON(
-				http.StatusUnprocessableEntity,
-				web.NewResponse(http.StatusUnprocessableEntity, nil, "Necessário informar endereço"),
-			)
-			return
-		}
-
-		if req.Telephone == "" {
-			ctx.JSON(
-				http.StatusUnprocessableEntity,
-				web.NewResponse(http.StatusUnprocessableEntity, nil, "Necessário informar telefone"),
-			)
-			return
-		}
-
 		seller, err := s.service.Update(int(id), req.Cid, req.CompanyName, req.Adress, req.Telephone)
 		if err != nil {
 			ctx.JSON(404, gin.H{"error": err.Error()})

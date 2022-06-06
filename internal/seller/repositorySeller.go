@@ -69,12 +69,24 @@ func (r *repositorySeller) Update(id, cid int, company, adress, telephone string
 	for i := range ps {
 		if ps[i].Id == id {
 			seller.Id = id
+			if cid == 0 {
+				seller.Id = ps[i].Id
+			}
+			if company == "" {
+				seller.CompanyName = ps[i].CompanyName
+			}
+			if adress == "" {
+				seller.Adress = ps[i].Adress
+			}
+			if telephone == "" {
+				seller.Telephone = ps[i].Telephone
+			}
 			ps[i] = seller
 			updated = true
 		}
 	}
 	if !updated {
-		return Seller{}, fmt.Errorf("produto %d não encontrado", id)
+		return Seller{}, fmt.Errorf("Vendedor %d não encontrado", id)
 	}
 	if err := r.db.Write(ps); err != nil {
 		return Seller{}, err
