@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 
@@ -19,6 +19,9 @@ type request struct {
 	Warehouse_code      string `json:"warehouse_code" binding:"required"`
 	Minimum_capacity    int    `json:"minimum_capacity" binding:"required"`
 	Minimum_temperature int    `json:"minimum_temperature" binding:"required"`
+}
+type requestUpdateAddress struct {
+	Address string `json:"address" binding:"required"`
 }
 
 func NewWarehouse(w warehouse.Service) *Warehouse {
@@ -40,6 +43,10 @@ func (c *Warehouse) GetAll(ctx *gin.Context) {
 func (c *Warehouse) Create(ctx *gin.Context) {
 	var r request
 	if err := ctx.ShouldBindJSON(&r); err != nil {
+		if err == io.EOF {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "the body cannot be empty"})
+			return
+		}
 		ctx.AbortWithStatusJSON(http.StatusUnprocessableEntity, gin.H{
 			"error": err.Error()})
 		return
@@ -59,26 +66,26 @@ func (c *Warehouse) Update(ctx *gin.Context) {
 		return
 	}
 
-	var r request
+	var r warehouse.Warehouse
 	if err := ctx.ShouldBindJSON(&r); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
 
-	if r.Address == "" {
-		ctx.JSON(422, gin.H{"error": "address is required"})
-	}
-	if r.Telephone == "" {
-		ctx.JSON(422, gin.H{"error": "telephone is required"})
-	}
-	if r.Warehouse_code == "" {
-		ctx.JSON(422, gin.H{"error": "warehouse_code is required"})
-	}
-	if r.Minimum_capacity == 0 {
-		ctx.JSON(422, gin.H{"error": "minimum_capacity is required"})
-	}
-	if r.Minimum_temperature == 0 {
-		ctx.JSON(422, gin.H{"error": "minimum_temperature is required"})
-	}
+	// if r.Address == "" {
+	// 	ctx.JSON(422, gin.H{"error": "address is required"})
+	// }
+	// if r.Telephone == "" {
+	// 	ctx.JSON(422, gin.H{"error": "telephone is required"})
+	// }
+	// if r.Warehouse_code == "" {
+	// 	ctx.JSON(422, gin.H{"error": "warehouse_code is required"})
+	// }
+	// if r.Minimum_capacity == 0 {
+	// 	ctx.JSON(422, gin.H{"error": "minimum_capacity is required"})
+	// }
+	// if r.Minimum_temperature == 0 {
+	// 	ctx.JSON(422, gin.H{"error": "minimum_temperature is required"})
+	// }
 
 	w, err := c.service.Update(id, r.Address, r.Telephone, r.Warehouse_code, r.Minimum_capacity, r.Minimum_temperature)
 	if err != nil {
@@ -115,5 +122,5 @@ func (c *Warehouse) Delete(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	ctx.JSON(http.StatusOK, fmt.Sprintf(" The warehouse with id %d was deleted", id))
+	ctx.JSON(http.StatusNoContent, gin.H{})
 }

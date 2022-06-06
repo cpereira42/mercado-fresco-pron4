@@ -7,17 +7,15 @@ import (
 )
 
 type Repository interface {
-	GetAll() ([]Warehouse, error)                                                                                           // GET
-	Create(id int, address, telephone, warehouse_code string, minimum_capacity, minimum_temperature int) (Warehouse, error) // POST
-	LastID() (int, error)                                                                                                   // CONTADOR
-	Update(id int, address, telephone, warehouse_code string, minimum_capacity, minimum_temperature int) (Warehouse, error) // PATCH
-	GetByID(id int) (Warehouse, error)                                                                                      // GET
-	Delete(id int) error                                                                                                    // DELETE
+	GetAll() ([]Warehouse, error)
+	Create(id int, address, telephone, warehouse_code string, minimum_capacity, minimum_temperature int) (Warehouse, error)
+	LastID() (int, error)
+	Update(id int, address, telephone, warehouse_code string, minimum_capacity, minimum_temperature int) (Warehouse, error)
+	GetByID(id int) (Warehouse, error)
+	Delete(id int) error
 }
 
 var wr []Warehouse
-
-//var lastID int
 
 type repository struct {
 	db store.Store
@@ -66,7 +64,6 @@ func (r *repository) Create(id int, address, telephone, warehouse_code string, m
 	if err := r.db.Write(&wr); err != nil {
 		return Warehouse{}, err
 	}
-	//lastID = w.ID
 	return w, nil
 
 }
@@ -80,6 +77,21 @@ func (r *repository) Update(id int, address, telephone, warehouse_code string, m
 	for i := range wr {
 		if wr[i].ID == id {
 			w.ID = id
+			if address == "" {
+				w.Address = wr[i].Address
+			}
+			if telephone == "" {
+				w.Telephone = wr[i].Telephone
+			}
+			if warehouse_code == "" {
+				w.Warehouse_code = wr[i].Warehouse_code
+			}
+			if minimum_capacity == 0 {
+				w.Minimum_capacity = wr[i].Minimum_capacity
+			}
+			if minimum_temperature == 0 {
+				w.Minimum_temperature = wr[i].Minimum_temperature
+			}
 			wr[i] = w
 			update = true
 		}

@@ -3,9 +3,9 @@ package warehouse
 type Service interface {
 	GetAll() ([]Warehouse, error)
 	Create(id int, address, telephone, warehouse_code string, minimum_capacity, minimum_temperature int) (Warehouse, error)
-	GetByID(id int) (Warehouse, error)                                                                                      // GET
-	Update(id int, address, telephone, warehouse_code string, minimum_capacity, minimum_temperature int) (Warehouse, error) // PATCH
-	Delete(id int) error                                                                                                    // DELETE
+	GetByID(id int) (Warehouse, error)
+	Update(id int, address, telephone, warehouse_code string, minimum_capacity, minimum_temperature int) (Warehouse, error)
+	Delete(id int) error
 }
 
 type service struct {
