@@ -3,7 +3,9 @@ module github.com/cpereira42/mercado-fresco-pron4
 go 1.18
 
 require (
-	github.com/gin-gonic/gin v1.8.0
+	github.com/fatih/structs v1.1.0
+	github.com/gin-gonic/gin v1.8.1
+	gopkg.in/validator.v2 v2.0.1
 )
 
 require (

@@ -49,7 +49,7 @@ func (c *BuyerController) GetID() gin.HandlerFunc {
 
 func (c *BuyerController) Create() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var request request
+		var request buyerRequest
 		if err := ctx.ShouldBindJSON(&request); err != nil {
 			ctx.JSON(400, gin.H{"error": err.Error()})
 			return
@@ -75,7 +75,7 @@ func (c *BuyerController) Update() gin.HandlerFunc {
 			return
 		}
 
-		var request request
+		var request buyerRequest
 		if err := ctx.ShouldBindJSON(&request); err != nil {
 			ctx.JSON(400, gin.H{"error": err.Error()})
 			return
@@ -123,7 +123,7 @@ func (c *BuyerController) Delete() gin.HandlerFunc {
 	}
 }
 
-type request struct {
+type buyerRequest struct {
 	ID             int    `json:"id"`
 	Card_number_ID string `json:"card_number_id"`
 	First_name     string `json:"first_name"`
