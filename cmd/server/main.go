@@ -18,9 +18,7 @@ func main() {
 	serviceProd := products.NewService(repoProd)
 
 	p := handler.NewProduct(serviceProd)
-
 	r := gin.Default()
-
 	pr := r.Group("/api/v1/products")
 	pr.GET("/", p.GetAll())
 	pr.GET("/:id", p.GetId())
@@ -28,8 +26,5 @@ func main() {
 	pr.POST("/", p.Store())
 	pr.PUT("/:id", p.Update())
 	pr.PATCH("/:id", p.UpdatePatch())
-
-	//pr.PUT("/:id", p.Update())
-
 	r.Run()
 }
