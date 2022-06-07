@@ -70,15 +70,15 @@ func (s *Seller) Create() gin.HandlerFunc {
 
 		seller, err := s.service.Create(req.Cid, req.CompanyName, req.Adress, req.Telephone)
 		if err != nil {
-			ctx.JSON(http.StatusNotFound, web.NewResponse(
-				http.StatusNotFound, nil, "Falha ao criar seller"),
+			ctx.JSON(http.StatusUnprocessableEntity, web.NewResponse(
+				http.StatusUnprocessableEntity, nil, "Seller creation failed"),
 			)
 			return
 		}
 
 		ctx.JSON(
 			http.StatusCreated,
-			web.NewResponse(http.StatusCreated, seller, "Failed to create new Seller"),
+			web.NewResponse(http.StatusCreated, seller, ""),
 		)
 	}
 }
@@ -131,7 +131,7 @@ func (s *Seller) Update() gin.HandlerFunc {
 
 		seller, err := s.service.Update(int(id), req.Cid, req.CompanyName, req.Adress, req.Telephone)
 		if err != nil {
-			ctx.JSON(http.StatusNotFound, web.NewResponse(http.StatusBadRequest, nil, err.Error()))
+			ctx.JSON(http.StatusNotFound, web.NewResponse(http.StatusNotFound, nil, err.Error()))
 			return
 		}
 		ctx.JSON(http.StatusOK, web.NewResponse(http.StatusOK, seller, ""))
