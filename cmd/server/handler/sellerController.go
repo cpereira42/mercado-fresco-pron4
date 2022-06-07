@@ -20,7 +20,7 @@ func NewSeller(s seller.Service) *Seller {
 func (s *Seller) Create() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
-		var req request
+		var req sellerRequest
 		if err := ctx.ShouldBindJSON(&req); err != nil {
 			ctx.JSON(http.StatusNotFound, web.NewResponse(
 				http.StatusNotFound, nil, "Failed to create new Seller"),
@@ -70,15 +70,15 @@ func (s *Seller) Create() gin.HandlerFunc {
 
 		seller, err := s.service.Create(req.Cid, req.CompanyName, req.Adress, req.Telephone)
 		if err != nil {
-			ctx.JSON(http.StatusNotFound, web.NewResponse(
-				http.StatusNotFound, nil, "Falha ao criar seller"),
+			ctx.JSON(http.StatusUnprocessableEntity, web.NewResponse(
+				http.StatusUnprocessableEntity, nil, "Seller creation failed"),
 			)
 			return
 		}
 
 		ctx.JSON(
 			http.StatusCreated,
-			web.NewResponse(http.StatusCreated, seller, "Failed to create new Seller"),
+			web.NewResponse(http.StatusCreated, seller, ""),
 		)
 	}
 }
@@ -123,7 +123,7 @@ func (s *Seller) Update() gin.HandlerFunc {
 			return
 		}
 
-		var req request
+		var req sellerRequest
 		if err := ctx.ShouldBindJSON(&req); err != nil {
 			ctx.JSON(http.StatusBadRequest, web.NewResponse(http.StatusBadRequest, nil, err.Error()))
 			return
@@ -131,7 +131,7 @@ func (s *Seller) Update() gin.HandlerFunc {
 
 		seller, err := s.service.Update(int(id), req.Cid, req.CompanyName, req.Adress, req.Telephone)
 		if err != nil {
-			ctx.JSON(http.StatusNotFound, web.NewResponse(http.StatusBadRequest, nil, err.Error()))
+			ctx.JSON(http.StatusNotFound, web.NewResponse(http.StatusNotFound, nil, err.Error()))
 			return
 		}
 		ctx.JSON(http.StatusOK, web.NewResponse(http.StatusOK, seller, ""))
@@ -156,7 +156,7 @@ func (s *Seller) Delete() gin.HandlerFunc {
 	}
 }
 
-type request struct {
+type sellerRequest struct {
 	Cid         int    `json:"cid"`
 	CompanyName string `json:"company_name"`
 	Adress      string `json:"address"`
