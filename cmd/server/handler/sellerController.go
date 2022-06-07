@@ -70,15 +70,15 @@ func (s *Seller) Create() gin.HandlerFunc {
 
 		seller, err := s.service.Create(req.Cid, req.CompanyName, req.Adress, req.Telephone)
 		if err != nil {
-			ctx.JSON(http.StatusNotFound, web.NewResponse(
-				http.StatusNotFound, nil, "Falha ao criar seller"),
+			ctx.JSON(http.StatusUnprocessableEntity, web.NewResponse(
+				http.StatusUnprocessableEntity, nil, "Seller creation failed"),
 			)
 			return
 		}
 
 		ctx.JSON(
 			http.StatusCreated,
-			web.NewResponse(http.StatusCreated, seller, "Failed to create new Seller"),
+			web.NewResponse(http.StatusCreated, seller, ""),
 		)
 	}
 }
