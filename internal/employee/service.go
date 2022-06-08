@@ -43,7 +43,7 @@ func (s service) GetByID(id int) (Employee, error) {
 	if !exists {
 		return Employee{}, fmt.Errorf("user with id %d not found", id)
 	}
-	employee, err := s.repository.GetByID(id)
+	employee, err = s.repository.GetByID(id)
 	if err != nil {
 		return Employee{}, err
 	}
@@ -121,6 +121,7 @@ func (s service) Update(id int, cardNumberID, firstName, lastName string, wareho
 		return Employee{}, fmt.Errorf("user with id %d not found", id)
 	}
 	employee, err := s.repository.Update(employee.ID, employee.CardNumberID, employee.FirstName, employee.LastName, employee.WarehouseID)
+	fmt.Println(employee)
 	if err != nil {
 		return Employee{}, err
 	}

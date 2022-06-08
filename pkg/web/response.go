@@ -11,19 +11,19 @@ import (
 type Response struct {
 	Code  int         `json:"code"`
 	Data  interface{} `json:"data,omitempty"`
-	Error any         `json:"error,omitempty"`
+	Error string      `json:"error,omitempty"`
 }
 
-type ApiError struct {
+type RequestError struct {
 	Field   string `json:"field"`
 	Message string `json:"message"`
 }
 
-func NewResponse(code int, data interface{}, err any) Response {
+func NewResponse(code int, data interface{}, err string) Response {
 	if code < 300 {
-		return (Response{code, data, ""})
+		return Response{code, data, ""}
 	}
-	return (Response{code, nil, err})
+	return Response{code, nil, err}
 }
 
 func msgForTag(tag string) string {
@@ -40,11 +40,13 @@ func CheckIfErrorRequest(ctx *gin.Context, req any) bool {
 	if err := ctx.ShouldBind(&req); err != nil {
 		var ve validator.ValidationErrors
 		if errors.As(err, &ve) {
-			out := make([]ApiError, len(ve))
+			out := make([]RequestError, len(ve))
 			for i, fe := range ve {
-				out[i] = ApiError{fe.Field(), msgForTag(fe.Tag())}
+				out[i] = RequestError{fe.Field(), msgForTag(fe.Tag())}
 			}
-			ctx.JSON(http.StatusUnprocessableEntity, NewResponse(http.StatusUnprocessableEntity, nil, out))
+			ctx.JSON(http.StatusUnprocessableEntity, gin.H{
+				"code":  http.StatusUnprocessableEntity,
+				"error": out})
 		}
 		return true
 	}
