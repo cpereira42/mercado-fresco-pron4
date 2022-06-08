@@ -94,7 +94,6 @@ func (c *EmployeeController) Update() gin.HandlerFunc {
 			ctx.JSON(http.StatusNotFound, web.NewResponse(http.StatusNotFound, nil, fmt.Sprintf("%v", err)))
 			return
 		}
-		fmt.Println(employee)
 		ctx.JSON(http.StatusOK, web.NewResponse(http.StatusOK, employee, ""))
 	}
 }
