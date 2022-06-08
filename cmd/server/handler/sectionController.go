@@ -3,11 +3,13 @@ package handler
 import (
 	//"fmt"
 	//"os"
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/cpereira42/mercado-fresco-pron4/internal/section"
 	"github.com/cpereira42/mercado-fresco-pron4/pkg/web"
+	"github.com/fatih/structs"
 	"github.com/gin-gonic/gin"
 )
 
@@ -47,13 +49,28 @@ func (controller *SectionController) CreateSection() gin.HandlerFunc {
 				web.NewResponse(http.StatusUnauthorized, nil, erro.Error()))
 			return
 		}*/
-
-		var newSection section.Section
+		
+		var newSection section.SectionRequest
 		if err := context.ShouldBindJSON(&newSection); err != nil {
 			context.JSON(http.StatusNotFound, 
 				web.NewResponse(http.StatusUnprocessableEntity, nil, err.Error()))
 			return
 		}
+		
+		fields := []string{"SectionNumber", "CurrentTemperature", "MinimumTemperature", "CurrentCapacity", 
+			"MinimumCapacity", "MaximumCapacity", "WareHouseId", "ProductTypeId"}
+		
+		mapSection := structs.Map(newSection)
+		for _, value := range fields {
+			if mapSection[value] == 0 {
+				err := fmt.Errorf("field %s is required", value)
+				context.JSON(
+					http.StatusUnprocessableEntity, 
+					web.NewResponse(http.StatusUnprocessableEntity, nil, err.Error()))
+				return 
+			}
+		}
+
 		sections, err := controller.service.CreateSection(newSection)
 		if err != nil {
 			context.JSON(http.StatusConflict, 
