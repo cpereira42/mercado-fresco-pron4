@@ -50,9 +50,9 @@ func main() {
 	pr.GET("/", p.GetAll())
 	pr.GET("/:id", p.GetId())
 	pr.DELETE("/:id", p.Delete())
-	pr.POST("/", p.Store())
+	pr.POST("/", p.Create())
 	pr.PUT("/:id", p.Update())
-	pr.PATCH("/:id", p.UpdatePatch())
+	pr.PATCH("/:id", p.Update())
 
 	sellers := r.Group("/api/v1/sellers")
 	sellers.GET("/", s.GetAll())
