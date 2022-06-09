@@ -23,7 +23,7 @@ func (s service) ListarSectionAll() ([]Section, error){
 }
 
 
-func (s service) ListarSectionOne(id int) (Section, error) {
+func (s service) ListarSectionOne(id int) (Section, error) { 
 	return s.repository.ListarSectionOne(id)	 
 }
 
@@ -58,7 +58,7 @@ func (s service) UpdateSection(id int, sectionUp Section) (Section, error) {
 	
 	for index := range sectionList {
 		if sectionList[index].Id != id && sectionList[index].SectionNumber  == sectionUp.SectionNumber {
-			return Section{}, fmt.Errorf("this section_number %d is already registered", sectionUp.SectionNumber)
+			return Section{}, fmt.Errorf("this section_number %v is already registered", sectionUp.SectionNumber)
 		}
 	}
 	return s.repository.UpdateSection(id, sectionUp)	

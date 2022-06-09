@@ -20,5 +20,49 @@
   "maximum_capacity": 65,
   "warehouse_id": 156,
   "product_type_id": 23
+ },
+ {
+  "id": 5,
+  "section_number": 6785,
+  "current_temperature": 795,
+  "minimum_temperature": 3,
+  "current_capacity": 15,
+  "minimum_capacity": 23,
+  "maximum_capacity": 456,
+  "warehouse_id": 78,
+  "product_type_id": 456
+ },
+ {
+  "id": 6,
+  "section_number": 678,
+  "current_temperature": 795,
+  "minimum_temperature": 3,
+  "current_capacity": 15,
+  "minimum_capacity": 23,
+  "maximum_capacity": 456,
+  "warehouse_id": 78,
+  "product_type_id": 456
+ },
+ {
+  "id": 7,
+  "section_number": 434,
+  "current_temperature": 79845,
+  "minimum_temperature": 4,
+  "current_capacity": 874,
+  "minimum_capacity": 46,
+  "maximum_capacity": 89,
+  "warehouse_id": 58,
+  "product_type_id": 653
+ },
+ {
+  "id": 8,
+  "section_number": 3,
+  "current_temperature": 79845,
+  "minimum_temperature": 4,
+  "current_capacity": 135,
+  "minimum_capacity": 23,
+  "maximum_capacity": 456,
+  "warehouse_id": 78,
+  "product_type_id": 456
  }
 ]
