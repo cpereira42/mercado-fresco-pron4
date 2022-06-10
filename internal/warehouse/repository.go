@@ -1,8 +1,6 @@
 package warehouse
 
 import (
-	"errors"
-
 	"github.com/cpereira42/mercado-fresco-pron4/pkg/store"
 )
 
@@ -16,6 +14,7 @@ type Repository interface {
 }
 
 var wr []Warehouse
+var w Warehouse
 
 type repository struct {
 	db store.Store
@@ -50,15 +49,6 @@ func (r *repository) Create(id int, address, telephone, warehouse_code string, m
 		return Warehouse{}, err
 	}
 	w := Warehouse{id, address, telephone, warehouse_code, minimum_capacity, minimum_temperature}
-	exists := false
-	for i := range wr {
-		if wr[i].Warehouse_code == warehouse_code {
-			exists = true
-		}
-	}
-	if exists {
-		return Warehouse{}, errors.New("Warehouse already exists")
-	}
 
 	wr = append(wr, w)
 	if err := r.db.Write(&wr); err != nil {
@@ -69,46 +59,8 @@ func (r *repository) Create(id int, address, telephone, warehouse_code string, m
 }
 
 func (r *repository) Update(id int, address, telephone, warehouse_code string, minimum_capacity, minimum_temperature int) (Warehouse, error) {
-	if err := r.db.Read(&wr); err != nil {
-		return Warehouse{}, err
-	}
 	w := Warehouse{id, address, telephone, warehouse_code, minimum_capacity, minimum_temperature}
-	update := false
-	exists := false
-	for i := range wr {
-		if wr[i].Warehouse_code == warehouse_code {
-			exists = true
-		}
-	}
-	if exists {
-		return Warehouse{}, errors.New("Warehouse already exists")
-	}
 
-	for i := range wr {
-		if wr[i].ID == id {
-			w.ID = id
-			if address == "" {
-				w.Address = wr[i].Address
-			}
-			if telephone == "" {
-				w.Telephone = wr[i].Telephone
-			}
-			if warehouse_code == "" {
-				w.Warehouse_code = wr[i].Warehouse_code
-			}
-			if minimum_capacity == 0 {
-				w.Minimum_capacity = wr[i].Minimum_capacity
-			}
-			if minimum_temperature == 0 {
-				w.Minimum_temperature = wr[i].Minimum_temperature
-			}
-			wr[i] = w
-			update = true
-		}
-	}
-	if !update {
-		return Warehouse{}, errors.New("Warehouse not found")
-	}
 	if err := r.db.Write(&wr); err != nil {
 		return Warehouse{}, err
 	}
@@ -116,21 +68,22 @@ func (r *repository) Update(id int, address, telephone, warehouse_code string, m
 }
 
 func (r *repository) GetByID(id int) (Warehouse, error) {
+
 	if err := r.db.Read(&wr); err != nil {
 		return Warehouse{}, err
 	}
-	var w Warehouse
-	exists := false
-	for i := range wr {
-		if wr[i].ID == id {
-			w = wr[i]
-			exists = true
-		}
 
-	}
-	if !exists {
-		return Warehouse{}, errors.New("Warehouse not found")
-	}
+	// exists := false
+	// for i := range wr {
+	// 	if wr[i].ID == id {
+	// 		w = wr[i]
+	// 		exists = true
+	// 	}
+
+	// }
+	// if !exists {
+	// 	return Warehouse{}, errors.New("Warehouse not found")
+	// }
 	return w, nil
 
 }
@@ -139,18 +92,8 @@ func (r *repository) Delete(id int) error {
 	if err := r.db.Read(&wr); err != nil {
 		return err
 	}
-	delete := false
-	var index int
-	for i := range wr {
-		if wr[i].ID == id {
-			delete = true
-			index = i
-		}
-	}
-	if !delete {
-		return errors.New("Warehouse not found")
-	}
-	wr = append(wr[:index], wr[index+1:]...)
+
+	wr = append(wr[:id], wr[id+1:]...)
 	if err := r.db.Write(&wr); err != nil {
 		return err
 	}
