@@ -55,6 +55,21 @@ func (c *BuyerController) Create() gin.HandlerFunc {
 			return
 		}
 
+		if request.Card_number_ID == "" {
+			ctx.JSON(http.StatusUnprocessableEntity, gin.H{"error": "Card ID is mandatory"})
+			return
+		}
+
+		if request.First_name == "" {
+			ctx.JSON(http.StatusUnprocessableEntity, gin.H{"error": "First name is mandatory"})
+			return
+		}
+
+		if request.Last_name == "" {
+			ctx.JSON(http.StatusUnprocessableEntity, gin.H{"error": "Last name is mandatory"})
+			return
+		}
+
 		buyer, err := c.service.Create(request.Card_number_ID, request.First_name, request.Last_name)
 
 		if err != nil {
