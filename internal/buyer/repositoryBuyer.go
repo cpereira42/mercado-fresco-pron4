@@ -64,16 +64,6 @@ func (r *repositoryBuyer) Create(id int, card_number_ID, first_name, last_name s
 		return Buyer{}, err
 	}
 	buyer = Buyer{id, card_number_ID, first_name, last_name}
-	exists := false
-	for i := range buyers {
-		if buyers[i].Card_number_ID == card_number_ID {
-			exists = true
-		}
-	}
-
-	if exists {
-		return Buyer{}, fmt.Errorf("a buyer with id %s, already exists", card_number_ID)
-	}
 	buyers = append(buyers, buyer)
 	if err := r.db.Write(buyers); err != nil {
 		return Buyer{}, err
