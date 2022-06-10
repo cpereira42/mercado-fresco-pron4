@@ -8,9 +8,16 @@ type Employee struct {
 	WarehouseID  int    `json:"warehouse_id"`
 }
 
-type Request struct {
-	CardNumberID string `json:"card_number_id" validate:"nonzero" `
-	FirstName    string `json:"first_name" validate:"nonzero" `
-	LastName     string `json:"last_name" validate:"nonzero"`
-	WarehouseID  int    `json:"warehouse_id" validate:"nonzero"`
+type RequestEmployeeCreate struct {
+	CardNumberID string `json:"card_number_id" binding:"required,numeric"`
+	FirstName    string `json:"first_name" binding:"required"`
+	LastName     string `json:"last_name" binding:"required"`
+	WarehouseID  int    `json:"warehouse_id" binding:"required"`
+}
+
+type RequestEmployeeUpdate struct {
+	CardNumberID string `json:"card_number_id" binding:"omitempty,required,numeric"`
+	FirstName    string `json:"first_name" binding:"omitempty,required"`
+	LastName     string `json:"last_name" binding:"omitempty,required"`
+	WarehouseID  int    `json:"warehouse_id" binding:"omitempty,required"`
 }
