@@ -56,8 +56,8 @@ func (controller *SectionController) CreateSection() gin.HandlerFunc {
 		}
 		sections, err := controller.service.CreateSection(newSection)
 		if err != nil {
-			context.JSON(http.StatusUnprocessableEntity, 
-				web.NewResponse(http.StatusUnprocessableEntity, nil, err.Error() ))
+			context.JSON(http.StatusConflict, 
+				web.NewResponse(http.StatusConflict, nil, err.Error() ))
 			return
 		}
 		context.JSON(http.StatusCreated, 

@@ -11,20 +11,13 @@ func (r repository) CreateSection(newSection Section) (Section, error) {
 	var sectionsList []Section
 	if err := r.db.Read(&sectionsList); err != nil {
 		return Section{}, err
-	}
-
-	for index := range sectionsList {
-		if sectionsList[index].SectionNumber == newSection.SectionNumber {
-			return newSection, fmt.Errorf("section invalid, section_number field must be unique")
-		}
-	}
-
-	lastID, _ := r.lastID()
-	lastID++
+	} 
+	lastID, _ := r.lastID()	
+	lastID ++
 
 	newSection.Id = lastID
-	sectionsList = append(sectionsList, newSection)
-	if err := r.db.Write(&sectionsList); err != nil {
+	sectionsList = append(sectionsList, newSection)		
+	if err := r.db.Write(sectionsList); err != nil {
 		return Section{}, err
 	}
 	return newSection, nil
@@ -57,13 +50,7 @@ func (r repository) UpdateSection(id int, sectionUp Section) (Section, error) {
 	var sectionList []Section
 	if err := r.db.Read(&sectionList); err != nil {
 		return Section{}, err
-	}
-
-	for index := range sectionList {
-		if sectionList[index].Id != id && sectionList[index].SectionNumber == sectionUp.SectionNumber {
-			return Section{}, fmt.Errorf("this section %d is already registered", sectionUp.SectionNumber)
-		}
-	}
+	} 
 	var updated, sectionEncontrado = false, false
 	strSection := structs.Map(sectionUp)
 
@@ -93,7 +80,7 @@ func (r repository) UpdateSection(id int, sectionUp Section) (Section, error) {
 			sectionUp = sectionList[index]
 			sectionUp.Id = sectionList[index].Id
 
-			if err := r.db.Write(&sectionList); err != nil {
+			if err := r.db.Write(sectionList); err != nil {
 				return Section{}, err
 			}
 			return sectionUp, nil
@@ -148,7 +135,7 @@ func iterateAboutSectionList(rep repository, sections []Section, id int) error {
 			} else {
 				sections = append(sections[:index], sections[index+1:]...)
 			}
-			if err := rep.db.Write(&sections); err != nil {
+			if err := rep.db.Write(sections); err != nil {
 				return err
 			}
 			return nil

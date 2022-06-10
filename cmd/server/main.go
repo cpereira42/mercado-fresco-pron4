@@ -2,7 +2,9 @@ package main
 
 import (
 	"github.com/cpereira42/mercado-fresco-pron4/cmd/server/handler"
+	"github.com/cpereira42/mercado-fresco-pron4/internal/buyer"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/employee"
+	"github.com/cpereira42/mercado-fresco-pron4/internal/products"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/section"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/seller"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/warehouse"
@@ -11,6 +13,15 @@ import (
 )
 
 func main() {
+
+	dbBuyers := store.New(store.FileType, "./internal/repositories/buyer.json")
+	repositoryBuyers := buyer.NewRepository(dbBuyers)
+	serviceBuyers := buyer.NewService(repositoryBuyers)
+	hdBuyers := handler.NewBuyer(serviceBuyers)
+
+	dbProd := store.New(store.FileType, "./internal/repositories/products.json")
+	repoProd := products.NewRepositoryProducts(dbProd)
+	serviceProd := products.NewService(repoProd)
 
 	dbWarehouse := store.New(store.FileType, "./internal/repositories/warehouse.json")
 	repoWarehouse := warehouse.NewRepository(dbWarehouse)
@@ -33,7 +44,15 @@ func main() {
 
 	s := handler.NewSeller(serviceSeller)
 
+	p := handler.NewProduct(serviceProd)
 	r := gin.Default()
+	pr := r.Group("/api/v1/products")
+	pr.GET("/", p.GetAll())
+	pr.GET("/:id", p.GetId())
+	pr.DELETE("/:id", p.Delete())
+	pr.POST("/", p.Create())
+	pr.PUT("/:id", p.Update())
+	pr.PATCH("/:id", p.Update())
 
 	sellers := r.Group("/api/v1/sellers")
 	sellers.GET("/", s.GetAll())
@@ -65,6 +84,13 @@ func main() {
 	wr.PATCH("/:id", w.Update)
 	wr.GET("/:id", w.GetByID)
 	wr.DELETE("/:id", w.Delete)
+
+	buyers := r.Group("/api/v1/buyers")
+	buyers.GET("/", hdBuyers.GetAll())
+	buyers.GET("/:id", hdBuyers.GetID())
+	buyers.POST("/", hdBuyers.Create())
+	buyers.PATCH("/:id", hdBuyers.Update())
+	buyers.DELETE("/:id", hdBuyers.Delete())
 
 	r.Run()
 }

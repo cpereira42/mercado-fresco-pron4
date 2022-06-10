@@ -2,22 +2,54 @@ package products
 
 type Product struct {
 	Id                             int     `json:"id"`
-	Product_code                   int     `json:"ui"`
+	Product_code                   string  `json:"product_code"`
 	Description                    string  `json:"description"`
 	Width                          float64 `json:"width"`
+	Length                         float64 `json:"length"`
 	Height                         float64 `json:"height"`
-	NetHeight                      float64 `json:"net_height"`
-	ExpirationRate                 string  `json:"expiration_rate"`
+	NetWeight                      float64 `json:"net_weight"`
+	ExpirationRate                 float64 `json:"expiration_rate"`
 	RecommendedFreezingTemperature float64 `json:"recommended_freezing_temperature"`
 	FreezingRate                   float64 `json:"freezing_rate"`
-	ProductType_Id                 float64 `json:"product_type_id"`
-	SellerId                       float64 `json:"seller_id"`
+	ProductTypeId                  int     `json:"product_type_id"`
+	SellerId                       int     `json:"seller_id"`
 }
 
 type Repository interface {
 	GetAll() ([]Product, error)
 	GetId(id int) (Product, error)
-	//Store(prod Product)
-	//Update(id int, prod Product)
-	//Delete(id int) error
+	Delete(id int) error
+	LastID() (int, error)
+	Create(p Product) (Product, error)
+	Update(id int, prod Product) (Product, error)
+	//UpdatePatch(id int, prod Product) (Product, error)
+	CheckCode(code string) error
+}
+
+type RequestProductsCreate struct {
+	Product_code                   string  `json:"product_code" binding:"required"`
+	Description                    string  `json:"description" binding:"required"`
+	Width                          float64 `json:"width" binding:"required"`
+	Length                         float64 `json:"length" binding:"required"`
+	Height                         float64 `json:"height" binding:"required"`
+	NetWeight                      float64 `json:"net_weight" binding:"required"`
+	ExpirationRate                 float64 `json:"expiration_rate" binding:"required"`
+	RecommendedFreezingTemperature float64 `json:"recommended_freezing_temperature" binding:"required"`
+	FreezingRate                   float64 `json:"freezing_rate" binding:"required"`
+	ProductTypeId                  int     `json:"product_type_id" binding:"required"`
+	SellerId                       int     `json:"seller_id" binding:"omitempty,required"`
+}
+
+type RequestProductsUpdate struct {
+	Product_code                   string  `json:"product_code" binding:"omitempty,required"`
+	Description                    string  `json:"description" binding:"omitempty,required"`
+	Width                          float64 `json:"width" binding:"omitempty,required"`
+	Length                         float64 `json:"length" binding:"omitempty,required"`
+	Height                         float64 `json:"height" binding:"omitempty,required"`
+	NetWeight                      float64 `json:"net_weight" binding:"omitempty,required"`
+	ExpirationRate                 float64 `json:"expiration_rate" binding:"omitempty,required"`
+	RecommendedFreezingTemperature float64 `json:"recommended_freezing_temperature" binding:"omitempty,required"`
+	FreezingRate                   float64 `json:"freezing_rate" binding:"omitempty,required"`
+	ProductTypeId                  int     `json:"product_type_id" binding:"omitempty,required"`
+	SellerId                       int     `json:"seller_id" binding:"omitempty,required"`
 }

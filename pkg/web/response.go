@@ -37,7 +37,7 @@ func msgForTag(tag string) string {
 }
 
 func CheckIfErrorRequest(ctx *gin.Context, req any) bool {
-	if err := ctx.Bind(&req); err != nil {
+	if err := ctx.ShouldBind(&req); err != nil {
 		var ve validator.ValidationErrors
 		if errors.As(err, &ve) {
 			out := make([]RequestError, len(ve))
