@@ -1,9 +1,7 @@
 package handler
 
 import (
-	//"fmt"
-	//"os"
-	"net/http"
+	"net/http" 
 	"strconv"
 
 	"github.com/cpereira42/mercado-fresco-pron4/internal/section"
@@ -20,62 +18,38 @@ func NewSectionController(sectionService section.Service) *SectionController {
 }
 func (controller *SectionController)ListarSectionAll() gin.HandlerFunc {
 	return func (context *gin.Context)  {
-		/*token := context.Request.Header.Get("token")
-		if token != os.Getenv("TOKEN") {
-			erro := fmt.Errorf("error: você não tem permissão para fazer essa solicitação")
-			context.JSON(http.StatusUnauthorized, 
-				web.NewResponse(http.StatusUnauthorized, nil, erro.Error()))
-			return
-		}*/
-
 		sections, err := controller.service.ListarSectionAll()
 		if err != nil {
 			context.JSON(http.StatusBadRequest, 
 				web.NewResponse(http.StatusBadRequest, nil, err.Error() ))
 			return
 		}
-		context.JSON(http.StatusOK, 
-			web.NewResponse(http.StatusOK, sections, ""))
+		context.JSON(http.StatusOK,	web.NewResponse(http.StatusOK, sections, ""))
 	}
 }
 func (controller *SectionController) CreateSection() gin.HandlerFunc {
-	return func (context *gin.Context)  {
-		/*token := context.Request.Header.Get("token")
-		if token != os.Getenv("TOKEN") {
-			erro := fmt.Errorf("error: você não tem permissão para fazer essa solicitação")
-			context.JSON(http.StatusUnauthorized, 
-				web.NewResponse(http.StatusUnauthorized, nil, erro.Error()))
+	return func (context *gin.Context)  { 
+		
+		var newSection section.SectionRequest
+		
+		ok := web.CheckIfErrorInRequest(context,  &newSection) 
+		if ok {
 			return
-		}*/
-
-		var newSection section.Section
-		if err := context.ShouldBindJSON(&newSection); err != nil {
-			context.JSON(http.StatusNotFound, 
-				web.NewResponse(http.StatusUnprocessableEntity, nil, err.Error()))
-			return
-		}
-		sections, err := controller.service.CreateSection(newSection)
+		} 
+		
+		section, err := controller.service.CreateSection(newSection)
 		if err != nil {
 			context.JSON(http.StatusConflict, 
 				web.NewResponse(http.StatusConflict, nil, err.Error() ))
 			return
 		}
-		context.JSON(http.StatusCreated, 
-			web.NewResponse(http.StatusCreated, sections, ""))
+		context.JSON(http.StatusCreated, web.NewResponse(http.StatusCreated, section, ""))
 	}
 }
-func (controller *SectionController) ListarSectionOne() gin.HandlerFunc {
-	return func(context *gin.Context) {
-		/*token := context.Request.Header.Get("token")
-		if token != os.Getenv("TOKEN") {
-			erro := fmt.Errorf("error: você não tem permissão para fazer essa solicitação")
-			context.JSON(http.StatusUnauthorized, 
-				web.NewResponse(http.StatusUnauthorized, nil, erro.Error()))
-			return
-		}*/
 
-		paramId := context.Param("id")
-		param, err := strconv.Atoi(paramId)
+func (controller *SectionController) ListarSectionOne() gin.HandlerFunc {
+	return func(context *gin.Context) { 
+		param, err := getRequestId(context)
 		if err != nil {
 			context.JSON(http.StatusNotFound, web.NewResponse(http.StatusNotFound, nil, err.Error()))
 			return 
@@ -89,31 +63,22 @@ func (controller *SectionController) ListarSectionOne() gin.HandlerFunc {
 	}
 }
 func (controller *SectionController) UpdateSection() gin.HandlerFunc{
-	return func (context *gin.Context)  {
-		/*token := context.Request.Header.Get("token")
-		if token != os.Getenv("TOKEN") {
-			erro := fmt.Errorf("error: você não tem permissão para fazer essa solicitação")
-			context.JSON(http.StatusUnauthorized, 
-				web.NewResponse(http.StatusUnauthorized, nil, erro.Error()))
-			return
-		}*/
-
-		id := context.Param("id")
-		paramId, errconv := strconv.Atoi(id)
+	return func (context *gin.Context) {
+		paramId, errconv := getRequestId(context)
 		if errconv != nil {
 			context.JSON(
 				http.StatusNotFound, 
 				web.NewResponse(http.StatusNotFound, nil, errconv.Error()))
-			return 
-		} 
-		var sectionUp section.Section
+			return
+		}
+		var sectionUp section.Section		
 		err := context.ShouldBindJSON(&sectionUp)
 		if err != nil {
 			context.JSON(
 				http.StatusNotFound, 
 				web.NewResponse(http.StatusNotFound, nil, err.Error()))
 			return
-		}		
+		}
 		updateSection,err := controller.service.UpdateSection(paramId, sectionUp)
 		if err != nil {
 			context.JSON(
@@ -128,16 +93,7 @@ func (controller *SectionController) UpdateSection() gin.HandlerFunc{
 }
 func (controller *SectionController) DeleteSection() gin.HandlerFunc {
 	return func(context *gin.Context) {
-		/*token := context.Request.Header.Get("token")
-		if token != os.Getenv("TOKEN") {
-			erro := fmt.Errorf("error: você não tem permissão para fazer essa solicitação")
-			context.JSON(http.StatusUnauthorized, 
-				web.NewResponse(http.StatusUnauthorized, nil, erro.Error()))
-			return
-		}*/
-
-		id := context.Param("id")
-		paramId, err := strconv.Atoi(id)
+		paramId, err := getRequestId(context)
 		if err != nil {
 			context.JSON(
 				http.StatusNotFound, 
@@ -156,3 +112,12 @@ func (controller *SectionController) DeleteSection() gin.HandlerFunc {
 			web.NewResponse(http.StatusNoContent, paramId, ""))
 	}
 } 
+
+
+func getRequestId(context *gin.Context) (paramId int, err error) {
+	id := context.Param("id")
+	paramId, err = strconv.Atoi(id)
+	return
+}
+
+ 
