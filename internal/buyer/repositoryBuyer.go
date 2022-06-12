@@ -64,16 +64,6 @@ func (r *repositoryBuyer) Create(id int, card_number_ID, first_name, last_name s
 		return Buyer{}, err
 	}
 	buyer = Buyer{id, card_number_ID, first_name, last_name}
-	exists := false
-	for i := range buyers {
-		if buyers[i].Card_number_ID == card_number_ID {
-			exists = true
-		}
-	}
-
-	if exists {
-		return Buyer{}, fmt.Errorf("a buyer with id %s, already exists", card_number_ID)
-	}
 	buyers = append(buyers, buyer)
 	if err := r.db.Write(buyers); err != nil {
 		return Buyer{}, err
@@ -86,11 +76,27 @@ func (r *repositoryBuyer) Update(id int, card_number_ID, first_name, last_name s
 	if err := r.db.Read(&buyers); err != nil {
 		return Buyer{}, err
 	}
-	buyer = Buyer{Card_number_ID: card_number_ID, First_name: first_name, Last_name: last_name}
+
+	buyer = Buyer{ID: id, Card_number_ID: card_number_ID, First_name: first_name, Last_name: last_name}
 	updated := false
 	for i := range buyers {
+		if buyers[i].Card_number_ID == card_number_ID {
+			exists := true
+			if exists {
+				return Buyer{}, fmt.Errorf("a buyer with the card ID %s already exists", card_number_ID)
+			}
+		}
 		if buyers[i].ID == id {
 			buyer.ID = id
+			if card_number_ID == "" {
+				buyer.Card_number_ID = buyers[i].Card_number_ID
+			}
+			if first_name == "" {
+				buyer.First_name = buyers[i].First_name
+			}
+			if last_name == "" {
+				buyer.Last_name = buyers[i].Last_name
+			}
 			buyers[i] = buyer
 			updated = true
 		}

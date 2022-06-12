@@ -6,31 +6,28 @@ import (
 	"net/http"
 	"reflect"
 	"strings"
-
-	"strconv"
-	//"strings"
-
 	"github.com/cpereira42/mercado-fresco-pron4/internal/section"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )
 
 type Response struct {
-	Code  string      `json:"code"`
+	Code  int         `json:"code"`
 	Data  interface{} `json:"data,omitempty"`
 	Error string      `json:"error,omitempty"`
 }
 
-func NewResponse(code int, data interface{}, err string) Response {
-	if code < 300 {
-		return (Response{strconv.FormatInt(int64(code), 10), data, ""})
-	}
-	return (Response{strconv.FormatInt(int64(code), 10), nil, err})
+type RequestError struct {
+	Field   string `json:"field"`
+	Message string `json:"message"`
 }
 
-type RequestError struct {
-	Field string `json:"field"`
-	Message string `json:"message"`
+func NewResponse(code int, data interface{}, err string) Response {
+	if code < 300 {
+		return Response{code, data, ""}
+	}
+	return Response{code, nil, err}
 }
 
 func msgForTag(tag string) string {
@@ -45,20 +42,20 @@ func msgForTag(tag string) string {
 
 func CheckIfErrorRequest(ctx *gin.Context, req any) bool {
 	if err := ctx.ShouldBind(&req); err != nil {
-		var ve validator.ValidationErrors 
+		var ve validator.ValidationErrors
 		if errors.As(err, &ve) {
 			out := make([]RequestError, len(ve))
 			for i, fe := range ve {
-				out[i] = RequestError{ fe.Field(), msgForTag(fe.Tag())}
+				out[i] = RequestError{fe.Field(), msgForTag(fe.Tag())}
 			}
 			ctx.JSON(http.StatusUnprocessableEntity, gin.H{
-				"code": http.StatusUnprocessableEntity,
+				"code":  http.StatusUnprocessableEntity,
 				"error": out})
 		}
 		return true
 	}
 	return false
-}
+}  
 
 /* 
 	Implementação de validação no bind das request em rotas post/patch
@@ -84,7 +81,7 @@ func CheckIfErrorInRequest(ctx *gin.Context, request *section.SectionRequest) bo
 			strin := strings.Split(errString, sep)[1]
 			requestError := RequestError{ unmarshalFieldError.Field.Name, strings.TrimSpace(strin) } 
 			ctx.JSON(http.StatusUnprocessableEntity, 
-				Response{strconv.FormatInt(int64(http.StatusUnprocessableEntity),10), requestError, ""})
+				Response{http.StatusUnprocessableEntity, requestError, ""})
 
 		case errors.As(err, &validationErrors):
 			
@@ -97,19 +94,19 @@ func CheckIfErrorInRequest(ctx *gin.Context, request *section.SectionRequest) bo
 				}
 			}
 			ctx.JSON(http.StatusUnprocessableEntity, 
-				Response{strconv.FormatInt(int64(http.StatusUnprocessableEntity),10), out, ""})
+				Response{http.StatusUnprocessableEntity, out, ""})
 
 		case  errors.As(err, &unmarshalTypeError) :
 			
 			strin := strings.Split(unmarshalTypeError.Error(), ":")[1]
 			requestError := RequestError{ unmarshalTypeError.Field, strings.TrimSpace(strin) }
 			ctx.JSON(http.StatusUnprocessableEntity,
-				Response{strconv.FormatInt(int64(http.StatusUnprocessableEntity),10), requestError, ""})
+				Response{http.StatusUnprocessableEntity, requestError, ""})
 
 		default:
 			
 			ctx.JSON(http.StatusUnprocessableEntity, 
-				Response{strconv.FormatInt(int64(http.StatusUnprocessableEntity),10), nil, err.Error()})
+				Response{http.StatusUnprocessableEntity, nil, err.Error()})
 
 		}
 		return true
