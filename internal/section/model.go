@@ -3,18 +3,18 @@ package section
 import "github.com/cpereira42/mercado-fresco-pron4/pkg/store"
 
 type Section struct {
-	Id                 int `json:"id"`
-	SectionNumber      int `json:"section_number"`
-	CurrentTemperature int `json:"current_temperature"`
-	MinimumTemperature int `json:"minimum_temperature"`
-	CurrentCapacity    int `json:"current_capacity"`
-	MinimumCapacity    int `json:"minimum_capacity"`
-	MaximumCapacity    int `json:"maximum_capacity"`
-	WareHouseId        int `json:"warehouse_id"`
-	ProductTypeId      int `json:"product_type_id"`
+	Id                 int `json:"id,omitempty" binding:"numeric"`
+	SectionNumber      int `json:"section_number,omitempty" binding:"numeric"`
+	CurrentTemperature int `json:"current_temperature,omitempty" binding:"numeric"`
+	MinimumTemperature int `json:"minimum_temperature,omitempty" binding:"numeric"`
+	CurrentCapacity    int `json:"current_capacity,omitempty" binding:"numeric"`
+	MinimumCapacity    int `json:"minimum_capacity,omitempty" binding:"numeric"`
+	MaximumCapacity    int `json:"maximum_capacity,omitempty" binding:"numeric"`
+	WareHouseId        int `json:"warehouse_id,omitempty" binding:"numeric"`
+	ProductTypeId      int `json:"product_type_id,omitempty" binding:"numeric"`
 }
 type SectionRequest struct {
-	SectionNumber      int `json:"section_number" binding:"numeric"`
+	SectionNumber      int `json:"section_number" binding:"required,numeric"`
 	CurrentTemperature int `json:"current_temperature" binding:"required,numeric"`
 	MinimumTemperature int `json:"minimum_temperature" binding:"required,numeric"`
 	CurrentCapacity    int `json:"current_capacity" binding:"required,numeric"`

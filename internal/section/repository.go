@@ -7,12 +7,12 @@ import (
 	"github.com/fatih/structs"
 )
 
-func (r repository) CreateSection(newSection Section) (Section, error) {
+func (r *repository) CreateSection(newSection Section) (Section, error) {
 	var sectionsList []Section
 	if err := r.db.Read(&sectionsList); err != nil {
 		return Section{}, err
 	} 
-	lastID, _ := r.lastID()	
+	lastID, _ := r.lastID()
 	lastID ++
 
 	newSection.Id = lastID
@@ -20,16 +20,16 @@ func (r repository) CreateSection(newSection Section) (Section, error) {
 	if err := r.db.Write(sectionsList); err != nil {
 		return Section{}, err
 	}
-	return newSection, nil
+	return omitFieldId(newSection), nil
 }
-func (r repository) ListarSectionAll() ([]Section, error) {
+func (r *repository) ListarSectionAll() ([]Section, error) {
 	var sectionsList []Section
 	if err := r.db.Read(&sectionsList); err != nil {
 		return sectionsList, err
 	}
 	return sectionsList, nil
 }
-func (r repository) ListarSectionOne(id int) (Section, error) {
+func (r *repository) ListarSectionOne(id int) (Section, error) {
 	var (
 		sectionList []Section
 		section     Section
@@ -46,8 +46,11 @@ func (r repository) ListarSectionOne(id int) (Section, error) {
 	return Section{}, fmt.Errorf("Section is not registered")
 }
 
-func (r repository) UpdateSection(id int, sectionUp Section) (Section, error) {
-	var sectionList []Section
+func (r *repository) UpdateSection(id int, sectionUp Section) (Section, error) {
+	var (
+		sectionList []Section
+		section Section = sectionUp
+	)
 	if err := r.db.Read(&sectionList); err != nil {
 		return Section{}, err
 	} 
@@ -57,11 +60,12 @@ func (r repository) UpdateSection(id int, sectionUp Section) (Section, error) {
 	field := []string{"SectionNumber", "CurrentTemperature", "MinimumTemperature", "CurrentCapacity",
 		"MinimumCapacity", "MaximumCapacity", "WareHouseId", "ProductTypeId"}
 
-	for index := range sectionList {
+		for index := range sectionList {
 		strSection2 := structs.Map(sectionList[index])
 		for _, value := range field {
 			if strSection2["Id"] == id {
 				sectionEncontrado = true
+				section = sectionList[index]
 				if strSection[value] != 0 && strSection2[value] != strSection[value] {
 					updated = true
 					strSection2[value] = strSection[value]
@@ -69,32 +73,34 @@ func (r repository) UpdateSection(id int, sectionUp Section) (Section, error) {
 			}
 		}
 		if updated {
-			sectionList[index].SectionNumber = strSection2["SectionNumber"].(int)
-			sectionList[index].CurrentTemperature = strSection2["CurrentTemperature"].(int)
-			sectionList[index].MinimumTemperature = strSection2["MinimumTemperature"].(int)
-			sectionList[index].CurrentCapacity = strSection2["CurrentCapacity"].(int)
-			sectionList[index].MinimumCapacity = strSection2["MinimumCapacity"].(int)
-			sectionList[index].MaximumCapacity = strSection2["MaximumCapacity"].(int)
-			sectionList[index].WareHouseId = strSection2["WareHouseId"].(int)
-			sectionList[index].ProductTypeId = strSection2["ProductTypeId"].(int)
-			sectionUp = sectionList[index]
+			sectionUp.SectionNumber = strSection2["SectionNumber"].(int)
+			sectionUp.CurrentTemperature = strSection2["CurrentTemperature"].(int)
+			sectionUp.MinimumTemperature = strSection2["MinimumTemperature"].(int)
+			sectionUp.CurrentCapacity = strSection2["CurrentCapacity"].(int)
+			sectionUp.MinimumCapacity = strSection2["MinimumCapacity"].(int)
+			sectionUp.MaximumCapacity = strSection2["MaximumCapacity"].(int)
+			sectionUp.WareHouseId = strSection2["WareHouseId"].(int)
+			sectionUp.ProductTypeId = strSection2["ProductTypeId"].(int)
 			sectionUp.Id = sectionList[index].Id
-
+			sectionList[index] = sectionUp
 			if err := r.db.Write(sectionList); err != nil {
 				return Section{}, err
 			}
-			return sectionUp, nil
+			return omitFieldId(sectionUp), nil
 		}
 	}
-
+	
 	if sectionEncontrado {
-		sectionUp.Id = id
-		return sectionUp, nil
+		return omitFieldId(section), nil
 	}
 	return Section{}, fmt.Errorf("unable to update section")
 }
+func omitFieldId(section Section) Section {
+	section.Id = 0
+	return section
+}
 
-func (r repository) DeleteSection(id int) error {
+func (r *repository) DeleteSection(id int) error {
 	var sectionsList []Section
 	if err := r.db.Read(&sectionsList); err != nil {
 		return err
@@ -105,7 +111,7 @@ func (r repository) DeleteSection(id int) error {
 	return nil
 }
 
-func (r repository) lastID() (int, error) {
+func (r *repository) lastID() (int, error) {
 	var (
 		sectionsList  []Section
 		erro          error
@@ -127,7 +133,7 @@ func NewRepository(db store.Store) Repository {
 //
 // HELPERS
 //
-func iterateAboutSectionList(rep repository, sections []Section, id int) error {
+func iterateAboutSectionList(rep *repository, sections []Section, id int) error {
 	for index := range sections {
 		if sections[index].Id == id {
 			if len(sections)-1 == index {

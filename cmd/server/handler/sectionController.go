@@ -6,7 +6,6 @@ import (
 
 	"github.com/cpereira42/mercado-fresco-pron4/internal/section"
 	"github.com/cpereira42/mercado-fresco-pron4/pkg/web"
-	"github.com/fatih/structs"
 	"github.com/gin-gonic/gin"
 )
 
@@ -30,26 +29,13 @@ func (controller *SectionController)ListarSectionAll() gin.HandlerFunc {
 }
 func (controller *SectionController) CreateSection() gin.HandlerFunc {
 	return func (context *gin.Context)  { 
-		var newSection section.SectionRequest
-		if err := context.ShouldBindJSON(&newSection); err != nil {
-			context.JSON(http.StatusUnprocessableEntity, 
-				web.NewResponse(http.StatusUnprocessableEntity, nil, err.Error()))
-			return
-		}
-
-		fields := []string{"SectionNumber", "CurrentTemperature", "MinimumTemperature", "CurrentCapacity", 
-			"MinimumCapacity", "MaximumCapacity", "WareHouseId", "ProductTypeId"}
 		
-		mapSection := structs.Map(newSection)
-		for _, value := range fields {
-			if mapSection[value] == 0 { 
-				context.JSON(
-					http.StatusUnprocessableEntity, 
-					web.NewResponse(http.StatusUnprocessableEntity, nil, 
-						"field "+value+" is required"))
-				return 
-			}
-		}	
+		var newSection section.SectionRequest
+		
+		ok := web.CheckIfErrorInRequest(context,  &newSection) 
+		if ok {
+			return
+		} 
 		
 		section, err := controller.service.CreateSection(newSection)
 		if err != nil {
@@ -83,16 +69,16 @@ func (controller *SectionController) UpdateSection() gin.HandlerFunc{
 			context.JSON(
 				http.StatusNotFound, 
 				web.NewResponse(http.StatusNotFound, nil, errconv.Error()))
-			return 
-		} 
-		var sectionUp section.Section
+			return
+		}
+		var sectionUp section.Section		
 		err := context.ShouldBindJSON(&sectionUp)
 		if err != nil {
 			context.JSON(
 				http.StatusNotFound, 
 				web.NewResponse(http.StatusNotFound, nil, err.Error()))
 			return
-		}		
+		}
 		updateSection,err := controller.service.UpdateSection(paramId, sectionUp)
 		if err != nil {
 			context.JSON(

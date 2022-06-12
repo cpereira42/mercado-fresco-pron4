@@ -199,16 +199,27 @@ func TestRepositoryCreateSection(t *testing.T) {
 
 
 func TestUpdateSection(t *testing.T) {
+	 
 	reqSection := Section{
 		Id: 1,
-		SectionNumber: 			1,
-		CurrentTemperature: 	22,
-		MinimumTemperature: 	333,
-		CurrentCapacity: 		111,
-		MinimumCapacity: 		888,
-		MaximumCapacity: 		4444,
-		WareHouseId: 			55555,
-		ProductTypeId: 			666666,
+		SectionNumber: 5444,
+		CurrentTemperature: 564,
+		MinimumTemperature: 22,
+		CurrentCapacity: 111,
+		MaximumCapacity: 99,
+		WareHouseId: 6756,
+		ProductTypeId: 4444,
+	}
+	reqSection2 := Section{
+		Id: 1,
+		SectionNumber: 5444,
+		CurrentTemperature: 564,
+		MinimumTemperature: 22,
+		CurrentCapacity: 111,
+		MinimumCapacity: 888,
+		MaximumCapacity: 99,
+		WareHouseId: 6756,
+		ProductTypeId: 4444,
 	}
 
 	t.Run("Update Section", func(t *testing.T) {
@@ -222,7 +233,7 @@ func TestUpdateSection(t *testing.T) {
 				CurrentCapacity: 111,
 				MinimumCapacity: 888,
 				MaximumCapacity: 99,
-				WareHouseId: 6756,
+				WareHouseId: 123,
 				ProductTypeId: 4444,
 			},		
 		)
@@ -243,7 +254,7 @@ func TestUpdateSection(t *testing.T) {
 		// chama o metodo a ser testado
 		resultado, _ := repository.UpdateSection(1, reqSection)
 		//verificar resultado retornado com o resultado esperado
-		assert.Equal(t, reqSection, resultado)
+		assert.Equal(t, reqSection2, resultado)
 	})
 
 }

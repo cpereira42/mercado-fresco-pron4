@@ -40,11 +40,8 @@ func (s service) CreateSection(newSection SectionRequest) (Section, error) {
 		if sectionList[index].SectionNumber == newSection.SectionNumber {
 			return Section{}, fmt.Errorf("section invalid, section_number field must be unique")
 		}
-	}
-	var sec Section =Section{ SectionNumber: newSection.SectionNumber, CurrentTemperature: newSection.CurrentTemperature,
-		MinimumTemperature: newSection.MinimumTemperature, CurrentCapacity: newSection.CurrentCapacity, 
-		MinimumCapacity: newSection.MinimumCapacity, MaximumCapacity: newSection.MaximumCapacity, 
-		WareHouseId: newSection.WareHouseId,ProductTypeId: newSection.ProductTypeId}
+	} 
+	var sec Section = factorySection(newSection)
 
 	return s.repository.CreateSection(sec)
 }
@@ -70,4 +67,13 @@ func (s service) DeleteSection(id int) error {
 
 func NewService(repository Repository) Service {
 	return &service{ repository: repository }
+}
+
+func factorySection(sectionRequest SectionRequest) Section {
+	return Section{ SectionNumber: sectionRequest.SectionNumber, 
+	CurrentTemperature: sectionRequest.CurrentTemperature,
+		MinimumTemperature: sectionRequest.MinimumTemperature, 
+		CurrentCapacity: sectionRequest.CurrentCapacity, 
+		MinimumCapacity: sectionRequest.MinimumCapacity, MaximumCapacity: sectionRequest.MaximumCapacity, 
+		WareHouseId: sectionRequest.WareHouseId,ProductTypeId: sectionRequest.ProductTypeId}
 }
