@@ -62,22 +62,20 @@ func main() {
 	sellers.DELETE("/:id", s.Delete())
 
 	routesEmployees := r.Group("/api/v1/employees")
-	{
-		routesEmployees.GET("/", handlerEmployees.GetAll())
-		routesEmployees.GET("/:id", handlerEmployees.GetByID())
-		routesEmployees.POST("/", handlerEmployees.Create())
-		routesEmployees.PATCH("/:id", handlerEmployees.Update())
-		routesEmployees.DELETE("/:id", handlerEmployees.Delete())
-	}
+	routesEmployees.GET("/", handlerEmployees.GetAll())
+	routesEmployees.GET("/:id", handlerEmployees.GetByID())
+	routesEmployees.POST("/", handlerEmployees.Create())
+	routesEmployees.PATCH("/:id", handlerEmployees.Update())
+	routesEmployees.DELETE("/:id", handlerEmployees.Delete())
 
 	section := r.Group("/api/v1/sections")
-	{
-		section.GET("/", sectionController.ListarSectionAll())    // lista todos recursos
-		section.GET("/:id", sectionController.ListarSectionOne()) // buscar recurso por id
-		section.POST("/", sectionController.CreateSection())      // cria um novo recurso
-		section.PATCH("/:id", sectionController.UpdateSection())  // modifica recursos
-		section.DELETE("/:id", sectionController.DeleteSection()) // remove recursos
-	}
+
+	section.GET("/", sectionController.ListarSectionAll())    // lista todos recursos
+	section.GET("/:id", sectionController.ListarSectionOne()) // buscar recurso por id
+	section.POST("/", sectionController.CreateSection())      // cria um novo recurso
+	section.PATCH("/:id", sectionController.UpdateSection())  // modifica recursos
+	section.DELETE("/:id", sectionController.DeleteSection()) // remove recursos
+
 	wr := r.Group("api/v1/warehouse")
 	wr.GET("/", w.GetAll)
 	wr.POST("/", w.Create)
@@ -92,5 +90,5 @@ func main() {
 	buyers.PATCH("/:id", hdBuyers.Update())
 	buyers.DELETE("/:id", hdBuyers.Delete())
 
-	r.Run(":8080")
+	r.Run()
 }
