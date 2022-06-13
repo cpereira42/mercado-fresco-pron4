@@ -92,5 +92,5 @@ func main() {
 	buyers.PATCH("/:id", hdBuyers.Update())
 	buyers.DELETE("/:id", hdBuyers.Delete())
 
-	r.Run(":9000")
+	r.Run()
 }
