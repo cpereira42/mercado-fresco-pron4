@@ -105,7 +105,7 @@ func (s *service) Update(id int, p RequestProductsUpdate) (Product, error) {
 	m2 := structs.Map(prodUp)
 	for i := 0; i < len(list); i++ {
 		if m2["Id"] == id {
-			if m2[list[i]] != m1[list[i]] && m1[list[i]] != "" && m1[list[i]] != nil && m1[list[i]] != 0.0 {
+			if m2[list[i]] != m1[list[i]] && m1[list[i]] != "" && m1[list[i]] != nil && m1[list[i]] != 0.0 && m1[list[i]] != 0 {
 				m2[list[i]] = m1[list[i]]
 			}
 		}
