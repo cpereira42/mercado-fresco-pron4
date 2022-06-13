@@ -2,7 +2,7 @@ package products
 
 type Product struct {
 	Id                             int     `json:"id"`
-	Product_code                   string  `json:"product_code"`
+	ProductCode                    string  `json:"product_code"`
 	Description                    string  `json:"description"`
 	Width                          float64 `json:"width"`
 	Length                         float64 `json:"length"`
@@ -27,7 +27,7 @@ type Repository interface {
 }
 
 type RequestProductsCreate struct {
-	Product_code                   string  `json:"product_code" binding:"required"`
+	ProductCode                    string  `json:"product_code" binding:"required"`
 	Description                    string  `json:"description" binding:"required"`
 	Width                          float64 `json:"width" binding:"required"`
 	Length                         float64 `json:"length" binding:"required"`
@@ -41,7 +41,7 @@ type RequestProductsCreate struct {
 }
 
 type RequestProductsUpdate struct {
-	Product_code                   string  `json:"product_code" binding:"omitempty,required"`
+	ProductCode                    string  `json:"product_code" binding:"omitempty,required"`
 	Description                    string  `json:"description" binding:"omitempty,required"`
 	Width                          float64 `json:"width" binding:"omitempty,required"`
 	Length                         float64 `json:"length" binding:"omitempty,required"`
