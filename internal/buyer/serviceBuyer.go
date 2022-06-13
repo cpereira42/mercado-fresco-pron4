@@ -42,6 +42,11 @@ func (s *service) Create(card_number_ID, first_name, last_name string) (Buyer, e
 		return Buyer{}, err
 	}
 	lastId++
+	buyers, err := s.repositoryBuyer.GetAll()
+	if err != nil {
+		return Buyer{}, err
+	}
+
 	buyer = Buyer{lastId, card_number_ID, first_name, last_name}
 	exists := false
 	for i := range buyers {
