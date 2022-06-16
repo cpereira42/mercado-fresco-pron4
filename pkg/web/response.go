@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"reflect"
 	"strings"
-	"github.com/cpereira42/mercado-fresco-pron4/internal/section"
+	//"github.com/cpereira42/mercado-fresco-pron4/internal/section"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -61,11 +61,7 @@ func CheckIfErrorRequest(ctx *gin.Context, req any) bool {
 	Implementação de validação no bind das request em rotas post/patch
 	esse método contém melhorias seguindo a lógica do metodo acima no código
 */
-func getBindRequest(context *gin.Context, request *section.SectionRequest) error {
-	return context.ShouldBind(&request)
-}
-
-func CheckIfErrorInRequest(ctx *gin.Context, request *section.SectionRequest) bool {
+func CheckIfErrorInRequest(ctx *gin.Context, request any) bool {
 	var (
 		// type of errors
 		out []RequestError
@@ -73,10 +69,10 @@ func CheckIfErrorInRequest(ctx *gin.Context, request *section.SectionRequest) bo
 		unmarshalTypeError *json.UnmarshalTypeError
 		validationErrors validator.ValidationErrors
 	)
-	if err := getBindRequest(ctx, request); err != nil {
+	if err := ctx.ShouldBind(&request); err != nil {
 		switch {
 		case errors.As(err, &unmarshalFieldError):
-			
+						
 			errString, sep  := unmarshalFieldError.Error(), ":"
 			strin := strings.Split(errString, sep)[1]
 			requestError := RequestError{ unmarshalFieldError.Field.Name, strings.TrimSpace(strin) } 
@@ -86,7 +82,7 @@ func CheckIfErrorInRequest(ctx *gin.Context, request *section.SectionRequest) bo
 		case errors.As(err, &validationErrors):
 			
 			out = make([]RequestError, len(validationErrors))
-			typeAluno := reflect.TypeOf(*request)			
+			typeAluno := reflect.TypeOf(request).Elem()
 			for i, fe := range validationErrors {
 				field, ok :=typeAluno.FieldByName(fe.Field())
 				if ok {
