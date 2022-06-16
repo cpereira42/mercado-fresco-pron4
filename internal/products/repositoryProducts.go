@@ -37,7 +37,7 @@ func (r *repositoryProduct) CheckCode(code string) error {
 	var ps []Product
 	r.db.Read(&ps)
 	for i := range ps {
-		if ps[i].Product_code == code {
+		if ps[i].ProductCode == code {
 			return fmt.Errorf("Product Code %s already registered", code)
 		}
 	}

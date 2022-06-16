@@ -76,9 +76,8 @@ func (s *service) Update(id int, address, telephone, warehouse_code string, mini
 	if !idExists {
 		return Warehouse{}, errors.New("invalid id")
 	}
-
 	for i := range wr {
-		if wr[i].Warehouse_code == warehouse_code {
+		if wr[i].Warehouse_code == warehouse_code && id != wr[i].ID {
 			exists = true
 		}
 	}

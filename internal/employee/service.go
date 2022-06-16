@@ -97,7 +97,7 @@ func (s service) Update(id int, cardNumberID, firstName, lastName string, wareho
 	}
 
 	for i := range employees {
-		if employees[i].CardNumberID == cardNumberID {
+		if employees[i].CardNumberID == cardNumberID && id != employees[i].ID {
 			exists = true
 		}
 	}

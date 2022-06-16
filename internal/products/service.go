@@ -49,7 +49,7 @@ func (s *service) CheckCode(id int, code string) bool {
 
 	ps, _ := s.repository.GetAll()
 	for i := range ps {
-		if ps[i].Product_code == code && ps[i].Id != id {
+		if ps[i].ProductCode == code && ps[i].Id != id {
 			return true
 		}
 	}
@@ -59,8 +59,8 @@ func (s *service) CheckCode(id int, code string) bool {
 func (s *service) Create(p RequestProductsCreate) (Product, error) {
 
 	var prod Product
-	if s.CheckCode(0, p.Product_code) {
-		return Product{}, fmt.Errorf("code Product %s already registred", p.Product_code)
+	if s.CheckCode(0, p.ProductCode) {
+		return Product{}, fmt.Errorf("code Product %s already registred", p.ProductCode)
 	}
 
 	lastID, err := s.repository.LastID()
@@ -70,7 +70,7 @@ func (s *service) Create(p RequestProductsCreate) (Product, error) {
 
 	lastID++
 	prod.Id = lastID
-	prod.Product_code = p.Product_code
+	prod.ProductCode = p.ProductCode
 	prod.Description = p.Description
 	prod.Width = p.Width
 	prod.Length = p.Length
@@ -91,27 +91,27 @@ func (s *service) Create(p RequestProductsCreate) (Product, error) {
 
 func (s *service) Update(id int, p RequestProductsUpdate) (Product, error) {
 
-	list := []string{"Product_code", "Description", "Width", "Length", "Height", "NetWeight", "ExpirationRate", "RecommendedFreezingTemperature", "FreezingRate", "ProductTypeId", "SellerId"}
+	list := []string{"ProductCode", "Description", "Width", "Length", "Height", "NetWeight", "ExpirationRate", "RecommendedFreezingTemperature", "FreezingRate", "ProductTypeId", "SellerId"}
 	prodUp, err := s.repository.GetId(id)
 	if err != nil {
 		return Product{}, fmt.Errorf("Product %d not found", id)
 	}
 
-	if s.CheckCode(id, p.Product_code) {
-		return Product{}, fmt.Errorf("code Product %s already registred", p.Product_code)
+	if s.CheckCode(id, p.ProductCode) {
+		return Product{}, fmt.Errorf("code Product %s already registred", p.ProductCode)
 	}
 
 	m1 := structs.Map(p)
 	m2 := structs.Map(prodUp)
 	for i := 0; i < len(list); i++ {
 		if m2["Id"] == id {
-			if m2[list[i]] != m1[list[i]] && m1[list[i]] != "" && m1[list[i]] != nil && m1[list[i]] != 0.0 {
+			if m2[list[i]] != m1[list[i]] && m1[list[i]] != "" && m1[list[i]] != nil && m1[list[i]] != 0.0 && m1[list[i]] != 0 {
 				m2[list[i]] = m1[list[i]]
 			}
 		}
 	}
 
-	prodUp.Product_code = m2["Product_code"].(string)
+	prodUp.ProductCode = m2["ProductCode"].(string)
 	prodUp.Description = m2["Description"].(string)
 	prodUp.Width = m2["Width"].(float64)
 	prodUp.Length = m2["Length"].(float64)
