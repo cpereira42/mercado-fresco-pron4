@@ -58,7 +58,7 @@ func (r *repository) UpdateSection(id int, sectionUp Section) (Section, error) {
 	strSection := structs.Map(sectionUp)
 
 	field := []string{"SectionNumber", "CurrentTemperature", "MinimumTemperature", "CurrentCapacity",
-		"MinimumCapacity", "MaximumCapacity", "WareHouseId", "ProductTypeId"}
+		"MinimumCapacity", "MaximumCapacity", "WarehouseId", "ProductTypeId"}
 
 		for index := range sectionList {
 		strSection2 := structs.Map(sectionList[index])
@@ -79,7 +79,7 @@ func (r *repository) UpdateSection(id int, sectionUp Section) (Section, error) {
 			sectionUp.CurrentCapacity = strSection2["CurrentCapacity"].(int)
 			sectionUp.MinimumCapacity = strSection2["MinimumCapacity"].(int)
 			sectionUp.MaximumCapacity = strSection2["MaximumCapacity"].(int)
-			sectionUp.WareHouseId = strSection2["WareHouseId"].(int)
+			sectionUp.WarehouseId = strSection2["WarehouseId"].(int)
 			sectionUp.ProductTypeId = strSection2["ProductTypeId"].(int)
 			sectionUp.Id = sectionList[index].Id
 			sectionList[index] = sectionUp

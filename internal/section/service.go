@@ -4,19 +4,6 @@ import (
 	"fmt"
 )
  
-type Service interface {
-	ListarSectionAll() ([]Section, error)
-	ListarSectionOne(id int) (Section, error)
-	CreateSection(newSection SectionRequest) (Section, error)
-	UpdateSection(id int, sectionUp Section) (Section, error)
-	DeleteSection(id int) error
-}
-
-
-type service struct {
-	repository Repository
-}
-
 
 func (s service) ListarSectionAll() ([]Section, error){ 
 	return s.repository.ListarSectionAll()
@@ -28,7 +15,7 @@ func (s service) ListarSectionOne(id int) (Section, error) {
 }
 
 
-func (s service) CreateSection(newSection SectionRequest) (Section, error) {
+func (s service) CreateSection(newSection SectionRequestCreate) (Section, error) {
 	
 	var sectionList []Section 
 	
@@ -46,11 +33,11 @@ func (s service) CreateSection(newSection SectionRequest) (Section, error) {
 	return s.repository.CreateSection(sec)
 }
 
-func (s service) UpdateSection(id int, sectionUp Section) (Section, error) { 
+func (s service) UpdateSection(id int, sectionUp SectionRequestUpdate) (Section, error) { 
 	var sectionList []Section 
 	sectionList, err := s.repository.ListarSectionAll()
 	if err != nil {
-		return sectionUp, err
+		return Section{}, err
 	}
 	
 	for index := range sectionList {
@@ -58,22 +45,31 @@ func (s service) UpdateSection(id int, sectionUp Section) (Section, error) {
 			return Section{}, fmt.Errorf("this section_number %v is already registered", sectionUp.SectionNumber)
 		}
 	}
-	return s.repository.UpdateSection(id, sectionUp)	
+	newSectionRequest := factorySectionUpdate(sectionUp)
+	return s.repository.UpdateSection(id, newSectionRequest)
 }
 
 func (s service) DeleteSection(id int) error {
 	return s.repository.DeleteSection(id)
 }
 
-func NewService(repository Repository) Service {
+func NewService(repository Repository) Service { 
 	return &service{ repository: repository }
 }
 
-func factorySection(sectionRequest SectionRequest) Section {
-	return Section{ SectionNumber: sectionRequest.SectionNumber, 
-	CurrentTemperature: sectionRequest.CurrentTemperature,
-		MinimumTemperature: sectionRequest.MinimumTemperature, 
-		CurrentCapacity: sectionRequest.CurrentCapacity, 
+func factorySection(sectionRequest SectionRequestCreate) Section {
+	return Section{ 
+		SectionNumber: sectionRequest.SectionNumber,CurrentTemperature: sectionRequest.CurrentTemperature,
+		MinimumTemperature: sectionRequest.MinimumTemperature,CurrentCapacity: sectionRequest.CurrentCapacity, 
 		MinimumCapacity: sectionRequest.MinimumCapacity, MaximumCapacity: sectionRequest.MaximumCapacity, 
-		WareHouseId: sectionRequest.WareHouseId,ProductTypeId: sectionRequest.ProductTypeId}
+		WarehouseId: sectionRequest.WarehouseId,ProductTypeId: sectionRequest.ProductTypeId,
+	}
+}
+func factorySectionUpdate(sectionRequest SectionRequestUpdate) Section {
+	return Section{ 
+		SectionNumber: sectionRequest.SectionNumber,CurrentTemperature: sectionRequest.CurrentTemperature,
+		MinimumTemperature: sectionRequest.MinimumTemperature,CurrentCapacity: sectionRequest.CurrentCapacity, 
+		MinimumCapacity: sectionRequest.MinimumCapacity, MaximumCapacity: sectionRequest.MaximumCapacity, 
+		WarehouseId: sectionRequest.WarehouseId,ProductTypeId: sectionRequest.ProductTypeId,
+	}
 }

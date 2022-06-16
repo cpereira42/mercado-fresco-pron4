@@ -43,9 +43,9 @@ func main() {
 	handlerEmployees := handler.NewEmployee(serviceEmployees)
 
 	s := handler.NewSeller(serviceSeller)
-
 	p := handler.NewProduct(serviceProd)
 	r := gin.Default()
+
 	pr := r.Group("/api/v1/products")
 	pr.GET("/", p.GetAll())
 	pr.GET("/:id", p.GetId())
@@ -60,7 +60,7 @@ func main() {
 	sellers.POST("/", s.Create())
 	sellers.PATCH("/:id", s.Update())
 	sellers.DELETE("/:id", s.Delete())
-
+	
 	routesEmployees := r.Group("/api/v1/employees")
 	routesEmployees.GET("/", handlerEmployees.GetAll())
 	routesEmployees.GET("/:id", handlerEmployees.GetByID())
@@ -69,7 +69,6 @@ func main() {
 	routesEmployees.DELETE("/:id", handlerEmployees.Delete())
 
 	section := r.Group("/api/v1/sections")
-
 	section.GET("/", sectionController.ListarSectionAll())    // lista todos recursos
 	section.GET("/:id", sectionController.ListarSectionOne()) // buscar recurso por id
 	section.POST("/", sectionController.CreateSection())      // cria um novo recurso

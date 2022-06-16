@@ -30,7 +30,7 @@ func (controller *SectionController)ListarSectionAll() gin.HandlerFunc {
 func (controller *SectionController) CreateSection() gin.HandlerFunc {
 	return func (context *gin.Context)  { 
 		
-		var newSection section.SectionRequest
+		var newSection section.SectionRequestCreate
 		
 		ok := web.CheckIfErrorInRequest(context,  &newSection) 
 		if ok {
@@ -71,12 +71,9 @@ func (controller *SectionController) UpdateSection() gin.HandlerFunc{
 				web.NewResponse(http.StatusNotFound, nil, errconv.Error()))
 			return
 		}
-		var sectionUp section.Section		
-		err := context.ShouldBindJSON(&sectionUp)
-		if err != nil {
-			context.JSON(
-				http.StatusNotFound, 
-				web.NewResponse(http.StatusNotFound, nil, err.Error()))
+		var sectionUp section.SectionRequestUpdate
+		ok := web.CheckIfErrorInRequest(context, &sectionUp)
+		if ok {
 			return
 		}
 		updateSection,err := controller.service.UpdateSection(paramId, sectionUp)
