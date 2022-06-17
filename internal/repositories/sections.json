@@ -31,5 +31,126 @@
   "maximum_capacity": 456,
   "warehouse_id": 78,
   "product_type_id": 456
+ },
+ {
+  "id": 4,
+  "section_number": 0,
+  "current_temperature": 1,
+  "minimum_temperature": 1,
+  "current_capacity": 15,
+  "minimum_capacity": 23,
+  "maximum_capacity": 456,
+  "warehouse_id": 78,
+  "product_type_id": 456
+ },
+ {
+  "id": 5,
+  "section_number": 114,
+  "current_temperature": 1,
+  "minimum_temperature": 1,
+  "current_capacity": 15,
+  "minimum_capacity": 23,
+  "maximum_capacity": 456,
+  "warehouse_id": 0,
+  "product_type_id": 0
+ },
+ {
+  "id": 6,
+  "section_number": 11445,
+  "current_temperature": 1,
+  "minimum_temperature": 1,
+  "current_capacity": 15,
+  "minimum_capacity": 23,
+  "maximum_capacity": 456,
+  "warehouse_id": 0,
+  "product_type_id": 0
+ },
+ {
+  "id": 7,
+  "section_number": 1148,
+  "current_temperature": 0,
+  "minimum_temperature": 0,
+  "current_capacity": 15,
+  "minimum_capacity": 0,
+  "maximum_capacity": 0,
+  "warehouse_id": 0,
+  "product_type_id": 0
+ },
+ {
+  "id": 8,
+  "section_number": 11448,
+  "current_temperature": 0,
+  "minimum_temperature": 0,
+  "current_capacity": 15,
+  "minimum_capacity": 0,
+  "maximum_capacity": 0,
+  "warehouse_id": 0,
+  "product_type_id": 0
+ },
+ {
+  "id": 9,
+  "section_number": 3,
+  "current_temperature": 0,
+  "minimum_temperature": 0,
+  "current_capacity": 15,
+  "minimum_capacity": 0,
+  "maximum_capacity": 0,
+  "warehouse_id": 0,
+  "product_type_id": 0
+ },
+ {
+  "id": 10,
+  "section_number": 456,
+  "current_temperature": 0,
+  "minimum_temperature": 0,
+  "current_capacity": 15,
+  "minimum_capacity": 0,
+  "maximum_capacity": 0,
+  "warehouse_id": 0,
+  "product_type_id": 0
+ },
+ {
+  "id": 11,
+  "section_number": 4756,
+  "current_temperature": 0,
+  "minimum_temperature": 0,
+  "current_capacity": 15,
+  "minimum_capacity": 0,
+  "maximum_capacity": 0,
+  "warehouse_id": 0,
+  "product_type_id": 0
+ },
+ {
+  "id": 12,
+  "section_number": 234,
+  "current_temperature": 0,
+  "minimum_temperature": 0,
+  "current_capacity": 15,
+  "minimum_capacity": 0,
+  "maximum_capacity": 0,
+  "warehouse_id": 0,
+  "product_type_id": 0
+ },
+ {
+  "id": 13,
+  "section_number": 897,
+  "current_temperature": 0,
+  "minimum_temperature": 0,
+  "current_capacity": 15,
+  "minimum_capacity": 0,
+  "maximum_capacity": 0,
+  "warehouse_id": 0,
+  "product_type_id": 0
+ },
+ {
+  "id": 14,
+  "section_number": 8937,
+  "current_temperature": 0,
+  "minimum_temperature": 0,
+  "current_capacity": 15,
+  "minimum_capacity": 0,
+  "maximum_capacity": 0,
+  "warehouse_id": 0,
+  "product_type_id": 0
  }
 ]

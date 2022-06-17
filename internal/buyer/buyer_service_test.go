@@ -99,34 +99,30 @@ func TestServiceGetAll(t *testing.T) {
 }
 
 func TestServiceGetId(t *testing.T) {
-
-	var mockRep = new(mock.BuyerRepository)
-
-	var buyerList []buyer.Buyer = []buyer.Buyer{
-		{
-			ID:             1,
-			Card_number_ID: "123",
-			First_name:     "S",
-			Last_name:      "abc",
-		},
-		{
-			ID:             2,
-			Card_number_ID: "78",
-			First_name:     "B",
-			Last_name:      "dfc",
-		},
-	}
-
 	t.Run("service metodo GetId", func(t *testing.T) {
-		mockRep.On("GetId").Return(buyerList, nil).Once()
+		var buyerList []buyer.Buyer = []buyer.Buyer{
+			{
+				ID:             1,
+				Card_number_ID: "123",
+				First_name:     "S",
+				Last_name:      "abc",
+			},
+			{
+				ID:             2,
+				Card_number_ID: "78",
+				First_name:     "B",
+				Last_name:      "dfc",
+			},
+		}
+		
+		var mockRep = new(mock.BuyerRepository)
+		
+		mockRep.On("GetId", tmock.Arguments{1}).Return(buyerList[0], nil).Once()
 
 		service := buyer.NewService(mockRep)
 
-		b, e := service.GetId(30)
-		assert.Nil(t, e)
+		b, _ := service.GetId(1)
 		assert.ObjectsAreEqual(b, buyerList[0])
-		assert.Equal(t, b.ID, buyerList[0].ID)
-
 		mockRep.AssertExpectations(t)
 	})
 }

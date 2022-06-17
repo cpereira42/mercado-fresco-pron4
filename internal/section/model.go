@@ -10,15 +10,15 @@ import "github.com/cpereira42/mercado-fresco-pron4/pkg/store"
  * Request PATCH: SectionRequestUpdate{}
  */
 type Section struct {
-	Id                 int `json:"id,omitempty" binding:"numeric"`
-	SectionNumber      int `json:"section_number,omitempty" binding:"numeric"`
-	CurrentTemperature int `json:"current_temperature,omitempty" binding:"numeric"`
-	MinimumTemperature int `json:"minimum_temperature,omitempty" binding:"numeric"`
-	CurrentCapacity    int `json:"current_capacity,omitempty" binding:"numeric"`
-	MinimumCapacity    int `json:"minimum_capacity,omitempty" binding:"numeric"`
-	MaximumCapacity    int `json:"maximum_capacity,omitempty" binding:"numeric"`
-	WarehouseId        int `json:"warehouse_id,omitempty" binding:"numeric"`
-	ProductTypeId      int `json:"product_type_id,omitempty" binding:"numeric"`
+	Id                 int `json:"id"`
+	SectionNumber      int `json:"section_number"`
+	CurrentTemperature int `json:"current_temperature"`
+	MinimumTemperature int `json:"minimum_temperature"`
+	CurrentCapacity    int `json:"current_capacity"`
+	MinimumCapacity    int `json:"minimum_capacity"`
+	MaximumCapacity    int `json:"maximum_capacity"`
+	WarehouseId        int `json:"warehouse_id"`
+	ProductTypeId      int `json:"product_type_id"`
 } 
 type SectionRequestCreate struct {
 	SectionNumber      int `json:"section_number" binding:"required,numeric"`
@@ -31,14 +31,14 @@ type SectionRequestCreate struct {
 	ProductTypeId      int `json:"product_type_id" binding:"required,numeric"`
 }
 type SectionRequestUpdate struct {
-	SectionNumber      int `json:"section_number" binding:"required,numeric,omitempty"`
-	CurrentTemperature int `json:"current_temperature" binding:"numeric,omitempty"`
-	MinimumTemperature int `json:"minimum_temperature" binding:"numeric,omitempty"`
-	CurrentCapacity    int `json:"current_capacity" binding:"numeric,omitempty"`
-	MinimumCapacity    int `json:"minimum_capacity" binding:"numeric,omitempty"`
-	MaximumCapacity    int `json:"maximum_capacity" binding:"numeric,omitempty"`
-	WarehouseId        int `json:"warehouse_id" binding:"numeric,omitempty"`
-	ProductTypeId      int `json:"product_type_id" binding:"numeric,omitempty"`
+	SectionNumber      int `json:"section_number" binding:"omitempty,required,numeric"`
+	CurrentTemperature int `json:"current_temperature" binding:"omitempty,required,numeric"`
+	MinimumTemperature int `json:"minimum_temperature" binding:"omitempty,required,numeric"`
+	CurrentCapacity    int `json:"current_capacity"	binding:"omitempty,required,numeric"`
+	MinimumCapacity    int `json:"minimum_capacity"	binding:"omitempty,required,numeric"`
+	MaximumCapacity    int `json:"maximum_capacity"	binding:"omitempty,required,numeric"`
+	WarehouseId        int `json:"warehouse_id" binding:"omitempty,required,numeric"`
+	ProductTypeId      int `json:"product_type_id" binding:"omitempty,required,numeric"`
 }
 
 /* 
@@ -53,7 +53,7 @@ type Repository interface {
 	CreateSection(section Section) (Section, error)
 	UpdateSection(id int, section Section) (Section, error)
 	DeleteSection(id int) error
-	lastID() (int, error)
+	LastID() (int, error)
 }
 
 type repository struct {

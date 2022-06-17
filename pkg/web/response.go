@@ -3,9 +3,12 @@ package web
 import (
 	"encoding/json"
 	"errors"
+	//"fmt"
+
 	"net/http"
 	"reflect"
 	"strings"
+
 	//"github.com/cpereira42/mercado-fresco-pron4/internal/section"
 
 	"github.com/gin-gonic/gin"
@@ -40,7 +43,7 @@ func msgForTag(tag string) string {
 	return ""
 }
 
-func CheckIfErrorRequest(ctx *gin.Context, req any) bool {
+/*func CheckIfErrorRequest(ctx *gin.Context, req any) bool {
 	if err := ctx.ShouldBind(&req); err != nil {
 		var ve validator.ValidationErrors
 		if errors.As(err, &ve) {
@@ -55,55 +58,54 @@ func CheckIfErrorRequest(ctx *gin.Context, req any) bool {
 		return true
 	}
 	return false
-}  
+}*/  
 
 /* 
 	Implementação de validação no bind das request em rotas post/patch
 	esse método contém melhorias seguindo a lógica do metodo acima no código
 */
-func CheckIfErrorInRequest(ctx *gin.Context, request any) bool {
+func CheckIfErrorRequest(ctx *gin.Context, request any) bool {
 	var (
 		// type of errors
 		out []RequestError
 		unmarshalFieldError *json.UnmarshalFieldError // this erro is deprecated
 		unmarshalTypeError *json.UnmarshalTypeError
 		validationErrors validator.ValidationErrors
-	)
+	)	
+	 
 	if err := ctx.ShouldBind(&request); err != nil {
+		 
 		switch {
-		case errors.As(err, &unmarshalFieldError):
-						
-			errString, sep  := unmarshalFieldError.Error(), ":"
-			strin := strings.Split(errString, sep)[1]
-			requestError := RequestError{ unmarshalFieldError.Field.Name, strings.TrimSpace(strin) } 
-			ctx.JSON(http.StatusUnprocessableEntity, 
-				Response{http.StatusUnprocessableEntity, requestError, ""})
-
-		case errors.As(err, &validationErrors):
+		case errors.As(err, &validationErrors): 
 			
 			out = make([]RequestError, len(validationErrors))
-			typeAluno := reflect.TypeOf(request).Elem()
+			typeData := reflect.TypeOf(request).Elem()
 			for i, fe := range validationErrors {
-				field, ok :=typeAluno.FieldByName(fe.Field())
+				field, ok :=typeData.FieldByName(fe.Field())
 				if ok {
 					out[i] = RequestError{ field.Tag.Get("json"), msgForTag(fe.Tag())}
 				}
 			}
 			ctx.JSON(http.StatusUnprocessableEntity, 
-				Response{http.StatusUnprocessableEntity, out, ""})
+				Response{http.StatusUnprocessableEntity, out, ""}) 
+
+		case errors.As(err, &unmarshalFieldError):
+			errString, sep  := unmarshalFieldError.Error(), ":"
+			strin := strings.Split(errString, sep)[1]
+			requestError := RequestError{ unmarshalFieldError.Field.Name, strings.TrimSpace(strin) } 
+			ctx.JSON(http.StatusUnprocessableEntity, 
+				Response{http.StatusUnprocessableEntity, requestError, ""}) 
 
 		case  errors.As(err, &unmarshalTypeError) :
 			
 			strin := strings.Split(unmarshalTypeError.Error(), ":")[1]
 			requestError := RequestError{ unmarshalTypeError.Field, strings.TrimSpace(strin) }
 			ctx.JSON(http.StatusUnprocessableEntity,
-				Response{http.StatusUnprocessableEntity, requestError, ""})
-
+				Response{http.StatusUnprocessableEntity, requestError, ""}) 
 		default:
 			
 			ctx.JSON(http.StatusUnprocessableEntity, 
-				Response{http.StatusUnprocessableEntity, nil, err.Error()})
-
+				Response{http.StatusUnprocessableEntity, nil, err.Error()}) 
 		}
 		return true
 	}

@@ -12,7 +12,7 @@ func (r *repository) CreateSection(newSection Section) (Section, error) {
 	if err := r.db.Read(&sectionsList); err != nil {
 		return Section{}, err
 	} 
-	lastID, _ := r.lastID()
+	lastID, _ := r.LastID()
 	lastID ++
 
 	newSection.Id = lastID
@@ -111,7 +111,7 @@ func (r *repository) DeleteSection(id int) error {
 	return nil
 }
 
-func (r *repository) lastID() (int, error) {
+func (r *repository) LastID() (int, error) {
 	var (
 		sectionsList  []Section
 		erro          error

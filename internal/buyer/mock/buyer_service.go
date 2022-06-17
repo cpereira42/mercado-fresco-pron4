@@ -81,12 +81,10 @@ func (b *BuyerService) GetId(id int) (buyer.Buyer, error) {
 		buyerObj buyer.Buyer
 	)
 
-	if rf, ok := args.Get(0).(func(id int) buyer.Buyer); ok {
+	if rf, ok := args.Get(0).(func(int) buyer.Buyer); ok {
 		buyerObj = rf(id)
 	} else {
-		if args.Get(0) != nil {
-			buyerObj = args.Get(0).(buyer.Buyer)
-		}
+		buyerObj = args.Get(0).(buyer.Buyer)
 	}
 
 	if rf, ok := args.Get(1).(func(id int) error); ok {

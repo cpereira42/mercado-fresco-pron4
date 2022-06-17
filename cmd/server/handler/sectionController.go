@@ -1,7 +1,8 @@
 package handler
 
 import (
-	"net/http" 
+	"fmt"
+	"net/http"
 	"strconv"
 
 	"github.com/cpereira42/mercado-fresco-pron4/internal/section"
@@ -32,7 +33,8 @@ func (controller *SectionController) CreateSection() gin.HandlerFunc {
 		
 		var newSection section.SectionRequestCreate
 		
-		ok := web.CheckIfErrorInRequest(context,  &newSection) 
+		ok := web.CheckIfErrorRequest(context,  &newSection) 
+		fmt.Println("houve error: ", ok)
 		if ok {
 			return
 		} 
@@ -72,7 +74,7 @@ func (controller *SectionController) UpdateSection() gin.HandlerFunc{
 			return
 		}
 		var sectionUp section.SectionRequestUpdate
-		ok := web.CheckIfErrorInRequest(context, &sectionUp)
+		ok := web.CheckIfErrorRequest(context, &sectionUp)
 		if ok {
 			return
 		}

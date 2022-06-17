@@ -130,7 +130,7 @@ func (b *BuyerRepository) Update(
 		err      error
 	)
 	if rf, ok := args.Get(0).(func(
-		int,string, string, string,
+		int, string, string, string,
 	) buyer.Buyer); ok {
 		buyerObj = rf(id, card_number_ID, first_name, last_name)
 	} else {
