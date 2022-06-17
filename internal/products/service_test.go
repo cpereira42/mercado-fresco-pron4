@@ -113,6 +113,7 @@ func Test_RepositoryFindAll(t *testing.T) {
 		assert.Nil(t, err)
 		assert.True(t, len(ps) == 2)
 		assert.Equal(t, produtos, ps)
+		repo.AssertExpectations(t)
 	})
 
 	t.Run("Find All Fail", func(t *testing.T) {
@@ -123,6 +124,7 @@ func Test_RepositoryFindAll(t *testing.T) {
 		ps, err := service.GetAll()
 		assert.True(t, len(ps) == 0)
 		assert.Equal(t, fmt.Errorf("Fail to get all"), err)
+		repo.AssertExpectations(t)
 	})
 }
 
@@ -138,6 +140,7 @@ func Test_RepositoryFindId(t *testing.T) {
 
 		assert.Nil(t, err)
 		assert.Equal(t, produtos[0], ps)
+		repo.AssertExpectations(t)
 	})
 
 	t.Run("GetId Fail", func(t *testing.T) {
@@ -149,6 +152,7 @@ func Test_RepositoryFindId(t *testing.T) {
 
 		assert.NotNil(t, err)
 		assert.Equal(t, fmt.Errorf("Falha ao localizar Id"), err)
+		repo.AssertExpectations(t)
 	})
 }
 
@@ -162,6 +166,7 @@ func Test_RepositoryDelete(t *testing.T) {
 		err := service.Delete(1)
 
 		assert.Nil(t, err)
+		repo.AssertExpectations(t)
 	})
 
 	t.Run("TestDeleteFail", func(t *testing.T) {
@@ -172,6 +177,7 @@ func Test_RepositoryDelete(t *testing.T) {
 		err := service.Delete(9)
 
 		assert.Equal(t, fmt.Errorf("produto não encontrado"), err)
+		repo.AssertExpectations(t)
 	})
 }
 
@@ -189,6 +195,7 @@ func Test_RepositoryUpdate(t *testing.T) {
 
 		assert.Nil(t, err)
 		assert.Equal(t, prod3, ps)
+		repo.AssertExpectations(t)
 	})
 
 	t.Run("Update Fail", func(t *testing.T) {
@@ -200,6 +207,7 @@ func Test_RepositoryUpdate(t *testing.T) {
 		_, err := service.Update(5, prodUp)
 
 		assert.Equal(t, fmt.Errorf("Product 5 not found"), err)
+
 	})
 
 	t.Run("Update Code already Registred Fail", func(t *testing.T) {
@@ -213,6 +221,7 @@ func Test_RepositoryUpdate(t *testing.T) {
 		_, err := service.Update(3, prodUp)
 
 		assert.Equal(t, fmt.Errorf("code Product prod2 already registred"), err)
+
 	})
 }
 
@@ -228,6 +237,7 @@ func Test_RepositoryCreate(t *testing.T) {
 
 		assert.Nil(t, err)
 		assert.Equal(t, prod4, ps)
+		repo.AssertExpectations(t)
 	})
 
 	t.Run("Create Fail GetLast Id ", func(t *testing.T) {
@@ -252,6 +262,7 @@ func Test_RepositoryCreate(t *testing.T) {
 
 		assert.NotNil(t, err)
 		assert.Equal(t, err, fmt.Errorf("Fail to save"))
+
 	})
 
 	produtos = append(produtos, prod4)
@@ -265,6 +276,7 @@ func Test_RepositoryCreate(t *testing.T) {
 
 		assert.NotNil(t, err)
 		assert.Equal(t, err, fmt.Errorf("code Product prod4 already registred"))
+
 	})
 
 }

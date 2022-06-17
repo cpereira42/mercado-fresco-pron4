@@ -32,7 +32,7 @@ func (c *Product) GetId() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 		if err != nil {
-			ctx.JSON(401, web.NewResponse(401, nil, "Invalid ID"))
+			ctx.JSON(404, web.NewResponse(404, nil, "Invalid ID"))
 			return
 		}
 		p, err := c.service.GetId(int(id))
