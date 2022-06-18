@@ -12,5 +12,12 @@
   "company_name": "Meli",
   "address": "Andromeda 860",
   "telephone": "444555"
+ },
+ {
+  "id": 3,
+  "cid": 3,
+  "company_name": "Meli",
+  "address": "Monroe 8888",
+  "telephone": "213123123"
  }
 ]

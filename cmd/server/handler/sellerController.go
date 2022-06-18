@@ -28,14 +28,6 @@ func (s *Seller) Create() gin.HandlerFunc {
 			return
 		}
 
-		if !s.service.CheckCid(req.Cid) {
-			ctx.JSON(
-				http.StatusConflict,
-				web.NewResponse(http.StatusConflict, nil, "Cid already registered"),
-			)
-			return
-		}
-
 		if req.Cid == 0 {
 			ctx.JSON(
 				http.StatusUnprocessableEntity,
@@ -69,9 +61,11 @@ func (s *Seller) Create() gin.HandlerFunc {
 		}
 
 		seller, err := s.service.Create(req.Cid, req.CompanyName, req.Adress, req.Telephone)
+
 		if err != nil {
-			ctx.JSON(http.StatusUnprocessableEntity, web.NewResponse(
-				http.StatusUnprocessableEntity, nil, "Seller creation failed"),
+			ctx.JSON(
+				http.StatusConflict,
+				web.NewResponse(http.StatusConflict, nil, "Cid already registered"),
 			)
 			return
 		}

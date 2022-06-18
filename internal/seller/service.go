@@ -1,5 +1,7 @@
 package seller
 
+import "errors"
+
 type Service interface {
 	GetAll() ([]Seller, error)
 	GetId(id int) (Seller, error)
@@ -20,6 +22,9 @@ func NewService(r RepositorySeller) Service {
 }
 
 func (s *service) Create(cid int, company, adress, telephone string) (Seller, error) {
+	if !s.CheckCid(cid) {
+		return Seller{}, errors.New("Cid already registered")
+	}
 	lastID, err := s.repository.LastID()
 
 	if err != nil {
@@ -38,7 +43,7 @@ func (s *service) Create(cid int, company, adress, telephone string) (Seller, er
 
 }
 
-func (s *service) CheckCid(cid int) bool {
+func (s service) CheckCid(cid int) bool {
 	sellers, err := s.repository.GetAll()
 	if err != nil {
 		return false
