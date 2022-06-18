@@ -10,13 +10,11 @@ type BuyerRepository struct {
 }
 
 /*
-GetAll() ([]Buyer, error)
-GetId(id int) (Buyer, error)
-Create(id int, card_number_ID, first_name, last_name string) (Buyer, error)
-LastID() (int, error)
-Update(id int, card_number_ID, first_name, last_name string) (Buyer, error)
-Delete(id int) error
-
+	GetAll() ([]Buyer, error)
+	GetId(id int) (Buyer, error)
+	Create(id int, card_number_ID, first_name, last_name string) (Buyer, error)
+	Update(id int, card_number_ID, first_name, last_name string) (Buyer, error)
+	Delete(id int) error
 */
 
 func (b *BuyerRepository) Create(
@@ -29,7 +27,6 @@ func (b *BuyerRepository) Create(
 		err      error
 		buyerObj buyer.Buyer
 	)
-
 	if rf, ok := args.Get(0).(func(int, string, string, string) buyer.Buyer); ok {
 		buyerObj = rf(id, card_number_ID, first_name, last_name)
 	} else {
@@ -37,7 +34,6 @@ func (b *BuyerRepository) Create(
 			buyerObj = args.Get(0).(buyer.Buyer)
 		}
 	}
-
 	if rf, ok := args.Get(1).(func(int, string, string, string) error); ok {
 		err = rf(id, card_number_ID, first_name, last_name)
 	} else {
@@ -49,12 +45,11 @@ func (b *BuyerRepository) Create(
 }
 
 func (b *BuyerRepository) GetAll() ([]buyer.Buyer, error) {
-	args := b.Called()
 	var (
+		args = b.Called()
 		buyerList []buyer.Buyer
 		err       error
 	)
-
 	if rf, ok := args.Get(0).(func() []buyer.Buyer); ok {
 		buyerList = rf()
 	} else {
@@ -62,13 +57,11 @@ func (b *BuyerRepository) GetAll() ([]buyer.Buyer, error) {
 			buyerList = args.Get(0).([]buyer.Buyer)
 		}
 	}
-
 	if rf, ok := args.Get(1).(func() error); ok {
 		err = rf()
 	} else {
 		err = args.Error(1)
 	}
-
 	return buyerList, err
 }
 
@@ -78,16 +71,14 @@ func (b *BuyerRepository) GetId(id int) (buyer.Buyer, error) {
 		err      error
 		buyerObj buyer.Buyer
 	)
-
-	if rf, ok := args.Get(0).(func(id int) buyer.Buyer); ok {
+	if rf, ok := args.Get(0).(func(int) buyer.Buyer); ok {
 		buyerObj = rf(id)
 	} else {
 		if args.Get(0) != nil {
 			buyerObj = args.Get(0).(buyer.Buyer)
 		}
 	}
-
-	if rf, ok := args.Get(1).(func(id int) error); ok {
+	if rf, ok := args.Get(1).(func(int) error); ok {
 		err = rf(id)
 	} else {
 		if args.Get(1) != nil {
@@ -103,7 +94,6 @@ func (b *BuyerRepository) LastID() (int, error) {
 		args = b.Called()
 		id   int
 	)
-
 	if rf, ok := args.Get(0).(func() int); ok {
 		id = rf()
 	} else {
@@ -111,7 +101,6 @@ func (b *BuyerRepository) LastID() (int, error) {
 			id = args.Get(0).(int)
 		}
 	}
-
 	if rf, ok := args.Get(1).(func() error); ok {
 		err = rf()
 	} else {
@@ -122,7 +111,9 @@ func (b *BuyerRepository) LastID() (int, error) {
 
 func (b *BuyerRepository) Update(
 	id int,
-	card_number_ID, first_name, last_name string,
+	card_number_ID, 
+	first_name, 
+	last_name string,
 ) (buyer.Buyer, error) {
 	var (
 		args     = b.Called(id, card_number_ID, first_name, last_name)
@@ -138,16 +129,16 @@ func (b *BuyerRepository) Update(
 			buyerObj = args.Get(0).(buyer.Buyer)
 		}
 	}
-
 	if rf, ok := args.Get(1).(func(
 		id int,
-		card_number_ID, first_name, last_name string,
+		card_number_ID, 
+		first_name, 
+		last_name string,
 	) error); ok {
 		err = rf(id, card_number_ID, first_name, last_name)
 	} else {
 		err = args.Error(1)
 	}
-
 	return buyerObj, err
 }
 
@@ -156,12 +147,10 @@ func (b *BuyerRepository) Delete(id int) error {
 		args = b.Called(id)
 		err  error
 	)
-
-	if rf, ok := args.Get(0).(func(id int) error); ok {
+	if rf, ok := args.Get(0).(func(int) error); ok {
 		err = rf(id)
 	} else {
 		err = args.Error(0)
 	}
-
 	return err
 }

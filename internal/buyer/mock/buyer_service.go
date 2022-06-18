@@ -40,7 +40,11 @@ func (b *BuyerService) Create(
 		}
 	}
 
-	if rf, ok := args.Get(1).(func(int,	string, string, string) error); ok {
+	if rf, ok := args.Get(1).(func(
+		int,	
+		string, 
+		string, 
+		string) error); ok {
 		err = rf(id, card_number_ID, first_name, last_name)
 	} else {
 		if args.Get(1) != nil {
@@ -51,12 +55,11 @@ func (b *BuyerService) Create(
 }
 
 func (b *BuyerService) GetAll() ([]buyer.Buyer, error) {
-	args := b.Called()
 	var (
+		args = b.Called()
 		buyerList []buyer.Buyer
 		err       error
 	)
-
 	if rf, ok := args.Get(0).(func() []buyer.Buyer); ok {
 		buyerList = rf()
 	} else {
@@ -64,7 +67,6 @@ func (b *BuyerService) GetAll() ([]buyer.Buyer, error) {
 			buyerList = args.Get(0).([]buyer.Buyer)
 		}
 	}
-
 	if rf, ok := args.Get(1).(func() error); ok {
 		err = rf()
 	} else {
@@ -80,14 +82,12 @@ func (b *BuyerService) GetId(id int) (buyer.Buyer, error) {
 		err      error
 		buyerObj buyer.Buyer
 	)
-
 	if rf, ok := args.Get(0).(func(int) buyer.Buyer); ok {
 		buyerObj = rf(id)
 	} else {
 		buyerObj = args.Get(0).(buyer.Buyer)
 	}
-
-	if rf, ok := args.Get(1).(func(id int) error); ok {
+	if rf, ok := args.Get(1).(func(int) error); ok {
 		err = rf(id)
 	} else {
 		if args.Get(1) != nil {
@@ -97,11 +97,11 @@ func (b *BuyerService) GetId(id int) (buyer.Buyer, error) {
 	return buyerObj, err
 }
 
- 
-
 func (b *BuyerService) Update(
 	id int,
-	card_number_ID, first_name, last_name string,
+	card_number_ID, 
+	first_name, 
+	last_name string,
 ) (buyer.Buyer, error) {
 	var (
 		args     = b.Called(id, card_number_ID, first_name, last_name)
@@ -109,8 +109,7 @@ func (b *BuyerService) Update(
 		err      error
 	)
 	if rf, ok := args.Get(0).(func(
-		id int,
-		card_number_ID, first_name, last_name string,
+		int,string,string,string,
 	) buyer.Buyer); ok {
 		buyerObj = rf(id, card_number_ID, first_name, last_name)
 	} else {
@@ -118,16 +117,13 @@ func (b *BuyerService) Update(
 			buyerObj = args.Get(0).(buyer.Buyer)
 		}
 	}
-
 	if rf, ok := args.Get(1).(func(
-		id int,
-		card_number_ID, first_name, last_name string,
+		int,string,string,string,
 	) error); ok {
 		err = rf(id, card_number_ID, first_name, last_name)
 	} else {
 		err = args.Error(1)
 	}
-
 	return buyerObj, err
 }
 
@@ -136,12 +132,10 @@ func (b *BuyerService) Delete(id int) error {
 		args = b.Called(id)
 		err  error
 	)
-
 	if rf, ok := args.Get(0).(func(id int) error); ok {
 		err = rf(id)
 	} else {
 		err = args.Error(0)
 	}
-
 	return err
 }
