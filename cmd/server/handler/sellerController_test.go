@@ -14,22 +14,9 @@ import (
 	"github.com/cpereira42/mercado-fresco-pron4/internal/seller/mocks"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
+	tmock "github.com/stretchr/testify/mock"
 )
 
-// func createServer() *gin.Engine {
-// 	gin.SetMode(gin.TestMode)
-
-// 	r := gin.Default()
-
-// sellers := r.Group("/api/v1/sellers")
-// sellers.GET("/", s.GetAll())
-// sellers.GET("/:id", s.GetId())
-// 	sellers.POST("/", s.Create())
-// 	sellers.PATCH("/:id", s.Update())
-// 	sellers.DELETE("/:id", s.Delete())
-
-// 	return r
-// }
 var seller1 seller.Seller = seller.Seller{Id: 1, Cid: 200, CompanyName: "MELI", Adress: "Rua B", Telephone: "9999-8888"}
 
 var sListSuccess []seller.Seller = []seller.Seller{
@@ -216,5 +203,66 @@ func TestControllerGetId(t *testing.T) {
 			assert.Equal(t, 404, rr.Code)
 			assert.Equal(t, "Seller 2 not found", objResp.Error)
 			assert.Equal(t, seller.Seller{}, objResp.Data)
+		})
+}
+
+func TestControllerCreate(t *testing.T) {
+	t.Run(
+		"Test Create - OK", func(t *testing.T) {
+			req, rr := createRequestTest(http.MethodPost, "/api/v1/sellers/",
+				`{
+				"cid": 200, 
+				"company_name": "MELI", 
+				"address": "Rua B", 
+				"telephone": "9999-8888"
+				}`)
+			serviceMock := new(mocks.Service)
+			s := handler.NewSeller(serviceMock)
+			r := gin.Default()
+			serviceMock.On("Create",
+				tmock.AnythingOfType("int"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string")).
+				Return(seller1, nil)
+			sellers := r.Group("/api/v1/sellers")
+			sellers.POST("/", s.Create())
+			r.ServeHTTP(rr, req)
+			assert.Equal(t, 201, rr.Code)
+			objResp := struct {
+				Code int
+				Data seller.Seller
+			}{}
+			err := json.Unmarshal(rr.Body.Bytes(), &objResp)
+			assert.Nil(t, err)
+			assert.Equal(t, seller1, objResp.Data)
+		})
+	t.Run(
+		"Test Create - Requisition Body error - without Telephone", func(t *testing.T) {
+			req, rr := createRequestTest(http.MethodPost, "/api/v1/sellers/",
+				`{
+					"cid": 200, 
+					"company_name": "MELI", 
+					"address": "Rua B"
+					}`)
+			serviceMock := new(mocks.Service)
+			s := handler.NewSeller(serviceMock)
+			r := gin.Default()
+			sellers := r.Group("/api/v1/sellers")
+			sellers.POST("/", s.Create())
+			r.ServeHTTP(rr, req)
+			assert.Equal(t, 422, rr.Code)
+			log.Println(string(rr.Body.Bytes()))
+			objResp := struct {
+				Code int
+				Data []struct {
+					Field   string
+					Message string
+				}
+			}{}
+			err := json.Unmarshal(rr.Body.Bytes(), &objResp)
+			assert.Nil(t, err)
+			assert.Equal(t, "This field is required", objResp.Data[0].Message)
+			assert.Equal(t, "telephone", objResp.Data[0].Field)
 		})
 }
