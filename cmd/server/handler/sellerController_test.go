@@ -252,7 +252,6 @@ func TestControllerCreate(t *testing.T) {
 			sellers.POST("/", s.Create())
 			r.ServeHTTP(rr, req)
 			assert.Equal(t, 422, rr.Code)
-			log.Println(string(rr.Body.Bytes()))
 			objResp := struct {
 				Code int
 				Data []struct {
@@ -264,5 +263,149 @@ func TestControllerCreate(t *testing.T) {
 			assert.Nil(t, err)
 			assert.Equal(t, "This field is required", objResp.Data[0].Message)
 			assert.Equal(t, "telephone", objResp.Data[0].Field)
+		})
+	t.Run(
+		"Test Create - CID already registered", func(t *testing.T) {
+			req, rr := createRequestTest(http.MethodPost, "/api/v1/sellers/",
+				`{
+						"cid": 200, 
+						"company_name": "MELI", 
+						"address": "Rua B",
+						"telephone": "9999-8888"
+						}`)
+			serviceMock := new(mocks.Service)
+			s := handler.NewSeller(serviceMock)
+			r := gin.Default()
+			serviceMock.On("Create",
+				tmock.AnythingOfType("int"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string")).
+				Return(seller.Seller{}, fmt.Errorf("Cid already registered"))
+			sellers := r.Group("/api/v1/sellers")
+			sellers.POST("/", s.Create())
+			r.ServeHTTP(rr, req)
+			assert.Equal(t, 409, rr.Code)
+			log.Println(string(rr.Body.Bytes()))
+			objResp := struct {
+				Code  int
+				Error string
+			}{}
+			err := json.Unmarshal(rr.Body.Bytes(), &objResp)
+			assert.Nil(t, err)
+			assert.Equal(t, "Cid already registered", objResp.Error)
+		})
+}
+
+func TestControllerUpdate(t *testing.T) {
+	t.Run(
+		"Test Update - OK", func(t *testing.T) {
+			req, rr := createRequestTest(http.MethodPatch, "/api/v1/sellers/1",
+				`{
+				"cid": 200, 
+				"company_name": "MELI", 
+				"address": "Rua B", 
+				"telephone": "9999-8888"
+				}`)
+			serviceMock := new(mocks.Service)
+			s := handler.NewSeller(serviceMock)
+			r := gin.Default()
+			serviceMock.On("Update",
+				tmock.AnythingOfType("int"),
+				tmock.AnythingOfType("int"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string")).
+				Return(seller1, nil)
+			sellers := r.Group("/api/v1/sellers")
+			sellers.PATCH("/:id", s.Update())
+			r.ServeHTTP(rr, req)
+			assert.Equal(t, 200, rr.Code)
+			objResp := struct {
+				Code int
+				Data seller.Seller
+			}{}
+			err := json.Unmarshal(rr.Body.Bytes(), &objResp)
+			assert.Nil(t, err)
+			assert.Equal(t, seller1, objResp.Data)
+		})
+	t.Run(
+		"Test Update - Invalid ID", func(t *testing.T) {
+			req, rr := createRequestTest(http.MethodPatch, "/api/v1/sellers/a",
+				`{
+					"cid": 200, 
+					"company_name": "MELI", 
+					"address": "Rua B", 
+					"telephone": "9999-8888"
+					}`)
+			serviceMock := new(mocks.Service)
+			s := handler.NewSeller(serviceMock)
+			r := gin.Default()
+			sellers := r.Group("/api/v1/sellers")
+			sellers.PATCH("/:id", s.Update())
+			r.ServeHTTP(rr, req)
+			assert.Equal(t, 400, rr.Code)
+			objResp := struct {
+				Code  int
+				Error string
+			}{}
+			err := json.Unmarshal(rr.Body.Bytes(), &objResp)
+			assert.Nil(t, err)
+			assert.Equal(t, "Invalid ID", objResp.Error)
+		})
+	t.Run(
+		"Test Update - Invalid JSON body", func(t *testing.T) {
+			req, rr := createRequestTest(http.MethodPatch, "/api/v1/sellers/1",
+				`{
+				"cid": 200, 
+				"company_name": "MELI" 
+				"address": "Rua B" 
+				"telephone": "9999-8888"
+				}`)
+			serviceMock := new(mocks.Service)
+			s := handler.NewSeller(serviceMock)
+			r := gin.Default()
+			sellers := r.Group("/api/v1/sellers")
+			sellers.PATCH("/:id", s.Update())
+			r.ServeHTTP(rr, req)
+			assert.Equal(t, 400, rr.Code)
+			objResp := struct {
+				Code  int
+				Error string
+			}{}
+			err := json.Unmarshal(rr.Body.Bytes(), &objResp)
+			assert.Nil(t, err)
+			assert.Equal(t, "Invalid body arguments", objResp.Error)
+		})
+	t.Run(
+		"Test Update - ID not found", func(t *testing.T) {
+			req, rr := createRequestTest(http.MethodPatch, "/api/v1/sellers/2",
+				`{
+					"cid": 200, 
+					"company_name": "MELI", 
+					"address": "Rua B", 
+					"telephone": "9999-8888"
+					}`)
+			serviceMock := new(mocks.Service)
+			s := handler.NewSeller(serviceMock)
+			r := gin.Default()
+			serviceMock.On("Update",
+				tmock.AnythingOfType("int"),
+				tmock.AnythingOfType("int"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string")).
+				Return(seller.Seller{}, fmt.Errorf("Seller 2 not found"))
+			sellers := r.Group("/api/v1/sellers")
+			sellers.PATCH("/:id", s.Update())
+			r.ServeHTTP(rr, req)
+			objResp := struct {
+				Code  int
+				Error string
+			}{}
+			err := json.Unmarshal(rr.Body.Bytes(), &objResp)
+			assert.Nil(t, err)
+			assert.Equal(t, 404, rr.Code)
+			assert.Equal(t, "Seller 2 not found", objResp.Error)
 		})
 }

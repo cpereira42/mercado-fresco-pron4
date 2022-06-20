@@ -210,7 +210,6 @@ func TestServiceGetAll(t *testing.T) {
 func TestServiceGetId(t *testing.T) {
 	mockRespository := new(mocks.RepositorySeller)
 	seller1 := seller.Seller{Id: 1, Cid: 200, CompanyName: "MELI", Adress: "Rua B", Telephone: "9999-8888"}
-	// seller2 := seller.Seller{8, 201, "Digital House", "Avenida Brasil", "7777-5555"}
 
 	t.Run(
 		"Receives data with found Id from Repository GetId",

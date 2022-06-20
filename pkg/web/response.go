@@ -39,29 +39,8 @@ func msgForTag(tag string) string {
 	}
 	return ""
 }
-
-func CheckIfErrorRequest(ctx *gin.Context, req any) bool {
-	if err := ctx.ShouldBind(&req); err != nil {
-		var ve validator.ValidationErrors
-		if errors.As(err, &ve) {
-			out := make([]RequestError, len(ve))
-			for i, fe := range ve {
-				out[i] = RequestError{fe.Field(), msgForTag(fe.Tag())}
-			}
-			ctx.JSON(http.StatusUnprocessableEntity, gin.H{
-				"code":  http.StatusUnprocessableEntity,
-				"error": out})
-		}
-		return true
-	}
-	return false
-}  
-
-/* 
-	Implementação de validação no bind das request em rotas post/patch
-	esse método contém melhorias seguindo a lógica do metodo acima no código
-*/
-func CheckIfErrorInRequest(ctx *gin.Context, request any) bool {
+  
+func CheckIfErrorRequest(ctx *gin.Context, request any) bool {
 	var (
 		// type of errors
 		out []RequestError

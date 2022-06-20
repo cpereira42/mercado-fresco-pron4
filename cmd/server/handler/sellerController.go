@@ -22,7 +22,7 @@ func (s *Seller) Create() gin.HandlerFunc {
 
 		var req seller.SellerRequestCreate
 
-		if web.CheckIfErrorInRequest(ctx, &req) {
+		if web.CheckIfErrorRequest(ctx, &req) {
 			return
 		}
 
@@ -85,7 +85,7 @@ func (s *Seller) Update() gin.HandlerFunc {
 
 		var req seller.SellerRequestUpdate
 		if err := ctx.ShouldBindJSON(&req); err != nil {
-			ctx.JSON(http.StatusBadRequest, web.NewResponse(http.StatusBadRequest, nil, err.Error()))
+			ctx.JSON(http.StatusBadRequest, web.NewResponse(http.StatusBadRequest, nil, "Invalid body arguments"))
 			return
 		}
 
