@@ -9,13 +9,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	//"github.com/meliBootcamp/go-web/aula03/ex01a/internal/products/mocks"
 	"github.com/cpereira42/mercado-fresco-pron4/cmd/server/handler"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/products"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/products/mocks"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
-	//products "github.com/meliBootcamp/go-web/aula03/ex01a/internal/products/repository"
 )
 
 var prod1 = products.Product{
@@ -122,9 +120,7 @@ func Test_RepositoryGetAll(t *testing.T) {
 		}{}
 		err := json.Unmarshal(rr.Body.Bytes(), &objRes)
 		assert.Equal(t, objRes.Code, 401)
-		//assert.Equal(t, objRes.Data, produtos)
 		assert.Nil(t, err)
-		//assert.True(t, len(objRes.Data) > 0)
 	})
 }
 
@@ -194,31 +190,6 @@ func Test_RepositoryGetId(t *testing.T) {
 		err := json.Unmarshal(rr.Body.Bytes(), &objRes)
 		assert.Nil(t, err)
 	})
-
-	/*t.Run("Get All Fail", func(t *testing.T) {
-		req, rr := createRequestTest(http.MethodGet, "/api/v1/products/", "")
-		serv := &mocks.Service{}
-		serv.On("GetAll").Return([]products.Product{}, fmt.Errorf("error"))
-
-		p := handler.NewProduct(serv)
-		r := gin.Default()
-		pr := r.Group("/api/v1/products")
-		pr.GET("/", p.GetAll())
-
-		r.ServeHTTP(rr, req)
-		assert.Equal(t, 401, rr.Code)
-
-		objRes := struct {
-			Code int
-			Data []products.Product
-		}{}
-		err := json.Unmarshal(rr.Body.Bytes(), &objRes)
-		assert.Equal(t, objRes.Code, 401)
-		//assert.Equal(t, objRes.Data, produtos)
-		assert.Nil(t, err)
-		//assert.True(t, len(objRes.Data) > 0)
-	})*/
-
 }
 
 func Test_RepositoryDelete(t *testing.T) {
@@ -256,8 +227,6 @@ func Test_RepositoryDelete(t *testing.T) {
 			Code  int
 			Error string
 		}{}
-		log.Println(string(rr.Body.Bytes()))
-
 		err := json.Unmarshal(rr.Body.Bytes(), &objRes)
 		assert.Nil(t, err)
 		assert.NotNil(t, objRes.Error)
@@ -410,9 +379,8 @@ func Test_RepositoryCreate(t *testing.T) {
 				Message string
 			}
 		}{}
-		log.Println(string(rr.Body.Bytes()))
 		err := json.Unmarshal(rr.Body.Bytes(), &objRes)
-		log.Println(objRes, err)
+		assert.Nil(t, err)
 		assert.Equal(t, "This field is required", objRes.Data[0].Message)
 	})
 
@@ -459,9 +427,8 @@ func Test_RepositoryCreate(t *testing.T) {
 			Code  int
 			Error string
 		}{}
-		log.Println(string(rr.Body.Bytes()))
 		err := json.Unmarshal(rr.Body.Bytes(), &objRes)
-		log.Println(objRes, err)
+		assert.Nil(t, err)
 		assert.Equal(t, "Product prod1 already registred", objRes.Error)
 	})
 
@@ -503,15 +470,6 @@ func Test_RepositoryCreate(t *testing.T) {
 
 		r.ServeHTTP(rr, req)
 		assert.Equal(t, 422, rr.Code)
-
-		objRes := struct {
-			Code int
-			Data products.Product
-		}{}
-		log.Println(string(rr.Body.Bytes()))
-		err := json.Unmarshal(rr.Body.Bytes(), &objRes)
-		log.Println(objRes, err)
-		//assert.Equal(t, prod1, objRes.Data)
 	})
 }
 
@@ -641,6 +599,32 @@ func Test_RepositoryUpdate(t *testing.T) {
 		err := json.Unmarshal(rr.Body.Bytes(), &objRes)
 		log.Println(objRes, err)
 		assert.Equal(t, "Error to save", objRes.Error)
+	})
+
+	t.Run("Update Fail - invalid args", func(t *testing.T) {
+		req, rr := createRequestTest(http.MethodPatch, "/api/v1/products/99", `{
+				"Description":                    10
+				}`)
+
+		serv := &mocks.Service{}
+		p := handler.NewProduct(serv)
+		r := gin.Default()
+		pr := r.Group("/api/v1/products")
+		pr.PATCH("/:id", p.Update())
+
+		r.ServeHTTP(rr, req)
+		assert.Equal(t, 422, rr.Code)
+
+		objRes := struct {
+			Code int
+			Data struct {
+				Field   string
+				Message string
+			}
+		}{}
+		err := json.Unmarshal(rr.Body.Bytes(), &objRes)
+		assert.Nil(t, err)
+		assert.Equal(t, "description", objRes.Data.Field)
 	})
 
 }

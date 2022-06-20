@@ -93,7 +93,7 @@ func (c *Product) Update() gin.HandlerFunc {
 		}
 
 		var request products.RequestProductsUpdate
-		if web.CheckIfErrorRequest(ctx, &request) {
+		if web.CheckIfErrorInRequest(ctx, &request) {
 			return
 		}
 
