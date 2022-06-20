@@ -2,6 +2,7 @@ package seller_test
 
 import (
 	"fmt"
+	"log"
 	"testing"
 
 	"github.com/cpereira42/mercado-fresco-pron4/internal/seller"
@@ -107,68 +108,68 @@ func TestServiceCreate(t *testing.T) {
 			mockRespository.AssertExpectations(t)
 		},
 	)
-	// t.Run(
-	// 	"If the application could not connect to the DB - LastID",
-	// 	func(t *testing.T) {
-	// 		msgError := fmt.Errorf("Could not read file")
-	// 		mockRespository.On("GetAll").Return(sListSuccess, nil)
-	// 		mockRespository.On("LastID").Return(0, msgError)
-	// 		mockRespository.On("Create",
-	// 			tmock.AnythingOfType("int"),
-	// 			tmock.AnythingOfType("int"),
-	// 			tmock.AnythingOfType("string"),
-	// 			tmock.AnythingOfType("string"),
-	// 			tmock.AnythingOfType("string")).
-	// 			Return(seller.Seller{}, nil).Maybe()
-	// 		service := seller.NewService(mockRespository)
+	t.Run(
+		"If the application could not connect to the DB - LastID",
+		func(t *testing.T) {
+			mockRespository := new(mocks.RepositorySeller)
+			msgError := fmt.Errorf("Could not read file")
+			mockRespository.On("GetAll").Return(sListSuccess, nil)
+			mockRespository.On("LastID").Return(0, fmt.Errorf("Could not read file"))
+			mockRespository.On("Create",
+				tmock.AnythingOfType("int"),
+				tmock.AnythingOfType("int"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string")).
+				Return(seller.Seller{}, nil).Maybe()
+			service := seller.NewService(mockRespository)
 
-	// 		newSeller, err := service.Create(
-	// 			210,
-	// 			seller1.CompanyName,
-	// 			seller1.Adress,
-	// 			seller1.Telephone,
-	// 		)
+			newSeller, err := service.Create(
+				210,
+				seller1.CompanyName,
+				seller1.Adress,
+				seller1.Telephone,
+			)
+			log.Println(newSeller)
+			assert.Error(t, err)
 
-	// 		assert.Error(t, err)
+			assert.EqualError(t, err, msgError.Error())
 
-	// 		assert.EqualError(t, err, msgError.Error())
+			assert.ObjectsAreEqual(seller.Seller{}, newSeller)
 
-	// 		assert.ObjectsAreEqual(seller.Seller{}, newSeller)
+		},
+	)
+	t.Run(
+		"If the application could not connect to the DB - Create",
+		func(t *testing.T) {
+			mockRespository := new(mocks.RepositorySeller)
+			msgError := fmt.Errorf("Could not read file")
+			mockRespository.On("GetAll").Return(sListSuccess, nil).Once()
+			mockRespository.On("LastID").Return(1, nil).Once()
+			mockRespository.On("Create",
+				tmock.AnythingOfType("int"),
+				tmock.AnythingOfType("int"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string")).
+				Return(seller.Seller{}, msgError).Maybe()
+			service := seller.NewService(mockRespository)
 
-	// 		mockRespository.AssertExpectations(t)
-	// 	},
-	// )
-	// t.Run(
-	// 	"If the application could not connect to the DB - Create",
-	// 	func(t *testing.T) {
-	// 		msgError := fmt.Errorf("Could not read file")
-	// 		mockRespository.On("GetAll").Return(sListSuccess, nil).Maybe()
-	// 		mockRespository.On("LastID").Return(1, nil)
-	// 		mockRespository.On("Create",
-	// 			tmock.AnythingOfType("int"),
-	// 			tmock.AnythingOfType("int"),
-	// 			tmock.AnythingOfType("string"),
-	// 			tmock.AnythingOfType("string"),
-	// 			tmock.AnythingOfType("string")).
-	// 			Return(seller.Seller{}, msgError).Maybe()
-	// 		service := seller.NewService(mockRespository)
+			newSeller, err := service.Create(
+				210,
+				seller1.CompanyName,
+				seller1.Adress,
+				seller1.Telephone,
+			)
 
-	// 		newSeller, err := service.Create(
-	// 			210,
-	// 			seller1.CompanyName,
-	// 			seller1.Adress,
-	// 			seller1.Telephone,
-	// 		)
+			assert.Error(t, err)
 
-	// 		assert.Error(t, err)
+			assert.EqualError(t, err, msgError.Error())
 
-	// 		assert.EqualError(t, err, msgError.Error())
+			assert.ObjectsAreEqual(seller.Seller{}, newSeller)
 
-	// 		assert.ObjectsAreEqual(seller.Seller{}, newSeller)
-
-	// 		mockRespository.AssertExpectations(t)
-	// 	},
-	// )
+		},
+	)
 }
 
 func TestServiceGetAll(t *testing.T) {
