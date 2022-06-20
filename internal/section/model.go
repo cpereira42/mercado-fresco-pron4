@@ -53,7 +53,7 @@ type Repository interface {
 	CreateSection(section Section) (Section, error)
 	UpdateSection(id int, section Section) (Section, error)
 	DeleteSection(id int) error
-	lastID() (int, error)
+	LastID() (int, error)
 }
 
 type repository struct {

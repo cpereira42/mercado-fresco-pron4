@@ -40,7 +40,7 @@ func msgForTag(tag string) string {
 	return ""
 }
 
-func CheckIfErrorRequest(ctx *gin.Context, req any) bool {
+/*func CheckIfErrorRequest(ctx *gin.Context, req any) bool {
 	if err := ctx.ShouldBind(&req); err != nil {
 		var ve validator.ValidationErrors
 		if errors.As(err, &ve) {
@@ -55,13 +55,13 @@ func CheckIfErrorRequest(ctx *gin.Context, req any) bool {
 		return true
 	}
 	return false
-}  
+}*/  
 
 /* 
 	Implementação de validação no bind das request em rotas post/patch
 	esse método contém melhorias seguindo a lógica do metodo acima no código
 */
-func CheckIfErrorInRequest(ctx *gin.Context, request any) bool {
+func CheckIfErrorRequest(ctx *gin.Context, request any) bool {
 	var (
 		// type of errors
 		out []RequestError
