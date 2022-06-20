@@ -13,7 +13,7 @@ import (
 var (
 	warehouse1 = warehouse.Warehouse{ID: 1, Address: "Rua 1", Telephone: "11111-1111", Warehouse_code: "W1", Minimum_capacity: 10, Minimum_temperature: 20}
 	warehouse2 = warehouse.Warehouse{ID: 2, Address: "Rua 2", Telephone: "22222-2222", Warehouse_code: "W2", Minimum_capacity: 20, Minimum_temperature: 30}
-	warehouse3 = warehouse.Warehouse{Address: "Rua 3", Telephone: "33333-3333", Warehouse_code: "W3", Minimum_capacity: 30, Minimum_temperature: 40}
+	warehouse3 = warehouse.Warehouse{ID: 3, Address: "Rua 3", Telephone: "33333-3333", Warehouse_code: "W3", Minimum_capacity: 30, Minimum_temperature: 40}
 )
 
 func TestServiceCreate(t *testing.T) {
@@ -146,4 +146,96 @@ func TestServiceCreate(t *testing.T) {
 			assert.ObjectsAreEqual([]warehouse.Warehouse{}, newWarehouse)
 
 		})
+
+}
+
+func TestServiceGetAll(t *testing.T) {
+
+	warehouseListSucess := []warehouse.Warehouse{warehouse1, warehouse2}
+	//warehouseListError := []warehouse.Warehouse{warehouse1}
+
+	t.Run(
+		"If GetAll is success, should return a list of warehouses",
+		func(t *testing.T) {
+			repo := &mocks.Repository{}
+			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
+			service := warehouse.NewService(repo)
+			warehouseAllList, err := service.GetAll()
+
+			assert.NoError(t, err)
+			assert.Equal(t, warehouseAllList, warehouseListSucess)
+		})
+	t.Run(
+		"If GetAll is error, should return an error",
+		func(t *testing.T) {
+			errorMsgCannotGetAll := fmt.Errorf("Cannot get all")
+			repo := &mocks.Repository{}
+			repo.On("GetAll").Return([]warehouse.Warehouse{}, errorMsgCannotGetAll).Once()
+			service := warehouse.NewService(repo)
+			_, err := service.GetAll()
+
+			assert.Error(t, err)
+			assert.EqualError(t, err, errorMsgCannotGetAll.Error())
+
+		})
+
+}
+
+func TestServiceGetById(t *testing.T) {
+
+	warehouseListSucess := []warehouse.Warehouse{warehouse1, warehouse2}
+
+	t.Run(
+		"If GetById is success, should return a warehouse",
+		func(t *testing.T) {
+			repo := &mocks.Repository{}
+			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
+			repo.On("GetByID", tmock.AnythingOfType("int")).Return(warehouse1, nil).Once()
+			service := warehouse.NewService(repo)
+			warehouseById, err := service.GetByID(1)
+
+			assert.NoError(t, err)
+			assert.Equal(t, warehouse1, warehouseById)
+		})
+	t.Run(
+		"If GetByID has an error use GetAll, should return an error",
+		func(t *testing.T) {
+			errorMsgCannotGetAll := fmt.Errorf("Cannot get all")
+			repo := &mocks.Repository{}
+			repo.On("GetAll").Return([]warehouse.Warehouse{}, errorMsgCannotGetAll).Once()
+			service := warehouse.NewService(repo)
+			_, err := service.GetByID(1)
+
+			assert.Error(t, err)
+			assert.EqualError(t, err, errorMsgCannotGetAll.Error())
+
+		})
+
+	t.Run(
+		"If GetById dont found a ID, should return an error",
+		func(t *testing.T) {
+			errorMsgCannotGetById := fmt.Errorf("Warehouse not found")
+			repo := &mocks.Repository{}
+			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
+			repo.On("GetByID", tmock.AnythingOfType("int")).Return(warehouse.Warehouse{}, errorMsgCannotGetById).Once()
+			service := warehouse.NewService(repo)
+			_, err := service.GetByID(4)
+			assert.Error(t, err)
+			assert.EqualError(t, err, errorMsgCannotGetById.Error())
+
+		})
+	t.Run(
+		"If GetById dont found a ID on DB, should return an error",
+		func(t *testing.T) {
+			errorMsgCannotGetById := fmt.Errorf("cannot get on bd")
+			repo := &mocks.Repository{}
+			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
+			repo.On("GetByID", tmock.AnythingOfType("int")).Return(warehouse.Warehouse{}, errorMsgCannotGetById).Once()
+			service := warehouse.NewService(repo)
+			_, err := service.GetByID(1)
+			assert.Error(t, err)
+			assert.EqualError(t, err, errorMsgCannotGetById.Error())
+
+		})
+
 }
