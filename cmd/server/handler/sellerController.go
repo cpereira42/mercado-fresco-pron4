@@ -81,7 +81,7 @@ func (s *Seller) GetAll() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		sellers, err := s.service.GetAll()
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, web.NewResponse(402, nil, err.Error()))
+			ctx.JSON(http.StatusBadRequest, web.NewResponse(http.StatusBadRequest, nil, err.Error()))
 			return
 		}
 		if len(sellers) == 0 {
