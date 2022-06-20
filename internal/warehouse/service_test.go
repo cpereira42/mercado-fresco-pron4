@@ -437,3 +437,60 @@ func TestServiceUpdate(t *testing.T) {
 		})
 
 }
+
+func TestService_Delete(t *testing.T) {
+	warehouseListSucess := []warehouse.Warehouse{warehouse1, warehouse2, warehouse3}
+	//warehouseListAfterDelete := []warehouse.Warehouse{warehouse2, warehouse3}
+
+	t.Run(
+		"Sucess deleting a Warehouse",
+		func(t *testing.T) {
+			repo := &mocks.Repository{}
+			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
+			repo.On("Delete", tmock.AnythingOfType("int")).Return(nil)
+			service := warehouse.NewService(repo)
+			err := service.Delete(1)
+			assert.NoError(t, err)
+			assert.Nil(t, err)
+		})
+	t.Run(
+		"If GetAll inside Update fail, should return an error",
+		func(t *testing.T) {
+			errorMsgCannotGetAll := fmt.Errorf("Cannot get all")
+			repo := &mocks.Repository{}
+			repo.On("GetAll").Return([]warehouse.Warehouse{}, errorMsgCannotGetAll).Once()
+			service := warehouse.NewService(repo)
+			err := service.Delete(1)
+
+			assert.Error(t, err)
+			assert.EqualError(t, err, errorMsgCannotGetAll.Error())
+
+		})
+
+	t.Run(
+		"If not found an ID, should return an error",
+		func(t *testing.T) {
+			errorMsgCannotGetById := fmt.Errorf("Warehouse not found")
+			repo := &mocks.Repository{}
+			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
+			repo.On("Delete", tmock.AnythingOfType("int")).Return(errorMsgCannotGetById).Once()
+			service := warehouse.NewService(repo)
+			err := service.Delete(4)
+			assert.Error(t, err)
+			assert.EqualError(t, err, errorMsgCannotGetById.Error())
+
+		})
+	t.Run(
+		"If Delete dont found a Warehouse on DB, should return an error",
+		func(t *testing.T) {
+			errorMsgCannotGetById := fmt.Errorf("cannot get on bd")
+			repo := &mocks.Repository{}
+			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
+			repo.On("Delete", tmock.AnythingOfType("int")).Return(errorMsgCannotGetById).Once()
+			service := warehouse.NewService(repo)
+			err := service.Delete(1)
+			assert.Error(t, err)
+			assert.EqualError(t, err, errorMsgCannotGetById.Error())
+
+		})
+}
