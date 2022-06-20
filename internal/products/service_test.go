@@ -201,12 +201,12 @@ func Test_RepositoryUpdate(t *testing.T) {
 	t.Run("Update Fail", func(t *testing.T) {
 		repo := &mocks.Repository{}
 		repo.On("GetAll").Return(produtos, nil)
-		repo.On("GetId", 5).Return(products.Product{}, fmt.Errorf("Product 5 not found"))
-		repo.On("Update", 5, prod3).Return(products.Product{}, fmt.Errorf("Product 5 not found"))
+		repo.On("GetId", 5).Return(products.Product{}, fmt.Errorf("Product not found"))
+		repo.On("Update", 5, prod3).Return(products.Product{}, fmt.Errorf("Product not found"))
 		service := products.NewService(repo)
 		_, err := service.Update(5, prodUp)
 
-		assert.Equal(t, fmt.Errorf("Product 5 not found"), err)
+		assert.Equal(t, fmt.Errorf("Product not found"), err)
 
 	})
 
