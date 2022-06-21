@@ -7,6 +7,15 @@ import (
 	"github.com/cpereira42/mercado-fresco-pron4/pkg/store"
 )
 
+type RepositorySeller interface {
+	GetAll() ([]Seller, error)
+	GetId(id int) (Seller, error)
+	Create(id, cid int, company, adress, telephone string) (Seller, error)
+	LastID() (int, error)
+	Update(id, cid int, company, adress, telephone string) (Seller, error)
+	Delete(id int) error
+}
+
 type repositorySeller struct {
 	db store.Store
 }
