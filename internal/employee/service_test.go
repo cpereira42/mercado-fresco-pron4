@@ -381,3 +381,60 @@ func TestServiceUpdate(t *testing.T) {
 			assert.EqualError(t, err, errorMsg.Error())
 		})
 }
+
+func TestServiceDelete(t *testing.T) {
+	employees := []employee.Employee{employee1, employee2, employee3}
+	t.Run("If GetByID is success, it should return a employee",
+		func(t *testing.T) {
+			repo := &mocks.Repository{}
+			repo.On("GetAll").Return(employees, nil).Once()
+			repo.On("Delete", tmock.AnythingOfType("int")).Return(nil).Once()
+
+			service := employee.NewService(repo)
+			err := service.Delete(1)
+
+			assert.Nil(t, err)
+			repo.AssertExpectations(t)
+
+		})
+	t.Run("If Delete has an error to get all employees, it should return an error",
+		func(t *testing.T) {
+			errorMsg := fmt.Errorf("Failed to get all employees in the Delete ")
+			repo := &mocks.Repository{}
+			repo.On("GetAll").Return([]employee.Employee{}, errorMsg).Once()
+
+			service := employee.NewService(repo)
+			err := service.Delete(1)
+
+			assert.Error(t, err)
+			assert.EqualError(t, err, errorMsg.Error())
+
+		})
+	t.Run("If the id in the Delete does not exists, it should return an error",
+		func(t *testing.T) {
+			errorMsg := fmt.Errorf("user with id 10 not found")
+			repo := &mocks.Repository{}
+			repo.On("GetAll").Return(employees, nil).Once()
+
+			service := employee.NewService(repo)
+			err := service.Delete(10)
+
+			assert.Error(t, err)
+			assert.EqualError(t, err, errorMsg.Error())
+
+		})
+
+	t.Run("If Delete has an error, it should return an error",
+		func(t *testing.T) {
+			errorMsg := fmt.Errorf("error to Delete")
+			repo := &mocks.Repository{}
+			repo.On("GetAll").Return(employees, nil).Once()
+			repo.On("Delete", tmock.AnythingOfType("int")).Return(errorMsg).Once()
+
+			service := employee.NewService(repo)
+			err := service.Delete(1)
+
+			assert.Error(t, err)
+			assert.EqualError(t, err, errorMsg.Error())
+		})
+}
