@@ -470,14 +470,14 @@ func TestService_Delete(t *testing.T) {
 	t.Run(
 		"If not found an ID, should return an error",
 		func(t *testing.T) {
-			errorMsgCannotGetById := fmt.Errorf("Warehouse not found")
+			errorMsgCannotGetByID := fmt.Errorf("Warehouse not found")
 			repo := &mocks.Repository{}
 			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
-			repo.On("Delete", tmock.AnythingOfType("int")).Return(errorMsgCannotGetById).Once()
+			repo.On("Delete", tmock.AnythingOfType("int")).Return(errorMsgCannotGetByID).Once()
 			service := warehouse.NewService(repo)
 			err := service.Delete(4)
 			assert.Error(t, err)
-			assert.EqualError(t, err, errorMsgCannotGetById.Error())
+			assert.EqualError(t, err, errorMsgCannotGetByID.Error())
 
 		})
 	t.Run(
