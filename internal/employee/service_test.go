@@ -19,6 +19,8 @@ var (
 
 	newEmployee = employee.Employee{CardNumberID: "123456", FirstName: "Marta", LastName: "Gomes", WarehouseID: 3}
 
+	newEmployeeError = employee.Employee{CardNumberID: "123", FirstName: "Marta", LastName: "Gomes", WarehouseID: 3}
+
 	employee1Update = employee.Employee{ID: 1, CardNumberID: "123", FirstName: "Gustavo", LastName: "Junior", WarehouseID: 1}
 
 	employeeUpdateSameCardNumberID = employee.Employee{ID: 1, CardNumberID: "1235", FirstName: "Gustavo", LastName: "Junior", WarehouseID: 1}
@@ -106,6 +108,101 @@ func TestServiceGetByID(t *testing.T) {
 
 			service := employee.NewService(repo)
 			_, err := service.GetByID(1)
+
+			assert.Error(t, err)
+			assert.EqualError(t, err, errorMsg.Error())
+		})
+}
+
+func TestServiceCreate(t *testing.T) {
+	employees := []employee.Employee{employee1, employee2, employee3}
+
+	t.Run("If Create is success, it should return a employee",
+		func(t *testing.T) {
+			repo := &mocks.Repository{}
+			repo.On("LastID").Return(3, nil).Once()
+			repo.On("GetAll").Return(employees, nil).Once()
+			repo.On("Create",
+				tmock.AnythingOfType("int"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("int"),
+			).Return(newEmployee, nil)
+
+			service := employee.NewService(repo)
+			employeeCreated, err := service.Create(newEmployee.CardNumberID, newEmployee.FirstName, newEmployee.LastName, newEmployee.WarehouseID)
+
+			assert.NoError(t, err)
+			assert.Equal(t, newEmployee, employeeCreated)
+
+		})
+	t.Run("If Create has an error to get last id, it should return an error",
+		func(t *testing.T) {
+			errorMsg := fmt.Errorf("Failed to get last id in the Create")
+			repo := &mocks.Repository{}
+			repo.On("LastID").Return(0, errorMsg).Once()
+
+			service := employee.NewService(repo)
+			_, err := service.Create(newEmployee.CardNumberID, newEmployee.FirstName, newEmployee.LastName, newEmployee.WarehouseID)
+
+			assert.Error(t, err)
+			assert.EqualError(t, err, errorMsg.Error())
+
+		})
+	t.Run("If Create has an error to get all employees, it should return an error",
+		func(t *testing.T) {
+			errorMsg := fmt.Errorf("Failed to get all employees in the Create")
+			repo := &mocks.Repository{}
+			repo.On("LastID").Return(3, nil).Once()
+			repo.On("GetAll").Return([]employee.Employee{}, errorMsg).Once()
+
+			service := employee.NewService(repo)
+			_, err := service.Create(newEmployee.CardNumberID, newEmployee.FirstName, newEmployee.LastName, newEmployee.WarehouseID)
+
+			assert.Error(t, err)
+			assert.EqualError(t, err, errorMsg.Error())
+
+		})
+	t.Run("If the CardNumberID  in the Create exists, it should return an error",
+		func(t *testing.T) {
+			errorMsg := fmt.Errorf("user with this card number id 123 exists")
+			repo := &mocks.Repository{}
+			repo.On("LastID").Return(3, nil).Once()
+			repo.On("GetAll").Return(employees, nil).Once()
+			repo.On("Create",
+				tmock.AnythingOfType("int"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("int"),
+			).Return(employee.Employee{}, errorMsg)
+
+			service := employee.NewService(repo)
+			_, err := service.Create(newEmployeeError.CardNumberID, newEmployeeError.FirstName, newEmployeeError.LastName, newEmployeeError.WarehouseID)
+
+			assert.Error(t, err)
+			assert.EqualError(t, err, errorMsg.Error())
+
+		})
+
+	t.Run("If Create has an error, it should return an error",
+		func(t *testing.T) {
+			errorMsg := fmt.Errorf("error to Create")
+			repo := &mocks.Repository{}
+			repo.On("LastID").Return(3, nil).Once()
+			repo.On("GetAll").Return(employees, nil).Once()
+			repo.On("GetByID", tmock.AnythingOfType("int")).Return(employee.Employee{}, errorMsg).Once()
+			repo.On("Create",
+				tmock.AnythingOfType("int"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("int"),
+			).Return(employee.Employee{}, errorMsg)
+
+			service := employee.NewService(repo)
+			_, err := service.Create(newEmployee.CardNumberID, newEmployee.FirstName, newEmployee.LastName, newEmployee.WarehouseID)
 
 			assert.Error(t, err)
 			assert.EqualError(t, err, errorMsg.Error())
