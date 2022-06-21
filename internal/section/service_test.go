@@ -223,21 +223,14 @@ func TestServiceCreateSection(t *testing.T) {
 			WarehouseId: 1,
 			ProductTypeId: 1,		
 		}
-
 		mockRep.On("ListarSectionAll").Return(sectionList, nil).Once()
-
 		mockRep.On("CreateSection", mock.AnythingOfType("section.Section")).Return(expectSection, nil).Once()
-
 		service := section.NewService(mockRep)
-
 		expSection, _ := service.CreateSection(newSection)
-
 		assert.ObjectsAreEqual(expectSection, expSection)
-
 	})
 	t.Run("metodo CreateSection, caso de caso de error ao listar sections dentro do metodo CriateSection", func(t *testing.T) {
-		mockRep := new(mocks.SectionRepository)
-	
+		mockRep := new(mocks.SectionRepository)	
 		newSection := section.SectionRequestCreate{
 			SectionNumber: 1,
 			CurrentTemperature: 1,
@@ -250,7 +243,6 @@ func TestServiceCreateSection(t *testing.T) {
 		}
 		expectSection := section.Section{}
 		expectErrorList := fmt.Errorf("não há sections registrados")
-
 		mockRep.On("ListarSectionAll").Return([]section.Section{}, expectErrorList).Once()
 		mockRep.On("CreateSection", 
 			mock.AnythingOfType("section.Section"),
@@ -343,7 +335,7 @@ func TestServiceCreateSection(t *testing.T) {
 
 func TestServiceUpdateSection(t *testing.T) {
 
-	t.Run("test servoce no metodoSection, caso de sucesso", func(t *testing.T) {
+	t.Run("test servoce no metodo UpdateSection, caso de sucesso", func(t *testing.T) {
 		var sectionList []section.Section = []section.Section{
 			{
 				Id: 1,
@@ -428,7 +420,7 @@ func TestServiceUpdateSection(t *testing.T) {
 		assert.ObjectsAreEqual(expectUpdateSection, obUpdateSection) 
 		 
 	})
-	t.Run("test servoce no metodoSection, caso de error section_number duplicado", func(t *testing.T) { 
+	t.Run("test servoce no metodo UpdateSection, caso de error section_number duplicado", func(t *testing.T) { 
 		var sectionList []section.Section = []section.Section{
 			{
 				Id: 1,
@@ -484,7 +476,7 @@ func TestServiceUpdateSection(t *testing.T) {
 		assert.Equal(t, expectedError, errConflict)
 		assert.ObjectsAreEqual(expectUpdateSection, obUpdateSectionConflict)
 	})
-	t.Run("test servoce no metodoSection, caso de error, lista de section retorna vazia dentro do metodo update", func(t *testing.T) { 
+	t.Run("test servoce no metodo UpdateSection, caso de error, lista de section retorna vazia dentro do metodo update", func(t *testing.T) { 
 		var sectionList []section.Section = []section.Section{}
 		
 		mockRep := new(mocks.SectionRepository)
@@ -521,7 +513,7 @@ func TestServiceUpdateSection(t *testing.T) {
 		assert.Equal(t, expectedError, errConflict)
 		assert.ObjectsAreEqual(expectUpdateSection, obUpdateSectionConflict)
 	})
-	t.Run("test servoce no metodoSection, caso de error, section não encontrado", func(t *testing.T) { 
+	t.Run("test servoce no metodo UpdateSection, caso de error, section não encontrado", func(t *testing.T) { 
 		var sectionListError []section.Section = []section.Section{
 			{
 				Id: 1,
