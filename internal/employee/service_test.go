@@ -84,7 +84,7 @@ func TestServiceGetByID(t *testing.T) {
 		})
 	t.Run("If the id in the GetByID does not exists, it should return an error",
 		func(t *testing.T) {
-			errorMsg := fmt.Errorf("user with id 10 not found")
+			errorMsg := fmt.Errorf("employee with id 10 not found")
 			repo := &mocks.Repository{}
 			repo.On("GetAll").Return(employees, nil).Once()
 			repo.On("GetByID", tmock.AnythingOfType("int")).Return(employee.Employee{}, errorMsg).Once()
@@ -164,7 +164,7 @@ func TestServiceCreate(t *testing.T) {
 		})
 	t.Run("If the CardNumberID  in the Create exists, it should return an error",
 		func(t *testing.T) {
-			errorMsg := fmt.Errorf("user with this card number id 123 exists")
+			errorMsg := fmt.Errorf("employee with this card number id 123 exists")
 			repo := &mocks.Repository{}
 			repo.On("LastID").Return(3, nil).Once()
 			repo.On("GetAll").Return(employees, nil).Once()
@@ -246,7 +246,7 @@ func TestServiceUpdate(t *testing.T) {
 
 	t.Run("If the id in the Update does not exists, it should return an error",
 		func(t *testing.T) {
-			errorMsg := fmt.Errorf("user with id 10 not found")
+			errorMsg := fmt.Errorf("employee with id 10 not found")
 			repo := &mocks.Repository{}
 			repo.On("GetAll").Return(employees, nil).Once()
 			repo.On("Update",
@@ -266,7 +266,7 @@ func TestServiceUpdate(t *testing.T) {
 		})
 	t.Run("If the CardNumberID  in the Update exists, it should return an error",
 		func(t *testing.T) {
-			errorMsg := fmt.Errorf("user with this card number id 123 exists")
+			errorMsg := fmt.Errorf("employee with this card number id 123 exists")
 			repo := &mocks.Repository{}
 			repo.On("GetAll").Return(employees, nil).Once()
 			repo.On("Update",
@@ -412,7 +412,7 @@ func TestServiceDelete(t *testing.T) {
 		})
 	t.Run("If the id in the Delete does not exists, it should return an error",
 		func(t *testing.T) {
-			errorMsg := fmt.Errorf("user with id 10 not found")
+			errorMsg := fmt.Errorf("employee with id 10 not found")
 			repo := &mocks.Repository{}
 			repo.On("GetAll").Return(employees, nil).Once()
 
