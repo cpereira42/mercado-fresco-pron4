@@ -62,9 +62,9 @@ func CheckIfErrorRequest(ctx *gin.Context, request any) bool {
 		case errors.As(err, &validationErrors):
 
 			out = make([]RequestError, len(validationErrors))
-			typeAluno := reflect.TypeOf(request).Elem()
+			typeData := reflect.TypeOf(request).Elem()
 			for i, fe := range validationErrors {
-				field, ok := typeAluno.FieldByName(fe.Field())
+				field, ok := typeData.FieldByName(fe.Field())
 				if ok {
 					out[i] = RequestError{field.Tag.Get("json"), msgForTag(fe.Tag())}
 				}
@@ -90,10 +90,7 @@ func CheckIfErrorRequest(ctx *gin.Context, request any) bool {
 	return false
 }
 
-/*
-	Implementação de validação no bind das request em rotas post/patch
-	esse método contém melhorias seguindo a lógica do metodo acima no código
-*/
+  
 func CheckIfErrorInRequest(ctx *gin.Context, request any) bool {
 	var (
 		// type of errors
