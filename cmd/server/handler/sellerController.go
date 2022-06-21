@@ -20,58 +20,18 @@ func NewSeller(s seller.Service) *Seller {
 func (s *Seller) Create() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
-		var req sellerRequest
-		if err := ctx.ShouldBindJSON(&req); err != nil {
-			ctx.JSON(http.StatusNotFound, web.NewResponse(
-				http.StatusNotFound, nil, "Failed to create new Seller"),
-			)
-			return
-		}
+		var req seller.SellerRequestCreate
 
-		if !s.service.CheckCid(req.Cid) {
-			ctx.JSON(
-				http.StatusConflict,
-				web.NewResponse(http.StatusConflict, nil, "Cid already registered"),
-			)
-			return
-		}
-
-		if req.Cid == 0 {
-			ctx.JSON(
-				http.StatusUnprocessableEntity,
-				web.NewResponse(http.StatusUnprocessableEntity, nil, "Cid is required"),
-			)
-			return
-		}
-
-		if req.CompanyName == "" {
-			ctx.JSON(
-				http.StatusUnprocessableEntity,
-				web.NewResponse(http.StatusUnprocessableEntity, nil, "Company name is required"),
-			)
-			return
-		}
-
-		if req.Adress == "" {
-			ctx.JSON(
-				http.StatusUnprocessableEntity,
-				web.NewResponse(http.StatusUnprocessableEntity, nil, "Adress is required"),
-			)
-			return
-		}
-
-		if req.Telephone == "" {
-			ctx.JSON(
-				http.StatusUnprocessableEntity,
-				web.NewResponse(http.StatusUnprocessableEntity, nil, "Telephone is required"),
-			)
+		if web.CheckIfErrorRequest(ctx, &req) {
 			return
 		}
 
 		seller, err := s.service.Create(req.Cid, req.CompanyName, req.Adress, req.Telephone)
+
 		if err != nil {
-			ctx.JSON(http.StatusUnprocessableEntity, web.NewResponse(
-				http.StatusUnprocessableEntity, nil, "Seller creation failed"),
+			ctx.JSON(
+				http.StatusConflict,
+				web.NewResponse(http.StatusConflict, nil, "Cid already registered"),
 			)
 			return
 		}
@@ -87,7 +47,7 @@ func (s *Seller) GetAll() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		sellers, err := s.service.GetAll()
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, web.NewResponse(402, nil, err.Error()))
+			ctx.JSON(http.StatusBadRequest, web.NewResponse(http.StatusBadRequest, nil, err.Error()))
 			return
 		}
 		if len(sellers) == 0 {
@@ -123,9 +83,9 @@ func (s *Seller) Update() gin.HandlerFunc {
 			return
 		}
 
-		var req sellerRequest
+		var req seller.SellerRequestUpdate
 		if err := ctx.ShouldBindJSON(&req); err != nil {
-			ctx.JSON(http.StatusBadRequest, web.NewResponse(http.StatusBadRequest, nil, err.Error()))
+			ctx.JSON(http.StatusBadRequest, web.NewResponse(http.StatusBadRequest, nil, "Invalid body arguments"))
 			return
 		}
 

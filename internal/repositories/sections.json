@@ -1,13 +1,1 @@
-[
- {
-  "id": 1,
-  "section_number": 345,
-  "current_temperature": 79345,
-  "minimum_temperature": 332,
-  "current_capacity": 15,
-  "minimum_capacity": 2334,
-  "maximum_capacity": 3,
-  "warehouse_id": 78,
-  "product_type_id": 456
- }
-]
+[]

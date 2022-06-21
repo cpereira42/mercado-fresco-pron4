@@ -603,10 +603,7 @@ func TestUpdateSection(t *testing.T) {
 		// análisa o retorno da response
 		assert.Equal(t, 422, rr.Code)	 
 	})
-	 
 }
-
-
 func TestSectionDelete(t *testing.T) {
 	// criar um mock do service 
 	var mockService *mocks.SectionService = &mocks.SectionService{}
@@ -623,17 +620,13 @@ func TestSectionDelete(t *testing.T) {
 			ProductTypeId: 2,
 		},
 	}
-	
 	t.Run("delete sucesso, (not content 204)", func(t *testing.T) {
 		// realizar a chamada do metodo que será testado
 		mockService.On("ListarSectionAll").Return(sectionListRes, nil).Once()
 		mockService.On("DeleteSection",  mock.AnythingOfType("int")).
 			Return(nil). 
 			Once()
-		
-		// realiza a chamado no server
 		rr := createServer(mockService, http.MethodDelete, "/api/v1/sections/1", "")
-
 		assert.Equal(t, http.StatusNoContent, rr.Code)
 	})
 	t.Run("delete error, (not found 404)", func(t *testing.T) {
@@ -646,7 +639,6 @@ func TestSectionDelete(t *testing.T) {
 		
 		// realiza a chamado no server
 		rr := createServer(mockService, http.MethodDelete, "/api/v1/sections/1", "")
-
 		assert.Equal(t, http.StatusNotFound, rr.Code)
 	})
 	t.Run("delete error, (not found 404)", func(t *testing.T) {
@@ -655,11 +647,7 @@ func TestSectionDelete(t *testing.T) {
 		mockService.On("DeleteSection",  mock.AnythingOfType("int")).
 			Return(nil). 
 			Once()
-		
-		// realiza a chamado no server
 		rr := createServer(mockService, http.MethodDelete, "/api/v1/sections/1s", "")
-
 		assert.Equal(t, http.StatusNotFound, rr.Code)
 	})
-
 }

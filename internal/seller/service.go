@@ -1,10 +1,12 @@
 package seller
 
+import "errors"
+
 type Service interface {
 	GetAll() ([]Seller, error)
 	GetId(id int) (Seller, error)
 	Create(cid int, company, adress, telephone string) (Seller, error)
-	CheckCid(cid int) bool
+	CheckCid(cid int) (bool, error)
 	Update(id, cid int, company, adress, telephone string) (Seller, error)
 	Delete(id int) error
 }
@@ -20,35 +22,42 @@ func NewService(r RepositorySeller) Service {
 }
 
 func (s *service) Create(cid int, company, adress, telephone string) (Seller, error) {
-	lastID, err := s.repository.LastID()
+	checkCid, err1 := s.CheckCid(cid)
+	if err1 != nil {
+		return Seller{}, err1
+	}
+	if !checkCid {
+		return Seller{}, errors.New("Cid already registered")
+	}
+	lastID, err2 := s.repository.LastID()
 
-	if err != nil {
-		return Seller{}, err
+	if err2 != nil {
+		return Seller{}, err2
 	}
 
 	lastID++
 
-	product, err := s.repository.Create(lastID, cid, company, adress, telephone)
+	product, err3 := s.repository.Create(lastID, cid, company, adress, telephone)
 
-	if err != nil {
-		return Seller{}, err
+	if err3 != nil {
+		return Seller{}, err3
 	}
 
 	return product, nil
 
 }
 
-func (s *service) CheckCid(cid int) bool {
+func (s service) CheckCid(cid int) (bool, error) {
 	sellers, err := s.repository.GetAll()
 	if err != nil {
-		return false
+		return false, errors.New("Could not read file")
 	}
 	for _, seller := range sellers {
 		if seller.Cid == cid {
-			return false
+			return false, nil
 		}
 	}
-	return true
+	return true, nil
 }
 
 func (s *service) GetAll() ([]Seller, error) {

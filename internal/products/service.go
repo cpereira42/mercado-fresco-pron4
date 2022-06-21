@@ -94,7 +94,7 @@ func (s *service) Update(id int, p RequestProductsUpdate) (Product, error) {
 	list := []string{"ProductCode", "Description", "Width", "Length", "Height", "NetWeight", "ExpirationRate", "RecommendedFreezingTemperature", "FreezingRate", "ProductTypeId", "SellerId"}
 	prodUp, err := s.repository.GetId(id)
 	if err != nil {
-		return Product{}, fmt.Errorf("Product %d not found", id)
+		return Product{}, fmt.Errorf("Product not found")
 	}
 
 	if s.CheckCode(id, p.ProductCode) {

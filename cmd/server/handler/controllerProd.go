@@ -32,7 +32,7 @@ func (c *Product) GetId() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 		if err != nil {
-			ctx.JSON(401, web.NewResponse(401, nil, "Invalid ID"))
+			ctx.JSON(404, web.NewResponse(404, nil, "Invalid ID"))
 			return
 		}
 		p, err := c.service.GetId(int(id))
@@ -48,13 +48,13 @@ func (c *Product) Delete() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 		if err != nil {
-			ctx.JSON(401, web.NewResponse(401, nil, "Invalid ID"))
+			ctx.JSON(404, web.NewResponse(404, nil, "Invalid ID"))
 			return
 		}
 
 		err = c.service.Delete(int(id))
 		if err != nil {
-			ctx.JSON(404, web.NewResponse(401, nil, err.Error()))
+			ctx.JSON(404, web.NewResponse(404, nil, err.Error()))
 			return
 		}
 		ctx.JSON(204, web.NewResponse(204, fmt.Sprintf("product %d was deleted", id), ""))
@@ -64,15 +64,23 @@ func (c *Product) Delete() gin.HandlerFunc {
 func (c *Product) Create() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var request products.RequestProductsCreate
-		if web.CheckIfErrorRequest(ctx, &request) {
+		if web.CheckIfErrorInRequest(ctx, &request) {
 			return
 		}
+
 		p, err := c.service.Create(request)
 		if err != nil {
-			ctx.JSON(422, web.NewResponse(422, nil, err.Error()))
+			fmt.Println(err)
+
+			if err.Error() == "Product "+request.ProductCode+" already registred" {
+
+				ctx.JSON(409, web.NewResponse(409, nil, err.Error()))
+			} else {
+				ctx.JSON(422, web.NewResponse(422, nil, err.Error()))
+			}
 			return
 		}
-		ctx.JSON(200, web.NewResponse(201, p, ""))
+		ctx.JSON(201, web.NewResponse(201, p, ""))
 	}
 }
 
@@ -80,16 +88,22 @@ func (c *Product) Update() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 		if err != nil {
-			ctx.JSON(401, web.NewResponse(401, nil, "Invali ID"))
+			ctx.JSON(404, web.NewResponse(404, nil, "Invali ID"))
 			return
 		}
+
 		var request products.RequestProductsUpdate
-		if web.CheckIfErrorRequest(ctx, &request) {
+		if web.CheckIfErrorInRequest(ctx, &request) {
 			return
 		}
+
 		p, err := c.service.Update(int(id), request)
 		if err != nil {
-			ctx.JSON(404, web.NewResponse(404, nil, err.Error()))
+			if err.Error() == "Product not found" {
+				ctx.JSON(404, web.NewResponse(404, nil, err.Error()))
+			} else {
+				ctx.JSON(422, web.NewResponse(422, nil, err.Error()))
+			}
 			return
 		}
 		ctx.JSON(200, web.NewResponse(200, p, ""))
