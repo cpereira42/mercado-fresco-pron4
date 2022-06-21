@@ -83,3 +83,69 @@ func TestHandlerGetAll(t *testing.T) {
 		assert.Equal(t, jsonResponse.Error, errorMsg.Error())
 	})
 }
+func TestHandlerGetByID(t *testing.T) {
+
+	t.Run("If request GetByID is OK, it should return status code 200 and an employee", func(t *testing.T) {
+		req, rr := createRequestTest(http.MethodGet, "/api/v1/employees/1", "")
+		serviceMock := &mocks.Service{}
+		serviceMock.On("GetByID", 1).Return(employee1, nil)
+
+		e := handler.NewEmployee(serviceMock)
+		r := gin.Default()
+		employeeGroup := r.Group("/api/v1/employees/")
+		employeeGroup.GET("/:id", e.GetByID())
+
+		r.ServeHTTP(rr, req)
+		assert.Equal(t, 200, rr.Code)
+
+		jsonResponse := struct {
+			Code int
+			Data employee.Employee
+		}{}
+		err := json.Unmarshal(rr.Body.Bytes(), &jsonResponse)
+		assert.Nil(t, err)
+		assert.Equal(t, jsonResponse.Data, employee1)
+
+	})
+	t.Run("If user is not passing a number in the parameter of the url to GetByID, it should return an error", func(t *testing.T) {
+		errorMsg := fmt.Errorf("invalid ID")
+		req, rr := createRequestTest(http.MethodGet, "/api/v1/employees/a", "")
+		serviceMock := &mocks.Service{}
+		serviceMock.On("GetByID").Return(employee.Employee{}, errorMsg)
+
+		e := handler.NewEmployee(serviceMock)
+		r := gin.Default()
+		employeeGroup := r.Group("/api/v1/employees/")
+		employeeGroup.GET("/:id", e.GetByID())
+		r.ServeHTTP(rr, req)
+
+		jsonResponse := struct {
+			Code  int
+			Error string
+		}{}
+		err := json.Unmarshal(rr.Body.Bytes(), &jsonResponse)
+		assert.Nil(t, err)
+		assert.Equal(t, jsonResponse.Error, errorMsg.Error())
+	})
+	t.Run("If request GetByID does not find a employee, it should return 404 and an error", func(t *testing.T) {
+		errorMsg := fmt.Errorf("employee with id 10 not found")
+		req, rr := createRequestTest(http.MethodGet, "/api/v1/employees/10", "")
+		serviceMock := &mocks.Service{}
+		serviceMock.On("GetByID", 10).Return(employee.Employee{}, errorMsg)
+
+		e := handler.NewEmployee(serviceMock)
+		r := gin.Default()
+		employeeGroup := r.Group("/api/v1/employees/")
+		employeeGroup.GET("/:id", e.GetByID())
+		r.ServeHTTP(rr, req)
+		assert.Equal(t, 404, rr.Code)
+
+		jsonResponse := struct {
+			Code  int
+			Error string
+		}{}
+		err := json.Unmarshal(rr.Body.Bytes(), &jsonResponse)
+		assert.Nil(t, err)
+		assert.Equal(t, jsonResponse.Error, errorMsg.Error())
+	})
+}
