@@ -19,11 +19,9 @@ var (
 
 	newEmployee = employee.Employee{CardNumberID: "123456", FirstName: "Marta", LastName: "Gomes", WarehouseID: 3}
 
-	newEmployeeError = employee.Employee{CardNumberID: "123", FirstName: "Marta", LastName: "Gomes", WarehouseID: 3}
-
 	employee1Update = employee.Employee{ID: 1, CardNumberID: "123", FirstName: "Gustavo", LastName: "Junior", WarehouseID: 1}
 
-	employeeUpdateSameCardNumberID = employee.Employee{ID: 1, CardNumberID: "1235", FirstName: "Gustavo", LastName: "Junior", WarehouseID: 1}
+	employeeUpdateSameCardNumberID = employee.Employee{ID: 2, CardNumberID: "123", FirstName: "Gustavo", LastName: "Junior", WarehouseID: 1}
 )
 
 func TestServiceGetAll(t *testing.T) {
@@ -179,7 +177,7 @@ func TestServiceCreate(t *testing.T) {
 			).Return(employee.Employee{}, errorMsg)
 
 			service := employee.NewService(repo)
-			_, err := service.Create(newEmployeeError.CardNumberID, newEmployeeError.FirstName, newEmployeeError.LastName, newEmployeeError.WarehouseID)
+			_, err := service.Create(employeeUpdateSameCardNumberID.CardNumberID, employeeUpdateSameCardNumberID.FirstName, employeeUpdateSameCardNumberID.LastName, employeeUpdateSameCardNumberID.WarehouseID)
 
 			assert.Error(t, err)
 			assert.EqualError(t, err, errorMsg.Error())
@@ -203,6 +201,181 @@ func TestServiceCreate(t *testing.T) {
 
 			service := employee.NewService(repo)
 			_, err := service.Create(newEmployee.CardNumberID, newEmployee.FirstName, newEmployee.LastName, newEmployee.WarehouseID)
+
+			assert.Error(t, err)
+			assert.EqualError(t, err, errorMsg.Error())
+		})
+}
+
+func TestServiceUpdate(t *testing.T) {
+	employees := []employee.Employee{employee1, employee2, employee3}
+
+	t.Run("If Update is success, it should return an updated employee",
+		func(t *testing.T) {
+			repo := &mocks.Repository{}
+			repo.On("GetAll").Return(employees, nil).Once()
+			repo.On("Update",
+				tmock.AnythingOfType("int"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("int"),
+			).Return(employee1Update, nil)
+
+			service := employee.NewService(repo)
+			employeeUpdated, err := service.Update(employee1Update.ID, employee1Update.CardNumberID, employee1Update.FirstName, employee1Update.LastName, employee1Update.WarehouseID)
+
+			assert.NoError(t, err)
+			assert.Equal(t, employee1Update, employeeUpdated)
+
+		})
+
+	t.Run("If Update has an error to get all employees, it should return an error",
+		func(t *testing.T) {
+			errorMsg := fmt.Errorf("Failed to get all employees in the Update")
+			repo := &mocks.Repository{}
+			repo.On("GetAll").Return([]employee.Employee{}, errorMsg).Once()
+
+			service := employee.NewService(repo)
+			_, err := service.Update(employee1Update.ID, employee1Update.CardNumberID, employee1Update.FirstName, employee1Update.LastName, employee1Update.WarehouseID)
+
+			assert.Error(t, err)
+			assert.EqualError(t, err, errorMsg.Error())
+
+		})
+
+	t.Run("If the id in the Update does not exists, it should return an error",
+		func(t *testing.T) {
+			errorMsg := fmt.Errorf("user with id 10 not found")
+			repo := &mocks.Repository{}
+			repo.On("GetAll").Return(employees, nil).Once()
+			repo.On("Update",
+				tmock.AnythingOfType("int"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("int"),
+			).Return(employee.Employee{}, errorMsg)
+
+			service := employee.NewService(repo)
+			_, err := service.Update(10, "", "", "", 0)
+
+			assert.Error(t, err)
+			assert.EqualError(t, err, errorMsg.Error())
+
+		})
+	t.Run("If the CardNumberID  in the Update exists, it should return an error",
+		func(t *testing.T) {
+			errorMsg := fmt.Errorf("user with this card number id 123 exists")
+			repo := &mocks.Repository{}
+			repo.On("GetAll").Return(employees, nil).Once()
+			repo.On("Update",
+				tmock.AnythingOfType("int"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("int"),
+			).Return(employee.Employee{}, errorMsg)
+
+			service := employee.NewService(repo)
+			_, err := service.Update(employeeUpdateSameCardNumberID.ID, employeeUpdateSameCardNumberID.CardNumberID, employeeUpdateSameCardNumberID.FirstName, employeeUpdateSameCardNumberID.LastName, employeeUpdateSameCardNumberID.WarehouseID)
+
+			assert.Error(t, err)
+			assert.EqualError(t, err, errorMsg.Error())
+
+		})
+	t.Run(
+		"If CardNumberID is empty, should return the same CardNumberID of the employee",
+		func(t *testing.T) {
+			repo := &mocks.Repository{}
+			repo.On("GetAll").Return(employees, nil).Once()
+			repo.On("Update",
+				tmock.AnythingOfType("int"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("int"),
+			).Return(employee1Update, nil)
+
+			service := employee.NewService(repo)
+			employeeUpdated, err := service.Update(employee1Update.ID, "", employee1Update.FirstName, employee1Update.LastName, employee1Update.WarehouseID)
+
+			assert.NoError(t, err)
+			assert.Equal(t, employee1Update, employeeUpdated)
+		})
+	t.Run(
+		"If FirstName is empty, should return the same FirstName of the employee",
+		func(t *testing.T) {
+			repo := &mocks.Repository{}
+			repo.On("GetAll").Return(employees, nil).Once()
+			repo.On("Update",
+				tmock.AnythingOfType("int"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("int"),
+			).Return(employee1Update, nil)
+
+			service := employee.NewService(repo)
+			employeeUpdated, err := service.Update(employee1Update.ID, employee1.CardNumberID, "", employee1Update.LastName, employee1Update.WarehouseID)
+
+			assert.NoError(t, err)
+			assert.Equal(t, employee1Update, employeeUpdated)
+		})
+	t.Run(
+		"If LastName is empty, should return the same LastName of the employee",
+		func(t *testing.T) {
+			repo := &mocks.Repository{}
+			repo.On("GetAll").Return(employees, nil).Once()
+			repo.On("Update",
+				tmock.AnythingOfType("int"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("int"),
+			).Return(employee1Update, nil)
+
+			service := employee.NewService(repo)
+			employeeUpdated, err := service.Update(employee1Update.ID, employee1.CardNumberID, employee1.FirstName, "", employee1Update.WarehouseID)
+
+			assert.NoError(t, err)
+			assert.Equal(t, employee1Update, employeeUpdated)
+		})
+	t.Run(
+		"If WarehouseID is empty, should return the same WarehouseID of the employee",
+		func(t *testing.T) {
+			repo := &mocks.Repository{}
+			repo.On("GetAll").Return(employees, nil).Once()
+			repo.On("Update",
+				tmock.AnythingOfType("int"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("int"),
+			).Return(employee1Update, nil)
+
+			service := employee.NewService(repo)
+			employeeUpdated, err := service.Update(employee1Update.ID, employee1.CardNumberID, employee1.FirstName, employee1.LastName, 0)
+
+			assert.NoError(t, err)
+			assert.Equal(t, employee1Update, employeeUpdated)
+		})
+
+	t.Run("If Update has an error, it should return an error",
+		func(t *testing.T) {
+			errorMsg := fmt.Errorf("error to Update")
+			repo := &mocks.Repository{}
+			repo.On("GetAll").Return(employees, nil).Once()
+			repo.On("Update",
+				tmock.AnythingOfType("int"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("int"),
+			).Return(employee.Employee{}, errorMsg)
+
+			service := employee.NewService(repo)
+			_, err := service.Update(employee1Update.ID, employee1Update.CardNumberID, employee1Update.FirstName, employee1Update.LastName, employee1Update.WarehouseID)
 
 			assert.Error(t, err)
 			assert.EqualError(t, err, errorMsg.Error())
