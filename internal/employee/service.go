@@ -53,7 +53,7 @@ func (s service) GetByID(id int) (Employee, error) {
 func (s service) Create(cardNumberID, firstName, lastName string, warehouseID int) (Employee, error) {
 	lastID, err := s.repository.LastID()
 	if err != nil {
-		return Employee{}, nil
+		return Employee{}, err
 	}
 	lastID++
 	employees, err := s.repository.GetAll()
