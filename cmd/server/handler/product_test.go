@@ -256,7 +256,6 @@ func Test_RepositoryCreate(t *testing.T) {
 	t.Run("Creat Fail - Duplicated", func(t *testing.T) {
 
 		serv := &mocks.Service{}
-		//serv.On("CheckCode", 0, "prod1").Return(true)
 		serv.On("Create", prodNew).Return(products.Product{}, fmt.Errorf("Product prod1 already registred"))
 		rr := createServer(serv, http.MethodPost, "/api/v1/products/", `{
 					"Description":                    "prod1",

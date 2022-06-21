@@ -41,17 +41,49 @@ func msgForTag(tag string) string {
 	return ""
 }
 
-func CheckIfErrorRequest(ctx *gin.Context, req any) bool {
-	if err := ctx.ShouldBind(&req); err != nil {
-		var ve validator.ValidationErrors
-		if errors.As(err, &ve) {
-			out := make([]RequestError, len(ve))
-			for i, fe := range ve {
-				out[i] = RequestError{fe.Field(), msgForTag(fe.Tag())}
+func CheckIfErrorRequest(ctx *gin.Context, request any) bool {
+	var (
+		// type of errors
+		out                 []RequestError
+		unmarshalFieldError *json.UnmarshalFieldError // this erro is deprecated
+		unmarshalTypeError  *json.UnmarshalTypeError
+		validationErrors    validator.ValidationErrors
+	)
+	if err := ctx.ShouldBind(&request); err != nil {
+		switch {
+		case errors.As(err, &unmarshalFieldError):
+
+			errString, sep := unmarshalFieldError.Error(), ":"
+			strin := strings.Split(errString, sep)[1]
+			requestError := RequestError{unmarshalFieldError.Field.Name, strings.TrimSpace(strin)}
+			ctx.JSON(http.StatusUnprocessableEntity,
+				Response{http.StatusUnprocessableEntity, requestError, ""})
+
+		case errors.As(err, &validationErrors):
+
+			out = make([]RequestError, len(validationErrors))
+			typeAluno := reflect.TypeOf(request).Elem()
+			for i, fe := range validationErrors {
+				field, ok := typeAluno.FieldByName(fe.Field())
+				if ok {
+					out[i] = RequestError{field.Tag.Get("json"), msgForTag(fe.Tag())}
+				}
 			}
-			ctx.JSON(http.StatusUnprocessableEntity, gin.H{
-				"code":  http.StatusUnprocessableEntity,
-				"error": out})
+			ctx.JSON(http.StatusUnprocessableEntity,
+				Response{http.StatusUnprocessableEntity, out, ""})
+
+		case errors.As(err, &unmarshalTypeError):
+
+			strin := strings.Split(unmarshalTypeError.Error(), ":")[1]
+			requestError := RequestError{unmarshalTypeError.Field, strings.TrimSpace(strin)}
+			ctx.JSON(http.StatusUnprocessableEntity,
+				Response{http.StatusUnprocessableEntity, requestError, ""})
+
+		default:
+
+			ctx.JSON(http.StatusUnprocessableEntity,
+				Response{http.StatusUnprocessableEntity, nil, err.Error()})
+
 		}
 		return true
 	}
