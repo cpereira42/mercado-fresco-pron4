@@ -13,6 +13,7 @@ import (
 	"github.com/cpereira42/mercado-fresco-pron4/internal/employee/mocks"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
+	tmock "github.com/stretchr/testify/mock"
 )
 
 var (
@@ -148,4 +149,105 @@ func TestHandlerGetByID(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, jsonResponse.Error, errorMsg.Error())
 	})
+}
+func TestHandlerCreate(t *testing.T) {
+
+	t.Run("If request Create is OK, it should return status code 201 and an employee", func(t *testing.T) {
+		req, rr := createRequestTest(http.MethodPost, "/api/v1/employees/",
+			`
+		{
+		"card_number_id": "123456",
+		"first_name": "Marta",
+		"last_name" : "Gomes",
+		"warehouse_id": 3
+  		}
+			`)
+		serviceMock := &mocks.Service{}
+		serviceMock.On("Create",
+			tmock.AnythingOfType("string"),
+			tmock.AnythingOfType("string"),
+			tmock.AnythingOfType("string"),
+			tmock.AnythingOfType("int"),
+		).Return(newEmployee, nil)
+
+		e := handler.NewEmployee(serviceMock)
+		r := gin.Default()
+		employeeGroup := r.Group("/api/v1/employees/")
+		employeeGroup.POST("/", e.Create())
+
+		r.ServeHTTP(rr, req)
+		assert.Equal(t, 201, rr.Code)
+
+		jsonResponse := struct {
+			Code int
+			Data employee.Employee
+		}{}
+		err := json.Unmarshal(rr.Body.Bytes(), &jsonResponse)
+		assert.Nil(t, err)
+		assert.Equal(t, jsonResponse.Data, newEmployee)
+
+	})
+	t.Run("If user is not passing the correct body to the Create , it should return status code 422 and an error", func(t *testing.T) {
+		req, rr := createRequestTest(http.MethodPost, "/api/v1/employees/",
+			`{
+		"card_number_id": "123456",
+		"last_name" : "Gomes",
+		"warehouse_id": 3
+  		}`)
+		serviceMock := &mocks.Service{}
+		e := handler.NewEmployee(serviceMock)
+		r := gin.Default()
+		employeeGroup := r.Group("/api/v1/employees")
+		employeeGroup.POST("/", e.Create())
+		r.ServeHTTP(rr, req)
+		assert.Equal(t, 422, rr.Code)
+
+		jsonResponse := struct {
+			Code  int
+			Error []struct {
+				Field   string
+				Message string
+			}
+		}{}
+		err := json.Unmarshal(rr.Body.Bytes(), &jsonResponse)
+		assert.Nil(t, err)
+		assert.Equal(t, "This field is required", jsonResponse.Error[0].Message)
+		assert.Equal(t, "FirstName", jsonResponse.Error[0].Field)
+	})
+	t.Run("If there is an error to Create, it should return status code 404 and an error", func(t *testing.T) {
+		errorMsg := fmt.Errorf("error to create employee")
+		req, rr := createRequestTest(http.MethodPost, "/api/v1/employees/",
+			`
+	{
+	"card_number_id": "123456",
+	"first_name": "Marta",
+	"last_name" : "Gomes",
+	"warehouse_id": 3
+	  }
+		`)
+		serviceMock := &mocks.Service{}
+		serviceMock.On("Create",
+			tmock.AnythingOfType("string"),
+			tmock.AnythingOfType("string"),
+			tmock.AnythingOfType("string"),
+			tmock.AnythingOfType("int"),
+		).Return(employee.Employee{}, errorMsg)
+
+		e := handler.NewEmployee(serviceMock)
+		r := gin.Default()
+		employeeGroup := r.Group("/api/v1/employees")
+		employeeGroup.POST("/", e.Create())
+
+		r.ServeHTTP(rr, req)
+		assert.Equal(t, 404, rr.Code)
+
+		jsonResponse := struct {
+			Code  int
+			Error string
+		}{}
+		err := json.Unmarshal(rr.Body.Bytes(), &jsonResponse)
+		assert.Nil(t, err)
+		assert.Equal(t, jsonResponse.Error, errorMsg.Error())
+	})
+
 }
