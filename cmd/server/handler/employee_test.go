@@ -217,14 +217,12 @@ func TestHandlerCreate(t *testing.T) {
 	t.Run("If there is an error to Create, it should return status code 404 and an error", func(t *testing.T) {
 		errorMsg := fmt.Errorf("error to create employee")
 		req, rr := createRequestTest(http.MethodPost, "/api/v1/employees/",
-			`
-	{
-	"card_number_id": "123456",
-	"first_name": "Marta",
-	"last_name" : "Gomes",
-	"warehouse_id": 3
-	  }
-		`)
+			`{
+		"card_number_id": "123456",
+		"first_name": "Marta",
+		"last_name" : "Gomes",
+		"warehouse_id": 3
+			}`)
 		serviceMock := &mocks.Service{}
 		serviceMock.On("Create",
 			tmock.AnythingOfType("string"),
@@ -250,4 +248,79 @@ func TestHandlerCreate(t *testing.T) {
 		assert.Equal(t, jsonResponse.Error, errorMsg.Error())
 	})
 
+}
+
+func TestHandlerUpdate(t *testing.T) {
+	t.Run("If request Update is OK, it should return status code 200 and an employee", func(t *testing.T) {
+		req, rr := createRequestTest(http.MethodPatch, "/api/v1/employees/1",
+			`{
+			"card_number_id": "123",
+			"first_name": "Gustavo",
+			"last_name" : "Junior",
+			"warehouse_id": 1
+			}`)
+		serviceMock := &mocks.Service{}
+		serviceMock.On("Update",
+			tmock.AnythingOfType("int"),
+			tmock.AnythingOfType("string"),
+			tmock.AnythingOfType("string"),
+			tmock.AnythingOfType("string"),
+			tmock.AnythingOfType("int"),
+		).Return(employee1Update, nil)
+
+		e := handler.NewEmployee(serviceMock)
+		r := gin.Default()
+		employeeGroup := r.Group("/api/v1/employees")
+		employeeGroup.PATCH("/:id", e.Update())
+
+		r.ServeHTTP(rr, req)
+		assert.Equal(t, 200, rr.Code)
+
+		jsonResponse := struct {
+			Code int
+			Data employee.Employee
+		}{}
+		err := json.Unmarshal(rr.Body.Bytes(), &jsonResponse)
+		assert.Nil(t, err)
+		assert.Equal(t, jsonResponse.Data, employee1Update)
+
+	})
+	t.Run("If user is not passing a number in the parameter of the url to Update, it should return an error", func(t *testing.T)
+		errorMsg := fmt.Errorf("invalid ID")
+		req, rr := createRequestTest(http.MethodPatch, "/api/v1/employees/a",
+			`{
+			"card_number_id": "123",
+			"first_name": "Gustavo",
+			"last_name" : "Junior",
+			"warehouse_id": 1
+			}`)
+		serviceMock := &mocks.Service{}
+		serviceMock.On("Update",
+			tmock.AnythingOfType("int"),
+			tmock.AnythingOfType("string"),
+			tmock.AnythingOfType("string"),
+			tmock.AnythingOfType("string"),
+			tmock.AnythingOfType("int"),
+		).Return(employee.Employee{}, errorMsg)
+
+		e := handler.NewEmployee(serviceMock)
+		r := gin.Default()
+		employeeGroup := r.Group("/api/v1/employees")
+		employeeGroup.PATCH("/:id", e.Update())
+
+		r.ServeHTTP(rr, req)
+		assert.Equal(t, 404, rr.Code)
+
+		jsonResponse := struct {
+			Code  int
+			Error string
+		}{}
+		err := json.Unmarshal(rr.Body.Bytes(), &jsonResponse)
+		assert.Nil(t, err)
+		assert.Equal(t, jsonResponse.Error, errorMsg.Error())
+
+	})
+	t.Run("If invalid JSON in the request Update, it should return status code 422 and an error", func(t *testing.T) {
+
+	})
 }
