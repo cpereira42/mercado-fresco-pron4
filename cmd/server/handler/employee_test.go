@@ -30,10 +30,30 @@ var (
 	employeeUpdateSameCardNumberID = employee.Employee{ID: 2, CardNumberID: "123", FirstName: "Gustavo", LastName: "Junior", WarehouseID: 1}
 )
 
+var employeeResponseJson = struct {
+	Code  int
+	Data  employee.Employee
+	Error string
+}{}
+
 func createRequestTest(method string, url string, body string) (*http.Request, *httptest.ResponseRecorder) {
 	req := httptest.NewRequest(method, url, bytes.NewBuffer([]byte(body)))
 	req.Header.Add("Content-Type", "application/json")
 	return req, httptest.NewRecorder()
+}
+
+func createServer(serv *mocks.Service, method string, url string, body string) *httptest.ResponseRecorder {
+	e := handler.NewEmployee(serv)
+	r := gin.Default()
+	pr := r.Group("/api/v1/employees")
+	pr.GET("/", e.GetAll())
+	pr.GET("/:id", e.GetByID())
+	pr.DELETE("/:id", e.Delete())
+	pr.POST("/", e.Create())
+	pr.PATCH("/:id", e.Update())
+	req, rr := createRequestTest(method, url, body)
+	r.ServeHTTP(rr, req)
+	return rr
 }
 
 func TestHandlerGetAll(t *testing.T) {
@@ -344,7 +364,7 @@ func TestHandlerUpdate(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, "invalid character '\"' after object key:value pair", jsonResponse.Error)
 	})
-	t.Run("If there is an error to Create, it should return status code 404 and an error", func(t *testing.T) {
+	t.Run("If there is an error to Update, it should return status code 404 and an error", func(t *testing.T) {
 		errorMsg := fmt.Errorf("error to update employee")
 		req, rr := createRequestTest(http.MethodPatch, "/api/v1/employees/1",
 			`{
@@ -378,4 +398,54 @@ func TestHandlerUpdate(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, jsonResponse.Error, errorMsg.Error())
 	})
+}
+
+func TestHandlerDelete(t *testing.T) {
+	t.Run("If request Delete is OK, it should return status code 204", func(t *testing.T) {
+		req, rr := createRequestTest(http.MethodDelete, "/api/v1/employees/1", "")
+		service := &mocks.Service{}
+		e := handler.NewEmployee(service)
+		r := gin.Default()
+
+		service.On("Delete", 1).Return(nil)
+		employeeGroup := r.Group("/api/v1/employees")
+		employeeGroup.DELETE("/:id", e.Delete())
+
+		r.ServeHTTP(rr, req)
+		assert.Equal(t, 204, rr.Code)
+	})
+	t.Run(
+		"If user is not passing a number in the parameter of the url to GetByID, it should return an error", func(t *testing.T) {
+			errorMsg := fmt.Errorf("invalid ID")
+			req, rr := createRequestTest(http.MethodDelete, "/api/v1/employees/a", "")
+			service := &mocks.Service{}
+			e := handler.NewEmployee(service)
+			r := gin.Default()
+			employeeGroup := r.Group("/api/v1/employees")
+			employeeGroup.DELETE("/:id", e.Delete())
+			r.ServeHTTP(rr, req)
+			assert.Equal(t, 404, rr.Code)
+			objResp := struct {
+				Code  int
+				Error string
+			}{}
+			err := json.Unmarshal(rr.Body.Bytes(), &objResp)
+			assert.Nil(t, err)
+			assert.Equal(t, errorMsg.Error(), objResp.Error)
+		})
+	t.Run(
+		"If the request Delete has an invalid ID, it should return status code  404 and an error", func(t *testing.T) {
+			errorMsg := fmt.Errorf("employee with id 10 not found")
+			serv := &mocks.Service{}
+			serv.On("Delete", 10).Return(errorMsg)
+
+			rr := createServer(serv, http.MethodDelete, "/api/v1/employees/10", "")
+			assert.Equal(t, 404, rr.Code)
+
+			err := json.Unmarshal(rr.Body.Bytes(), &employeeResponseJson)
+			assert.Nil(t, err)
+			assert.NotNil(t, employeeResponseJson.Error)
+			assert.Equal(t, errorMsg.Error(), employeeResponseJson.Error)
+
+		})
 }
