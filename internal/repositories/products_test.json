@@ -1,16 +1,1 @@
-[
- {
-  "id": 1,
-  "product_code": "prod1",
-  "description": "celular",
-  "width": 1.1,
-  "length": 2.2,
-  "height": 3.3,
-  "net_weight": 4.4,
-  "expiration_rate": 5.5,
-  "recommended_freezing_temperature": 6.6,
-  "freezing_rate": 7,
-  "product_type_id": 8,
-  "seller_id": 0
- }
-]
+[]

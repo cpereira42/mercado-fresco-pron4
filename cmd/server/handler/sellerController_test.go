@@ -23,13 +23,13 @@ var sListSuccess []seller.Seller = []seller.Seller{
 	seller1,
 }
 
-func createRequestTest(method string, url string, body string) (*http.Request, *httptest.ResponseRecorder) {
+func CreateRequestTestSeller(method string, url string, body string) (*http.Request, *httptest.ResponseRecorder) {
 	req := httptest.NewRequest(method, url, bytes.NewBuffer([]byte(body)))
 	req.Header.Add("Content-Type", "application/json")
 	return req, httptest.NewRecorder()
 }
 
-func TestControllerGetAll(t *testing.T) {
+func TestControllerGetAllSeller(t *testing.T) {
 	t.Run(
 		"Test GetAll - OK", func(t *testing.T) {
 			req, rr := createRequestTest(http.MethodGet, "/api/v1/sellers/", "")
@@ -93,7 +93,7 @@ func TestControllerGetAll(t *testing.T) {
 		})
 }
 
-func TestControllerDelete(t *testing.T) {
+func TestControllerDeleteSeller(t *testing.T) {
 	t.Run(
 		"Test Delete - OK", func(t *testing.T) {
 			req, rr := createRequestTest(http.MethodDelete, "/api/v1/sellers/1", "")
@@ -145,7 +145,7 @@ func TestControllerDelete(t *testing.T) {
 		})
 }
 
-func TestControllerGetId(t *testing.T) {
+func TestControllerGetIdSeller(t *testing.T) {
 	t.Run(
 		"Test GetId - OK", func(t *testing.T) {
 			req, rr := createRequestTest(http.MethodGet, "/api/v1/sellers/1", "")
@@ -206,7 +206,7 @@ func TestControllerGetId(t *testing.T) {
 		})
 }
 
-func TestControllerCreate(t *testing.T) {
+func TestControllerCreateSeller(t *testing.T) {
 	t.Run(
 		"Test Create - OK", func(t *testing.T) {
 			req, rr := createRequestTest(http.MethodPost, "/api/v1/sellers/",
@@ -297,7 +297,7 @@ func TestControllerCreate(t *testing.T) {
 		})
 }
 
-func TestControllerUpdate(t *testing.T) {
+func TestControllerUpdateSeller(t *testing.T) {
 	t.Run(
 		"Test Update - OK", func(t *testing.T) {
 			req, rr := createRequestTest(http.MethodPatch, "/api/v1/sellers/1",
