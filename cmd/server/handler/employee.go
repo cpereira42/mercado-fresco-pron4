@@ -84,7 +84,7 @@ func (c *EmployeeController) Update() gin.HandlerFunc {
 
 		var request employee.RequestEmployeeUpdate
 
-		if web.CheckIfErrorRequest(ctx, &request) {
+		if web.CheckIfErrorInRequest(ctx, &request) {
 			return
 		}
 
