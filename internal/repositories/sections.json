@@ -1,1 +1,13 @@
-[]
+[
+ {
+  "id": 1,
+  "section_number": 3431,
+  "current_temperature": 1,
+  "minimum_temperature": 1,
+  "current_capacity": 1,
+  "minimum_capacity": 1,
+  "maximum_capacity": 1,
+  "warehouse_id": 1,
+  "product_type_id": 1
+ }
+]

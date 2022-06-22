@@ -62,9 +62,9 @@ func CheckIfErrorRequest(ctx *gin.Context, request any) bool {
 		case errors.As(err, &validationErrors):
 
 			out = make([]RequestError, len(validationErrors))
-			typeData := reflect.TypeOf(request).Elem()
+			typeAluno := reflect.TypeOf(request).Elem()
 			for i, fe := range validationErrors {
-				field, ok := typeData.FieldByName(fe.Field())
+				field, ok := typeAluno.FieldByName(fe.Field())
 				if ok {
 					out[i] = RequestError{field.Tag.Get("json"), msgForTag(fe.Tag())}
 				}

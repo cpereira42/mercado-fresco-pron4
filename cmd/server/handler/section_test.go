@@ -1,62 +1,18 @@
 package handler_test
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
-
 	"net/http"
-	"net/http/httptest"
-
-	//"os"
 	"testing"
-
 	"github.com/cpereira42/mercado-fresco-pron4/cmd/server/handler"
-	//"github.com/cpereira42/mercado-fresco-pron4/internal/section"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/section"
 	mocks "github.com/cpereira42/mercado-fresco-pron4/internal/section/mock"
-
-	//"github.com/cpereira42/mercado-fresco-pron4/pkg/store"
-	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
-/*
- * inicia uma request
- * @param method
- * @param url
- * @param body
- */
-func createRequestServer(method, url, body string) (*http.Request, *httptest.ResponseRecorder) {
-	req := httptest.NewRequest(method, url, bytes.NewBuffer([]byte(body)))
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("TOKEN", "123456")
-	return req, httptest.NewRecorder()
-}
-
-/* 
- * cria um server
- * @param mock
- * @param method
- * @param url
- * @param body
- */
-func createServer(serv *mocks.SectionService, method, url, body string) *httptest.ResponseRecorder {
-	sectionController := handler.NewSectionController(serv)
-	router := gin.Default()
-	gp := router.Group("/api/v1/sections")
-	gp.GET("/", sectionController.ListarSectionAll())
-	gp.GET("/:id", sectionController.ListarSectionOne())
-	gp.POST("/", sectionController.CreateSection())
-	gp.PATCH("/:id", sectionController.UpdateSection())
-	gp.DELETE("/:id", sectionController.DeleteSection())
-	req, rr := createRequestServer(method, url, body)
-	router.ServeHTTP(rr, req)
-	return rr
-}
- 
 
 func getData(data []byte, v any) error {
 	return json.Unmarshal(data, v)
@@ -66,7 +22,6 @@ func getData(data []byte, v any) error {
 func TestCreateSection(t *testing.T) {
 	t.Run("criar section, sucesso (ok 201)", func(t *testing.T) {
 		mockService := &mocks.SectionService{}
-		
 		newSectionCreate := section.SectionRequestCreate{
 			SectionNumber: 1,
 			CurrentTemperature: 1,
@@ -77,7 +32,6 @@ func TestCreateSection(t *testing.T) {
 			WarehouseId: 1,
 			ProductTypeId: 1,
 		}
-
 		newSectionRes := section.Section{
 			Id: 1,
 			SectionNumber: 1,
@@ -102,30 +56,19 @@ func TestCreateSection(t *testing.T) {
 				ProductTypeId: 456,
 			},
 		}
-		
 		mockService.On("ListarSectionAll").Return(sectionList, nil).Once()
 		mockService.On("CreateSection", 
 			mock.AnythingOfType("section.SectionRequestCreate"),
 		).Return(newSectionRes, nil).Once()
-
 		newSectionCreateByte, _ := json.Marshal(newSectionCreate)
-
-		rr := createServer(mockService, 
+		rr := handler.CreateServerSection(mockService, 
 			http.MethodPost, "/api/v1/sections/", string(newSectionCreateByte))
-		
-		objRes := struct {
-			Code int 
-			Data section.Section
-		}{}
-
-		getData(rr.Body.Bytes(), &objRes)
-
-		assert.Equal(t, objRes.Code, rr.Code)		
-		assert.ObjectsAreEqual(newSectionRes, objRes.Data)		
+		getData(rr.Body.Bytes(), &handler.ObjetoResponse)
+		assert.Equal(t, handler.ObjetoResponse.Code, rr.Code)		
+		assert.ObjectsAreEqual(newSectionRes, handler.ObjetoResponse.Data)		
 	})
 	t.Run("criar section, error (conflic 409)", func(t *testing.T) {
 		mockService := &mocks.SectionService{}
-		
 		newSectionCreate := section.SectionRequestCreate{
 			SectionNumber: 3,
 			CurrentTemperature: 1,
@@ -136,7 +79,6 @@ func TestCreateSection(t *testing.T) {
 			WarehouseId: 1,
 			ProductTypeId: 1,
 		}
-
 		newSectionRes := section.Section{}
 		errNewSection := errors.New("section invalid, section_number field must be unique")
 		var sectionList []section.Section = []section.Section{
@@ -182,37 +124,29 @@ func TestCreateSection(t *testing.T) {
 				ProductTypeId: 456,
 			},
 		}
-		
 		mockService.On("ListarSectionAll").Return(sectionList, nil).Once()
 		mockService.On("CreateSection", 
 			mock.AnythingOfType("section.SectionRequestCreate")).
 			Return(newSectionRes, errNewSection).
 			Once()
-
 		newSectionCreateByte, _ := json.Marshal(newSectionCreate)
-
-		rr := createServer(mockService, 
-			http.MethodPost, "/api/v1/sections/", string(newSectionCreateByte))
-		
-		objRes := struct {
-			Code int 
-			Data section.Section
-		}{}
-
-		getData(rr.Body.Bytes(), &objRes)
-
-		assert.Equal(t, objRes.Code, rr.Code)		
-		assert.ObjectsAreEqual(newSectionRes, objRes.Data)		
+		rr := handler.CreateServerSection(
+			mockService, 
+			http.MethodPost, 
+			"/api/v1/sections/", 
+			string(newSectionCreateByte),
+		)
+		getData(rr.Body.Bytes(), &handler.ObjetoResponse)
+		assert.Equal(t, handler.ObjetoResponse.Code, rr.Code)		
+		assert.ObjectsAreEqual(newSectionRes, handler.ObjetoResponse.Data)		
 	})
 	t.Run("criar section, error (unprocessableEntity 422)", func(t *testing.T) {
 		mockService := &mocks.SectionService{}
-		
 		newSectionCreate := section.SectionRequestCreate{
 			SectionNumber: 3,
 			CurrentTemperature: 1, 
 			MaximumCapacity: 1, 
 		}
-
 		newSectionRes := section.Section{}
 		errNewSection := errors.New("This field is required")
 		var sectionList []section.Section = []section.Section{
@@ -228,37 +162,32 @@ func TestCreateSection(t *testing.T) {
 				ProductTypeId: 456,
 			},
 		}
-		
 		mockService.On("ListarSectionAll").Return(sectionList, nil).Once()
 		mockService.On("CreateSection", 
 			mock.AnythingOfType("section.SectionRequestCreate")).
 			Return(newSectionRes, errNewSection).
 			Once()
-
 		newSectionCreateByte, _ := json.Marshal(newSectionCreate)
-
-		rr := createServer(
+		rr := handler.CreateServerSection(
 			mockService, 
 			http.MethodPost, 
 			"/api/v1/sections/", 
 			string(newSectionCreateByte),
 		)
-		
-		objRes := struct {
-			Code int 
-			Data section.Section
-		}{}
-
-		getData(rr.Body.Bytes(), &objRes)
-
+		getData(rr.Body.Bytes(), &handler.ObjetoResponse)
 		assert.Equal(t, 422, rr.Code)		
-		assert.ObjectsAreEqual(newSectionRes, objRes.Data)		
+		assert.ObjectsAreEqual(newSectionRes, handler.ObjetoResponse.Data)		
 	})
 }
 
 func TestListarSectionAll(t *testing.T) {
-	mockService := &mocks.SectionService{} 		
+	mockService := &mocks.SectionService{}
 	t.Run("lista todos section, sucesso (ok 200)", func(t *testing.T) {
+		var ObjetoResponse struct {
+			Code int `json:"code"`
+			Data []section.Section `json:"data"`
+			Error error `json:"error"`
+		}
 		sectionList := []section.Section{
 			{
 				Id: 1,
@@ -275,53 +204,37 @@ func TestListarSectionAll(t *testing.T) {
 		mockService.On("ListarSectionAll").
 			Return(sectionList, nil).
 			Once()
-		
-		rr := createServer(mockService, http.MethodGet, "/api/v1/sections/", "")
-		
-		assert.Equal(t, 200, rr.Code) 
-
-		objResponse := struct {
-			Code int 
-			Data []section.Section
-		}{}
-		 
-		errListResponse := getData(rr.Body.Bytes(), &objResponse)
-		assert.True(t, len(objResponse.Data) != 0)
-		assert.Equal(t, sectionList, objResponse.Data)
-		assert.Equal(t, 200, objResponse.Code)
+		rr := handler.CreateServerSection(mockService, http.MethodGet, "/api/v1/sections/", "")
+		assert.Equal(t, 200, rr.Code)
+		errListResponse := getData(rr.Body.Bytes(), &ObjetoResponse)
+		assert.True(t, len(ObjetoResponse.Data) != 0)
+		assert.Equal(t, sectionList, ObjetoResponse.Data)
+		assert.Equal(t, 200, ObjetoResponse.Code)
 		assert.Nil(t, errListResponse)
 	})
 	t.Run("lista todos section, error (bad request 400)", func(t *testing.T) {
-		 
+		var ObjetoResponse struct {
+			Code int `json:"code"`
+			Data []section.Section `json:"data"`
+			Error error `json:"error"`
+		}
 		sectionListNil := []section.Section{}
 		errListNil := errors.New("não há sections registrados")
 		mockService.On("ListarSectionAll").
 			Return(sectionListNil, errListNil).
 			Once()
-		
-		rr := createServer(mockService, http.MethodGet, "/api/v1/sections/", "")
-		
-		assert.Equal(t, 400, rr.Code) 
-
-		objResponse := struct {
-			Code int 
-			Data []section.Section
-		}{}
-			
-		errListResponse := json.Unmarshal(rr.Body.Bytes(), &objResponse.Data)
-
-		assert.True(t, len(objResponse.Data) == 0)
+		rr := handler.CreateServerSection(mockService, http.MethodGet, "/api/v1/sections/", "")
+		assert.Equal(t, 400, rr.Code)
+		 
+		errListResponse := json.Unmarshal(rr.Body.Bytes(), &ObjetoResponse.Data)
+		assert.True(t, len(ObjetoResponse.Data) == 0)
 		assert.Error(t, errListResponse)
 	})
 }
 
-func TestListarSectionOne(t *testing.T) {
-	
+func TestListarSectionOne(t *testing.T) {	
 	t.Run("lista section, sucesso(ok 200)", func(t *testing.T) {
-		// criar mock do service
 		var mockService *mocks.SectionService = &mocks.SectionService{}
-	
-		// objeto esperado no retorno
 		newSectionRes := section.Section{
 			Id: 1,
 			SectionNumber: 1,
@@ -333,49 +246,35 @@ func TestListarSectionOne(t *testing.T) {
 			WarehouseId: 1,
 			ProductTypeId: 1,
 		}
-		// chama metodo mockado que será testado
 		mockService.On("ListarSectionOne", mock.AnythingOfType("int")). 
 			Return(newSectionRes, nil).
 			Once()
-
-		rr := createServer(
+		rr := handler.CreateServerSection(
 			mockService, 
 			http.MethodGet, 
 			"/api/v1/sections/1", 
 			"",
-		)
-		
+		)		
 		assert.Equal(t, http.StatusOK, rr.Code)
 	})
 	t.Run("lista section, error(not found 404)", func(t *testing.T) {
-		// criar mock do service
 		var mockService *mocks.SectionService = &mocks.SectionService{}
-	
-		// objeto esperado no retorno
 		var sectionNil section.Section = section.Section{}
-		//var errListOne := errors.New("não há section registrados")
-
 		mockService.On("ListarSectionOne", mock.Anything). 
 			Return(sectionNil, errors.New("Section is not registered")). 
 			Once()
-
-		rr := createServer(mockService, http.MethodGet, "/api/v1/sections/3", "")
-		
-		assert.Equal(t, http.StatusNotFound, rr.Code)		 
-
+		rr := handler.CreateServerSection(mockService, http.MethodGet, "/api/v1/sections/3", "")
+		assert.Equal(t, http.StatusNotFound, rr.Code)
 	})
 	t.Run("lista section, error(not found 404)", func(t *testing.T) {
 		var mockService *mocks.SectionService = &mocks.SectionService{}
-
 		var searchSection section.Section = section.Section{}
 		var errSection error = errors.New("Sectin is not registered")
-
 		mockService.On("ListarSectionOne", 
 			mock.AnythingOfType("int")).
 				Return(searchSection, errSection).
 				Once()
-
-		rr := createServer(
+		rr := handler.CreateServerSection(
 			mockService, 
 			http.MethodGet, 
 			"/api/v1/sections/2s", 
@@ -387,12 +286,10 @@ func TestListarSectionOne(t *testing.T) {
 
 
 func TestUpdateSection(t *testing.T) {
-	// inicia o caso de test de sucesso
+	var sectionListResponse []section.Section = []section.Section{}
+	var mockService *mocks.SectionService = &mocks.SectionService{}
+
 	t.Run("update section, sucesso (ok 200)", func(t *testing.T) {
-		// cria um objeto de mock do service
-		var mockService *mocks.SectionService = &mocks.SectionService{}
-	
-		// cria as datas de test
 		updateSection := section.SectionRequestUpdate{
 			SectionNumber: 1,
 			CurrentTemperature: 23, 
@@ -413,55 +310,26 @@ func TestUpdateSection(t *testing.T) {
 			MaximumCapacity: 23,
 			WarehouseId: 23,
 			ProductTypeId: 23,
-		}
-		sectionListRes := []section.Section{
-			{
-				Id: 1,
-				SectionNumber: 1,
-				CurrentTemperature: 2, 
-				MinimumTemperature: 2,
-				CurrentCapacity: 2,
-				MinimumCapacity: 2,
-				MaximumCapacity: 2,
-				WarehouseId: 2,
-				ProductTypeId: 2,
-			},
-		}
-		// chamada dos métodos de teste
-		mockService.On("ListarSectionAll").Return(sectionListRes, nil).Once()
+		} 
+		mockService.On("ListarSectionAll").Return(sectionListResponse, nil).Once()
 		mockService.On("UpdateSection", 
 			mock.AnythingOfType("int"),
 			mock.AnythingOfType("section.SectionRequestUpdate"), 
-		).Return(updateSectionRes, nil).Once()
-
-		// prepara os dados do body da request
-		updateSectionByte, _ := json.Marshal(updateSection)
-		// realizar a chamada de request
-		rr := createServer(
+		).Return(updateSectionRes, nil).Once() 
+		updateSectionByte, _ := json.Marshal(updateSection) 
+		rr := handler.CreateServerSection(
 			mockService, 
 			http.MethodPatch, 
 			"/api/v1/sections/1", 
 			string(updateSectionByte),
-		)
-		// análisa o retorno da response
-		assert.Equal(t, 200, rr.Code)
-		// gera uma estrutura compativel com a que sera retornado no body do response
-		objRes := struct {
-			Code int 
-			Data section.Section
-		}{}
-		// obtem os dados da response
-		err := getData(rr.Body.Bytes(), &objRes) 
+		) 
+		assert.Equal(t, 200, rr.Code) 
+		err := getData(rr.Body.Bytes(), &handler.ObjetoResponse) 
 		assert.Nil(t, err)
-		assert.Equal(t, objRes.Code, rr.Code)
-		assert.ObjectsAreEqual(updateSectionRes, objRes.Data)
-	})
-	// inicia o caso de test de sucesso
-	t.Run("update section, error (not found 404)", func(t *testing.T) {
-		// cria um objeto de mock do service
-		var mockService *mocks.SectionService = &mocks.SectionService{}
-
-		// cria as datas de test
+		assert.Equal(t, handler.ObjetoResponse.Code, rr.Code)
+		assert.ObjectsAreEqual(updateSectionRes, handler.ObjetoResponse.Data)
+	}) 
+	t.Run("update section, error (not found 404)", func(t *testing.T) { 
 		updateSection := section.SectionRequestUpdate{
 			SectionNumber: 1,
 			CurrentTemperature: 23, 
@@ -471,50 +339,27 @@ func TestUpdateSection(t *testing.T) {
 			MaximumCapacity: 23,
 			WarehouseId: 23,
 			ProductTypeId: 23,
-		} 
-		updateSectionRes := section.Section{}
-		errUpdateSection := errors.New("o tipo do parâmentro está invalido")
-		
-		sectionListRes := []section.Section{
-			{
-				Id: 1,
-				SectionNumber: 1,
-				CurrentTemperature: 2, 
-				MinimumTemperature: 2,
-				CurrentCapacity: 2,
-				MinimumCapacity: 2,
-				MaximumCapacity: 2,
-				WarehouseId: 2,
-				ProductTypeId: 2,
-			},
 		}
-		// chamada dos métodos de teste
 		mockService.On("ListarSectionAll").
-			Return(sectionListRes, nil).
+			Return(sectionListResponse, nil).
 			Once()
 		mockService.On("UpdateSection", 
 			mock.AnythingOfType("int"),
 			mock.AnythingOfType("section.SectionRequestUpdate")).
-				Return(updateSectionRes, errUpdateSection).
-				Once()
-
-		// prepara os dados do body da request
-		updateSectionByte, _ := json.Marshal(updateSection)
-		// realizar a chamada de request
-		rr := createServer(
+				Return(section.Section{}, errors.New("o tipo do parâmentro está invalido")).
+				Once() 
+		updateSectionByte, _ := json.Marshal(updateSection) 
+		rr := handler.CreateServerSection(
 			mockService, 
 			http.MethodPatch, 
 			"/api/v1/sections/1s", 
 			string(updateSectionByte),
-		)
-		// análisa o retorno da response
-		assert.Equal(t, 404, rr.Code)	 
+		) 
+		assert.Equal(t, 404, rr.Code)
+		_ = getData(rr.Body.Bytes(), &handler.ObjetoResponse)
+		assert.Equal(t, handler.ObjetoResponse.Code, rr.Code)		
 	})
-	t.Run("update section, error (not found 404)", func(t *testing.T) {
-		// cria um objeto de mock do service
-		var mockService *mocks.SectionService = &mocks.SectionService{}
-
-		// cria as datas de test
+	t.Run("update section, error (not found 404)", func(t *testing.T) { 
 		updateSection := section.SectionRequestUpdate{
 			SectionNumber: 1,
 			CurrentTemperature: 23, 
@@ -523,41 +368,24 @@ func TestUpdateSection(t *testing.T) {
 			WarehouseId: 23,
 			ProductTypeId: 23,
 		} 
-		updateSectionRes := section.Section{}
-		errUpdateSection := errors.New("section is not found")
-		
-		sectionListRes := []section.Section{}
-		errSectionListRes := fmt.Errorf("não há sections registrados")
-		// chamada dos métodos de teste
 		mockService.On("ListarSectionAll").
-			Return(sectionListRes, errSectionListRes).
+			Return([]section.Section{}, fmt.Errorf("não há sections registrados") ).
 			Once()
 		mockService.On("UpdateSection", 
 			mock.AnythingOfType("int"),
 			mock.AnythingOfType("section.SectionRequestUpdate")).
-				Return(updateSectionRes, errUpdateSection).
-				Once()
-
-		// prepara os dados do body da request
-		updateSectionByte, _ := json.Marshal(updateSection)
-		// realizar a chamada de request
-		rr := createServer(
+				Return(section.Section{}, errors.New("section is not found")).
+				Once() 
+		updateSectionByte, _ := json.Marshal(updateSection) 
+		rr := handler.CreateServerSection(
 			mockService, 
 			http.MethodPatch, 
 			"/api/v1/sections/1", 
 			string(updateSectionByte),
-		)
-		// análisa o retorno da response
+		) 
 		assert.Equal(t, 404, rr.Code)	 
 	})
 	t.Run("update section, error (unprocessableEntity 422)", func(t *testing.T) {
-		// cria um objeto de mock do service
-		var mockService *mocks.SectionService = &mocks.SectionService{}
-
-		// cria as datas de test
-		updateSectionRes := section.Section{}
-		errUpdateSection := errors.New("This field is required")
-		
 		sectionListRes := []section.Section{
 			{
 				Id: 1,
@@ -570,18 +398,15 @@ func TestUpdateSection(t *testing.T) {
 				WarehouseId: 1,
 				ProductTypeId: 1,
 			},
-		} 
-		// chamada dos métodos de teste
+		}  
 		mockService.On("ListarSectionAll").
 			Return(sectionListRes, nil).
 			Once()
 		mockService.On("UpdateSection", 
 			mock.AnythingOfType("int"),
 			mock.AnythingOfType("section.SectionRequestUpdate")).
-				Return(updateSectionRes, errUpdateSection).
-				Once()
-
-		// prepara os dados do body da request
+				Return(section.Section{}, errors.New("This field is required") ).
+				Once() 
 		updateSectionByte := `{
 			"section_number":1,
 			"current_temperature":23,
@@ -591,21 +416,17 @@ func TestUpdateSection(t *testing.T) {
 			"maximum_capacity":23,
 			"warehouse_id":23,
 			"product_type_id":23
-		}`
-		//fmt.Println(string(updateSectionByte))
-		// realizar a chamada de request
-		rr := createServer(
+		}` 
+		rr := handler.CreateServerSection(
 			mockService, 
 			http.MethodPatch, 
 			"/api/v1/sections/1", 
 			string(updateSectionByte),
-		)
-		// análisa o retorno da response
+		) 
 		assert.Equal(t, 422, rr.Code)	 
 	})
 }
 func TestSectionDelete(t *testing.T) {
-	// criar um mock do service 
 	var mockService *mocks.SectionService = &mocks.SectionService{}
 	var sectionListRes = []section.Section{
 		{
@@ -621,33 +442,28 @@ func TestSectionDelete(t *testing.T) {
 		},
 	}
 	t.Run("delete sucesso, (not content 204)", func(t *testing.T) {
-		// realizar a chamada do metodo que será testado
 		mockService.On("ListarSectionAll").Return(sectionListRes, nil).Once()
 		mockService.On("DeleteSection",  mock.AnythingOfType("int")).
 			Return(nil). 
 			Once()
-		rr := createServer(mockService, http.MethodDelete, "/api/v1/sections/1", "")
+		rr := handler.CreateServerSection(mockService, http.MethodDelete, "/api/v1/sections/1", "")
 		assert.Equal(t, http.StatusNoContent, rr.Code)
 	})
 	t.Run("delete error, (not found 404)", func(t *testing.T) {
 		errNotFound :=  errors.New("section not found")
-		// realizar a chamada do metodo que será testado
 		mockService.On("ListarSectionAll").Return(sectionListRes, nil).Once()
 		mockService.On("DeleteSection",  mock.AnythingOfType("int")).
 			Return(errNotFound). 
 			Once()
-		
-		// realiza a chamado no server
-		rr := createServer(mockService, http.MethodDelete, "/api/v1/sections/1", "")
+		rr := handler.CreateServerSection(mockService, http.MethodDelete, "/api/v1/sections/1", "")
 		assert.Equal(t, http.StatusNotFound, rr.Code)
 	})
 	t.Run("delete error, (not found 404)", func(t *testing.T) {
-		// realizar a chamada do metodo que será testado
 		mockService.On("ListarSectionAll").Return(sectionListRes, nil).Once()
 		mockService.On("DeleteSection",  mock.AnythingOfType("int")).
 			Return(nil). 
 			Once()
-		rr := createServer(mockService, http.MethodDelete, "/api/v1/sections/1s", "")
+		rr := handler.CreateServerSection(mockService, http.MethodDelete, "/api/v1/sections/1s", "")
 		assert.Equal(t, http.StatusNotFound, rr.Code)
 	})
 }
