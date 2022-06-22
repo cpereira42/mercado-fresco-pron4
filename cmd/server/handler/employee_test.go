@@ -285,7 +285,7 @@ func TestHandlerUpdate(t *testing.T) {
 		assert.Equal(t, jsonResponse.Data, employee1Update)
 
 	})
-	t.Run("If user is not passing a number in the parameter of the url to Update, it should return an error", func(t *testing.T)
+	t.Run("If user is not passing a number in the parameter of the url to Update, it should return an error", func(t *testing.T) {
 		errorMsg := fmt.Errorf("invalid ID")
 		req, rr := createRequestTest(http.MethodPatch, "/api/v1/employees/a",
 			`{
@@ -321,6 +321,61 @@ func TestHandlerUpdate(t *testing.T) {
 
 	})
 	t.Run("If invalid JSON in the request Update, it should return status code 422 and an error", func(t *testing.T) {
+		req, rr := createRequestTest(http.MethodPatch, "/api/v1/employees/1",
+			`{
+		"card_number_id": "123456"
+		"last_name" : "Gomes",
+		"warehouse_id": 3
+  		}`)
+		serviceMock := &mocks.Service{}
+		e := handler.NewEmployee(serviceMock)
+		r := gin.Default()
+		employeeGroup := r.Group("/api/v1/employees")
+		employeeGroup.PATCH("/:id", e.Update())
+		r.ServeHTTP(rr, req)
+		assert.Equal(t, 422, rr.Code)
 
+		jsonResponse := struct {
+			Code  int
+			Error string
+		}{}
+
+		err := json.Unmarshal(rr.Body.Bytes(), &jsonResponse)
+		assert.Nil(t, err)
+		assert.Equal(t, "invalid character '\"' after object key:value pair", jsonResponse.Error)
+	})
+	t.Run("If there is an error to Create, it should return status code 404 and an error", func(t *testing.T) {
+		errorMsg := fmt.Errorf("error to update employee")
+		req, rr := createRequestTest(http.MethodPatch, "/api/v1/employees/1",
+			`{
+		"card_number_id": "123456",
+		"first_name": "Marta",
+		"last_name" : "Gomes",
+		"warehouse_id": 3
+			}`)
+		serviceMock := &mocks.Service{}
+		serviceMock.On("Update",
+			tmock.AnythingOfType("int"),
+			tmock.AnythingOfType("string"),
+			tmock.AnythingOfType("string"),
+			tmock.AnythingOfType("string"),
+			tmock.AnythingOfType("int"),
+		).Return(employee.Employee{}, errorMsg)
+
+		e := handler.NewEmployee(serviceMock)
+		r := gin.Default()
+		employeeGroup := r.Group("/api/v1/employees")
+		employeeGroup.PATCH("/:id", e.Update())
+
+		r.ServeHTTP(rr, req)
+		assert.Equal(t, 404, rr.Code)
+
+		jsonResponse := struct {
+			Code  int
+			Error string
+		}{}
+		err := json.Unmarshal(rr.Body.Bytes(), &jsonResponse)
+		assert.Nil(t, err)
+		assert.Equal(t, jsonResponse.Error, errorMsg.Error())
 	})
 }
