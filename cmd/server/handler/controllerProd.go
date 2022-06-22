@@ -64,7 +64,7 @@ func (c *Product) Delete() gin.HandlerFunc {
 func (c *Product) Create() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var request products.RequestProductsCreate
-		if web.CheckIfErrorInRequest(ctx, &request) {
+		if web.CheckIfErrorRequest(ctx, &request) {
 			return
 		}
 
@@ -93,7 +93,7 @@ func (c *Product) Update() gin.HandlerFunc {
 		}
 
 		var request products.RequestProductsUpdate
-		if web.CheckIfErrorInRequest(ctx, &request) {
+		if web.CheckIfErrorRequest(ctx, &request) {
 			return
 		}
 
