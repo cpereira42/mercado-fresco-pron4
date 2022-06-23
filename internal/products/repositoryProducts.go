@@ -6,23 +6,33 @@ import (
 	"github.com/cpereira42/mercado-fresco-pron4/pkg/store"
 )
 
-type repositoryProduct struct {
+type Repository interface {
+	GetAll() ([]Product, error)
+	GetId(id int) (Product, error)
+	Delete(id int) error
+	LastID() (int, error)
+	Create(p Product) (Product, error)
+	Update(id int, prod Product) (Product, error)
+	CheckCode(code string) error
+}
+
+type repository struct {
 	db store.Store
 }
 
 func NewRepositoryProducts(db store.Store) Repository {
-	return &repositoryProduct{
+	return &repository{
 		db: db,
 	}
 }
 
-func (r *repositoryProduct) GetAll() ([]Product, error) {
+func (r *repository) GetAll() ([]Product, error) {
 	var ps []Product
 	r.db.Read(&ps)
 	return ps, nil
 }
 
-func (r *repositoryProduct) GetId(id int) (Product, error) {
+func (r *repository) GetId(id int) (Product, error) {
 	var ps []Product
 	r.db.Read(&ps)
 	for i := range ps {
@@ -33,7 +43,7 @@ func (r *repositoryProduct) GetId(id int) (Product, error) {
 	return Product{}, fmt.Errorf("Product %d not found", id)
 }
 
-func (r *repositoryProduct) CheckCode(code string) error {
+func (r *repository) CheckCode(code string) error {
 	var ps []Product
 	r.db.Read(&ps)
 	for i := range ps {
@@ -44,7 +54,7 @@ func (r *repositoryProduct) CheckCode(code string) error {
 	return nil
 }
 
-func (r *repositoryProduct) Delete(id int) error {
+func (r *repository) Delete(id int) error {
 	var index int
 	var ps []Product
 	r.db.Read(&ps)
@@ -61,7 +71,7 @@ func (r *repositoryProduct) Delete(id int) error {
 	return fmt.Errorf("Product %d not found", id)
 }
 
-func (r *repositoryProduct) Create(p Product) (Product, error) {
+func (r *repository) Create(p Product) (Product, error) {
 	var ps []Product
 	r.db.Read(&ps)
 	ps = append(ps, p)
@@ -71,7 +81,7 @@ func (r *repositoryProduct) Create(p Product) (Product, error) {
 	return p, nil
 }
 
-func (r *repositoryProduct) LastID() (int, error) {
+func (r *repository) LastID() (int, error) {
 	var ps []Product
 	if err := r.db.Read(&ps); err != nil {
 		return 0, err
@@ -82,7 +92,7 @@ func (r *repositoryProduct) LastID() (int, error) {
 	return ps[len(ps)-1].Id, nil
 }
 
-func (r *repositoryProduct) Update(id int, p Product) (Product, error) {
+func (r *repository) Update(id int, p Product) (Product, error) {
 	var ps []Product
 	r.db.Read(&ps)
 	for i := range ps {

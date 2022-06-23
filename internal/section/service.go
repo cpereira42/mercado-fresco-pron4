@@ -1,22 +1,30 @@
 package section
 
-import ( 
+import (
+	"errors"
 	"fmt"
 )
  
 
-func (s service) ListarSectionAll() ([]Section, error){ 
-	return s.repository.ListarSectionAll()
+func (s service) ListarSectionAll() ([]Section, error){
+	sectionList, err := s.repository.ListarSectionAll()
+	if err != nil {
+		return []Section{}, errors.New("não há sections registrado")
+	}
+	return sectionList, nil
 }
 
 
 func (s service) ListarSectionOne(id int) (Section, error) { 
-	return s.repository.ListarSectionOne(id)	 
+	sect, err := s.repository.ListarSectionOne(id)	 
+	if err != nil {
+		return Section{}, err
+	}
+	return sect, nil
 }
 
 
 func (s service) CreateSection(newSection SectionRequestCreate) (Section, error) {
-	
 	var sectionList []Section 
 	
 	sectionList, err := s.repository.ListarSectionAll()
@@ -49,8 +57,12 @@ func (s service) UpdateSection(id int, sectionUp SectionRequestUpdate) (Section,
 	return s.repository.UpdateSection(id, newSectionRequest)
 }
 
-func (s service) DeleteSection(id int) error {
-	return s.repository.DeleteSection(id)
+func (s service) DeleteSection(id int) error {	
+	err := s.repository.DeleteSection(id)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func NewService(repository Repository) Service { 

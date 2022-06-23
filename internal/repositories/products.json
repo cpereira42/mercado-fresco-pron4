@@ -12,5 +12,19 @@
   "freezing_rate": 7,
   "product_type_id": 8,
   "seller_id": 0
+ },
+ {
+  "id": 2,
+  "product_code": "prod2",
+  "description": "prod2",
+  "width": 7.7,
+  "length": 4.3,
+  "height": 3.3,
+  "net_weight": 5.5,
+  "expiration_rate": 1,
+  "recommended_freezing_temperature": 6.6,
+  "freezing_rate": 2,
+  "product_type_id": 8,
+  "seller_id": 9
  }
 ]

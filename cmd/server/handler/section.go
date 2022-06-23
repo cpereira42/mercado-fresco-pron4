@@ -32,8 +32,7 @@ func (controller *SectionController) CreateSection() gin.HandlerFunc {
 		
 		var newSection section.SectionRequestCreate
 		
-		ok := web.CheckIfErrorInRequest(context,  &newSection) 
-		if ok {
+		if web.CheckIfErrorRequest(context,  &newSection) {
 			return
 		} 
 		
@@ -72,8 +71,7 @@ func (controller *SectionController) UpdateSection() gin.HandlerFunc{
 			return
 		}
 		var sectionUp section.SectionRequestUpdate
-		ok := web.CheckIfErrorInRequest(context, &sectionUp)
-		if ok {
+		if web.CheckIfErrorRequest(context, &sectionUp) {
 			return
 		}
 		updateSection,err := controller.service.UpdateSection(paramId, sectionUp)
