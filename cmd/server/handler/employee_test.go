@@ -41,21 +41,20 @@ var employeeResponseJson = struct {
 }{}
 
 var employeeFieldsResponseJson = struct {
-	Code  int
-	Data  employee.Employee
-	Error []struct {
+	Code int
+	Data []struct {
 		Field   string
 		Message string
 	}
 }{}
 
-func createRequestTest(method string, url string, body string) (*http.Request, *httptest.ResponseRecorder) {
+func createRequestTestEmployee(method string, url string, body string) (*http.Request, *httptest.ResponseRecorder) {
 	req := httptest.NewRequest(method, url, bytes.NewBuffer([]byte(body)))
 	req.Header.Add("Content-Type", "application/json")
 	return req, httptest.NewRecorder()
 }
 
-func createServer(serverMock *mocks.Service, method string, url string, body string) *httptest.ResponseRecorder {
+func createServerEmployee(serverMock *mocks.Service, method string, url string, body string) *httptest.ResponseRecorder {
 	e := handler.NewEmployee(serverMock)
 	r := gin.Default()
 	employeesGroup := r.Group("/api/v1/employees")
@@ -64,7 +63,7 @@ func createServer(serverMock *mocks.Service, method string, url string, body str
 	employeesGroup.DELETE("/:id", e.Delete())
 	employeesGroup.POST("/", e.Create())
 	employeesGroup.PATCH("/:id", e.Update())
-	req, rr := createRequestTest(method, url, body)
+	req, rr := createRequestTestEmployee(method, url, body)
 	r.ServeHTTP(rr, req)
 	return rr
 }
@@ -75,7 +74,7 @@ func TestHandlerGetAll(t *testing.T) {
 	t.Run("If request GetAll is OK, it should return status code 200 and a list of employees", func(t *testing.T) {
 		serviceMock := &mocks.Service{}
 		serviceMock.On("GetAll").Return(employees, nil)
-		rr := createServer(serviceMock, http.MethodGet, "/api/v1/employees/", "")
+		rr := createServerEmployee(serviceMock, http.MethodGet, "/api/v1/employees/", "")
 
 		err := json.Unmarshal(rr.Body.Bytes(), &employeesResponseJson)
 
@@ -88,7 +87,7 @@ func TestHandlerGetAll(t *testing.T) {
 		errorMsg := fmt.Errorf("error to get all employees")
 		serviceMock := &mocks.Service{}
 		serviceMock.On("GetAll").Return([]employee.Employee{}, errorMsg)
-		rr := createServer(serviceMock, http.MethodGet, "/api/v1/employees/", "")
+		rr := createServerEmployee(serviceMock, http.MethodGet, "/api/v1/employees/", "")
 		err := json.Unmarshal(rr.Body.Bytes(), &employeeResponseJson)
 
 		assert.Equal(t, 404, rr.Code)
@@ -101,7 +100,7 @@ func TestHandlerGetByID(t *testing.T) {
 	t.Run("If request GetByID is OK, it should return status code 200 and an employee", func(t *testing.T) {
 		serviceMock := &mocks.Service{}
 		serviceMock.On("GetByID", 1).Return(employee1, nil)
-		rr := createServer(serviceMock, http.MethodGet, "/api/v1/employees/1", "")
+		rr := createServerEmployee(serviceMock, http.MethodGet, "/api/v1/employees/1", "")
 
 		err := json.Unmarshal(rr.Body.Bytes(), &employeeResponseJson)
 
@@ -114,7 +113,7 @@ func TestHandlerGetByID(t *testing.T) {
 		errorMsg := fmt.Errorf("invalid ID")
 		serviceMock := &mocks.Service{}
 		serviceMock.On("GetByID").Return(employee.Employee{}, errorMsg)
-		rr := createServer(serviceMock, http.MethodGet, "/api/v1/employees/a", "")
+		rr := createServerEmployee(serviceMock, http.MethodGet, "/api/v1/employees/a", "")
 
 		err := json.Unmarshal(rr.Body.Bytes(), &employeeResponseJson)
 
@@ -126,7 +125,7 @@ func TestHandlerGetByID(t *testing.T) {
 		errorMsg := fmt.Errorf("employee with id 10 not found")
 		serviceMock := &mocks.Service{}
 		serviceMock.On("GetByID", 10).Return(employee.Employee{}, errorMsg)
-		rr := createServer(serviceMock, http.MethodGet, "/api/v1/employees/10", "")
+		rr := createServerEmployee(serviceMock, http.MethodGet, "/api/v1/employees/10", "")
 
 		err := json.Unmarshal(rr.Body.Bytes(), &employeeResponseJson)
 
@@ -145,7 +144,7 @@ func TestHandlerCreate(t *testing.T) {
 			tmock.AnythingOfType("string"),
 			tmock.AnythingOfType("int"),
 		).Return(newEmployee, nil)
-		rr := createServer(serviceMock, http.MethodPost, "/api/v1/employees/",
+		rr := createServerEmployee(serviceMock, http.MethodPost, "/api/v1/employees/",
 			`
 		{
 		"card_number_id": "123456",
@@ -155,16 +154,16 @@ func TestHandlerCreate(t *testing.T) {
   		}
 			`)
 
-		err := json.Unmarshal(rr.Body.Bytes(), &employeeFieldsResponseJson)
+		err := json.Unmarshal(rr.Body.Bytes(), &employeeResponseJson)
 
 		assert.Equal(t, 201, rr.Code)
 		assert.Nil(t, err)
-		assert.Equal(t, newEmployee, employeeFieldsResponseJson.Data)
+		assert.Equal(t, newEmployee, employeeResponseJson.Data)
 
 	})
 	t.Run("If user is not passing the correct body to the Create , it should return status code 422 and an error", func(t *testing.T) {
 		serviceMock := &mocks.Service{}
-		rr := createServer(serviceMock, http.MethodPost, "/api/v1/employees/",
+		rr := createServerEmployee(serviceMock, http.MethodPost, "/api/v1/employees/",
 			`{
 		"card_number_id": "123456",
 		"last_name" : "Gomes",
@@ -175,8 +174,8 @@ func TestHandlerCreate(t *testing.T) {
 
 		err := json.Unmarshal(rr.Body.Bytes(), &employeeFieldsResponseJson)
 		assert.Nil(t, err)
-		assert.Equal(t, "This field is required", employeeFieldsResponseJson.Error[0].Message)
-		assert.Equal(t, "FirstName", employeeFieldsResponseJson.Error[0].Field)
+		assert.Equal(t, "This field is required", employeeFieldsResponseJson.Data[0].Message)
+		assert.Equal(t, "first_name", employeeFieldsResponseJson.Data[0].Field)
 	})
 	t.Run("If there is an error to Create, it should return status code 404 and an error", func(t *testing.T) {
 		errorMsg := fmt.Errorf("error to create employee")
@@ -187,7 +186,7 @@ func TestHandlerCreate(t *testing.T) {
 			tmock.AnythingOfType("string"),
 			tmock.AnythingOfType("int"),
 		).Return(employee.Employee{}, errorMsg)
-		rr := createServer(serviceMock, http.MethodPost, "/api/v1/employees/",
+		rr := createServerEmployee(serviceMock, http.MethodPost, "/api/v1/employees/",
 			`{
 		"card_number_id": "123456",
 		"first_name": "Marta",
@@ -214,7 +213,7 @@ func TestHandlerUpdate(t *testing.T) {
 			tmock.AnythingOfType("string"),
 			tmock.AnythingOfType("int"),
 		).Return(employee1Update, nil)
-		rr := createServer(serviceMock, http.MethodPatch, "/api/v1/employees/1",
+		rr := createServerEmployee(serviceMock, http.MethodPatch, "/api/v1/employees/1",
 			`{
 			"card_number_id": "123",
 			"first_name": "Gustavo",
@@ -239,7 +238,7 @@ func TestHandlerUpdate(t *testing.T) {
 			tmock.AnythingOfType("string"),
 			tmock.AnythingOfType("int"),
 		).Return(employee.Employee{}, errorMsg)
-		rr := createServer(serviceMock, http.MethodPatch, "/api/v1/employees/a",
+		rr := createServerEmployee(serviceMock, http.MethodPatch, "/api/v1/employees/a",
 			`{
 			"card_number_id": "123",
 			"first_name": "Gustavo",
@@ -256,7 +255,7 @@ func TestHandlerUpdate(t *testing.T) {
 	})
 	t.Run("If invalid JSON in the request Update, it should return status code 422 and an error", func(t *testing.T) {
 		serviceMock := &mocks.Service{}
-		rr := createServer(serviceMock, http.MethodPatch, "/api/v1/employees/1",
+		rr := createServerEmployee(serviceMock, http.MethodPatch, "/api/v1/employees/1",
 			`{
 		"card_number_id": "123456"
 		"last_name" : "Gomes",
@@ -279,7 +278,7 @@ func TestHandlerUpdate(t *testing.T) {
 			tmock.AnythingOfType("string"),
 			tmock.AnythingOfType("int"),
 		).Return(employee.Employee{}, errorMsg)
-		rr := createServer(serviceMock, http.MethodPatch, "/api/v1/employees/1",
+		rr := createServerEmployee(serviceMock, http.MethodPatch, "/api/v1/employees/1",
 			`{
 		"card_number_id": "123456",
 		"first_name": "Marta",
@@ -299,7 +298,7 @@ func TestHandlerDelete(t *testing.T) {
 	t.Run("If request Delete is OK, it should return status code 204", func(t *testing.T) {
 		serviceMock := &mocks.Service{}
 		serviceMock.On("Delete", 1).Return(nil)
-		rr := createServer(serviceMock, http.MethodDelete, "/api/v1/employees/1", "")
+		rr := createServerEmployee(serviceMock, http.MethodDelete, "/api/v1/employees/1", "")
 
 		assert.Equal(t, 204, rr.Code)
 	})
@@ -307,7 +306,7 @@ func TestHandlerDelete(t *testing.T) {
 		"If user is not passing a number in the parameter of the url to GetByID, it should return status code 404 and  an error", func(t *testing.T) {
 			errorMsg := fmt.Errorf("invalid ID")
 			serviceMock := &mocks.Service{}
-			rr := createServer(serviceMock, http.MethodDelete, "/api/v1/employees/a", "")
+			rr := createServerEmployee(serviceMock, http.MethodDelete, "/api/v1/employees/a", "")
 
 			err := json.Unmarshal(rr.Body.Bytes(), &employeeResponseJson)
 
@@ -321,7 +320,7 @@ func TestHandlerDelete(t *testing.T) {
 			serviceMock := &mocks.Service{}
 			serviceMock.On("Delete", 10).Return(errorMsg)
 
-			rr := createServer(serviceMock, http.MethodDelete, "/api/v1/employees/10", "")
+			rr := createServerEmployee(serviceMock, http.MethodDelete, "/api/v1/employees/10", "")
 
 			err := json.Unmarshal(rr.Body.Bytes(), &employeeResponseJson)
 
