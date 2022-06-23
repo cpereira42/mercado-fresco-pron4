@@ -1,13 +1,13 @@
 [
  {
   "id": 1,
-  "section_number": 3431,
-  "current_temperature": 1,
-  "minimum_temperature": 1,
-  "current_capacity": 1,
-  "minimum_capacity": 1,
-  "maximum_capacity": 1,
-  "warehouse_id": 1,
-  "product_type_id": 1
+  "section_number": 5424233,
+  "current_temperature": 234324,
+  "minimum_temperature": 332,
+  "current_capacity": 10,
+  "minimum_capacity": 2334,
+  "maximum_capacity": 3,
+  "warehouse_id": 78,
+  "product_type_id": 456
  }
 ]

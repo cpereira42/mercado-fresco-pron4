@@ -1,7 +1,4 @@
-package section
-
-import "github.com/cpereira42/mercado-fresco-pron4/pkg/store"
-
+package entites
 
 /* 
  * Modelo de estrutura de entradas de requests post/patch e de db
@@ -55,12 +52,7 @@ type Repository interface {
 	DeleteSection(id int) error
 	LastID() (int, error)
 }
-
-type repository struct {
-	db store.Store
-}
-
-
+ 
 /*
  * estrutura do service.go
  *	Service interface{}
@@ -75,6 +67,3 @@ type Service interface {
 	DeleteSection(id int) error
 }
 
-type service struct {
-	repository Repository
-}

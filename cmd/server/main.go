@@ -1,11 +1,16 @@
 package main
 
 import (
+	sectionController "github.com/cpereira42/mercado-fresco-pron4/cmd/server/handler/section"
+	sectionService "github.com/cpereira42/mercado-fresco-pron4/internal/section/service"
+	sectionRepository "github.com/cpereira42/mercado-fresco-pron4/internal/section/repository/file"
+
+
 	"github.com/cpereira42/mercado-fresco-pron4/cmd/server/handler"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/buyer"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/employee"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/products"
-	"github.com/cpereira42/mercado-fresco-pron4/internal/section"
+
 	"github.com/cpereira42/mercado-fresco-pron4/internal/seller"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/warehouse"
 	"github.com/cpereira42/mercado-fresco-pron4/pkg/store"
@@ -29,9 +34,9 @@ func main() {
 	w := handler.NewWarehouse(svcWarehouse)
 
 	dbSection := store.New(store.FileType, "./internal/repositories/sections.json")
-	repSection := section.NewRepository(dbSection)
-	serviceSection := section.NewService(repSection)
-	sectionController := handler.NewSectionController(serviceSection)
+	repSection := sectionRepository.NewRepository(dbSection)
+	serviceSection := sectionService.NewService(repSection)
+	sectionController := sectionController.NewSectionController(serviceSection)
 
 	dbSeller := store.New(store.FileType, "../mercado-fresco-pron4/internal/repositories/sellers.json")
 	repoSeller := seller.NewRepositorySeller(dbSeller)
