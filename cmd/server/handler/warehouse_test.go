@@ -26,7 +26,7 @@ var (
 	warehouseList     []warehouse.Warehouse = []warehouse.Warehouse{warehouse1, warehouse2, warehouse3}
 )
 
-func createRequestTest(method string, url string, body string) (*http.Request, *httptest.ResponseRecorder) {
+func createRequestTests(method string, url string, body string) (*http.Request, *httptest.ResponseRecorder) {
 	req := httptest.NewRequest(method, url, bytes.NewBuffer([]byte(body)))
 	req.Header.Add("Content-Type", "application/json")
 	return req, httptest.NewRecorder()
@@ -35,7 +35,7 @@ func createRequestTest(method string, url string, body string) (*http.Request, *
 func TestControllerGetAll(t *testing.T) {
 	t.Run(
 		"should return all warehouses", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodGet, "/api/v1/warehouse/", "")
+			req, rr := createRequestTests(http.MethodGet, "/api/v1/warehouse/", "")
 			serviceMock := new(mocks.Service)
 			w := handler.NewWarehouse(serviceMock)
 			r := gin.Default()
@@ -54,7 +54,7 @@ func TestControllerGetAll(t *testing.T) {
 		})
 	t.Run(
 		"should return error 500", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodGet, "/api/v1/warehouse/", "")
+			req, rr := createRequestTests(http.MethodGet, "/api/v1/warehouse/", "")
 			serviceMock := new(mocks.Service)
 			w := handler.NewWarehouse(serviceMock)
 			r := gin.Default()
@@ -76,7 +76,7 @@ func TestControllerGetAll(t *testing.T) {
 func TestControllerUpdate(t *testing.T) {
 	t.Run(
 		"should updated warehouse", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodPatch, "/api/v1/warehouse/1",
+			req, rr := createRequestTests(http.MethodPatch, "/api/v1/warehouse/1",
 				`{
 				"address": "Rua 4",
 				"telephone": "11111111",
@@ -109,7 +109,7 @@ func TestControllerUpdate(t *testing.T) {
 		})
 	t.Run(
 		"Test Update - should return 404", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodPatch, "/api/v1/warehouse/a",
+			req, rr := createRequestTests(http.MethodPatch, "/api/v1/warehouse/a",
 				`{
 				"address": "Rua 4",
 				"telephone": "11111111",
@@ -134,7 +134,7 @@ func TestControllerUpdate(t *testing.T) {
 		})
 	t.Run(
 		"Test Update - Invalid JSON", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodPatch, "/api/v1/warehouse/1",
+			req, rr := createRequestTests(http.MethodPatch, "/api/v1/warehouse/1",
 				`{
 				"telephone": "11111111"
 				"warehouse_code": "W1",
@@ -159,7 +159,7 @@ func TestControllerUpdate(t *testing.T) {
 		})
 	t.Run(
 		"Test Update - id not found", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodPatch, "/api/v1/warehouse/1",
+			req, rr := createRequestTests(http.MethodPatch, "/api/v1/warehouse/1",
 				`{
 				"address": "Rua 4",
 				"telephone": "11111111",
@@ -197,7 +197,7 @@ func TestControllerUpdate(t *testing.T) {
 func TestControllerDelete(t *testing.T) {
 	t.Run(
 		"Test Delete - should return 204", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodDelete, "/api/v1/warehouse/1", "")
+			req, rr := createRequestTests(http.MethodDelete, "/api/v1/warehouse/1", "")
 			serviceMock := new(mocks.Service)
 			w := handler.NewWarehouse(serviceMock)
 			r := gin.Default()
@@ -209,7 +209,7 @@ func TestControllerDelete(t *testing.T) {
 		})
 	t.Run(
 		"Test Delete - should return 404", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodDelete, "/api/v1/warehouse/a", "")
+			req, rr := createRequestTests(http.MethodDelete, "/api/v1/warehouse/a", "")
 			serviceMock := new(mocks.Service)
 			w := handler.NewWarehouse(serviceMock)
 			r := gin.Default()
@@ -227,7 +227,7 @@ func TestControllerDelete(t *testing.T) {
 		})
 	t.Run(
 		"Test Delete - ID not found", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodDelete, "/api/v1/warehouse/5", "")
+			req, rr := createRequestTests(http.MethodDelete, "/api/v1/warehouse/5", "")
 			serviceMock := new(mocks.Service)
 			w := handler.NewWarehouse(serviceMock)
 			r := gin.Default()
@@ -251,7 +251,7 @@ func TestControllerDelete(t *testing.T) {
 func TestControllerGet(t *testing.T) {
 	t.Run(
 		"Test GetByID - should return 200", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodGet, "/api/v1/warehouse/1", "")
+			req, rr := createRequestTests(http.MethodGet, "/api/v1/warehouse/1", "")
 			serviceMock := new(mocks.Service)
 			w := handler.NewWarehouse(serviceMock)
 			r := gin.Default()
@@ -270,7 +270,7 @@ func TestControllerGet(t *testing.T) {
 		})
 	t.Run(
 		"Test GetByID - Invalid ID - should return 404", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodGet, "/api/v1/warehouse/a", "")
+			req, rr := createRequestTests(http.MethodGet, "/api/v1/warehouse/a", "")
 			serviceMock := new(mocks.Service)
 			w := handler.NewWarehouse(serviceMock)
 			r := gin.Default()
@@ -289,7 +289,7 @@ func TestControllerGet(t *testing.T) {
 
 	t.Run(
 		"Test GetByID - ID not found - should return 404", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodGet, "/api/v1/warehouse/5", "")
+			req, rr := createRequestTests(http.MethodGet, "/api/v1/warehouse/5", "")
 			serviceMock := new(mocks.Service)
 			w := handler.NewWarehouse(serviceMock)
 			r := gin.Default()
@@ -313,7 +313,7 @@ func TestControllerGet(t *testing.T) {
 func TestControllerCreate(t *testing.T) {
 	t.Run(
 		"Test Create - should return 201", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodPost, "/api/v1/warehouse/",
+			req, rr := createRequestTests(http.MethodPost, "/api/v1/warehouse/",
 				`{
 				"address": "Rua 1",
 				"telephone": "11111111",
@@ -346,7 +346,7 @@ func TestControllerCreate(t *testing.T) {
 
 	t.Run(
 		"Test Create - Request Body error - without Telephone", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodPost, "/api/v1/warehouse/",
+			req, rr := createRequestTests(http.MethodPost, "/api/v1/warehouse/",
 				`{
 				"address": "Rua 1",
 				"warehouse_code": "W1",
@@ -374,7 +374,7 @@ func TestControllerCreate(t *testing.T) {
 
 	t.Run(
 		"Test Create - should return 409", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodPost, "/api/v1/warehouse/",
+			req, rr := createRequestTests(http.MethodPost, "/api/v1/warehouse/",
 				`{
 				"address": "Rua 1",
 				"telephone": "11111111",
@@ -407,7 +407,7 @@ func TestControllerCreate(t *testing.T) {
 		})
 	t.Run(
 		"Test Create - Error to save", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodPost, "/api/v1/warehouse/",
+			req, rr := createRequestTests(http.MethodPost, "/api/v1/warehouse/",
 				`{
 				"address": "Rua 1",
 				"telephone": "11111111",
