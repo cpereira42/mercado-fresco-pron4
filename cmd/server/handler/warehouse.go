@@ -38,7 +38,11 @@ func (c *Warehouse) Create(ctx *gin.Context) {
 
 	w, err := c.service.Create(r.Address, r.Telephone, r.Warehouse_code, r.Minimum_capacity, r.Minimum_temperature)
 	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnprocessableEntity, web.NewResponse(http.StatusUnprocessableEntity, nil, err.Error()))
+		if err.Error() == "Warehouse already exists" {
+			ctx.JSON(409, web.NewResponse(409, nil, err.Error()))
+		} else {
+			ctx.AbortWithStatusJSON(http.StatusUnprocessableEntity, web.NewResponse(http.StatusUnprocessableEntity, nil, err.Error()))
+		}
 		return
 	}
 	ctx.JSON(http.StatusCreated, web.NewResponse(http.StatusCreated, w, ""))

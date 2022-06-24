@@ -367,12 +367,44 @@ func TestControllerCreate(t *testing.T) {
 					Message string
 				}
 			}{}
-			log.Println(string(rr.Body.Bytes()))
 			err := json.Unmarshal(rr.Body.Bytes(), &objResp)
 			assert.Nil(t, err)
 			assert.Equal(t, "telephone", objResp.Data[0].Field)
 		})
 
+	t.Run(
+		"Test Create - should return 409", func(t *testing.T) {
+			req, rr := createRequestTest(http.MethodPost, "/api/v1/warehouse/",
+				`{
+				"address": "Rua 1",
+				"telephone": "11111111",
+				"warehouse_code": "W1",
+				"minimum_capacity": 10,
+				"minimum_temperature": 20
+			}`)
+			serviceMock := new(mocks.Service)
+			w := handler.NewWarehouse(serviceMock)
+			r := gin.Default()
+			msgError := fmt.Errorf("Warehouse already exists")
+			serviceMock.On("Create",
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("int"),
+				tmock.AnythingOfType("int")).
+				Return(warehouse.Warehouse{}, msgError)
+			wr := r.Group("/api/v1/warehouse")
+			wr.POST("/", w.Create)
+			r.ServeHTTP(rr, req)
+			assert.Equal(t, 409, rr.Code)
+			objResp := struct {
+				Code  int
+				Error string
+			}{}
+			err := json.Unmarshal(rr.Body.Bytes(), &objResp)
+			assert.Nil(t, err)
+			assert.Equal(t, "Warehouse already exists", objResp.Error)
+		})
 	t.Run(
 		"Test Create - Error to save", func(t *testing.T) {
 			req, rr := createRequestTest(http.MethodPost, "/api/v1/warehouse/",
