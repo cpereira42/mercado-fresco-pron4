@@ -107,9 +107,9 @@ func (c *EmployeeController) Delete() gin.HandlerFunc {
 
 		err = c.service.Delete(id)
 		if err != nil {
-			ctx.AbortWithStatus(http.StatusNotFound)
+			ctx.JSON(http.StatusNotFound, web.NewResponse(http.StatusNotFound, nil, err.Error()))
 			return
 		}
-		ctx.AbortWithStatus(http.StatusNoContent)
+		ctx.JSON(http.StatusNoContent, web.NewResponse(http.StatusNoContent, nil, ""))
 	}
 }

@@ -32,7 +32,7 @@ func (c *Warehouse) GetAll(ctx *gin.Context) {
 func (c *Warehouse) Create(ctx *gin.Context) {
 	var r warehouse.RequestWarehouseCreate
 
-	if web.CheckIfErrorInRequest(ctx, &r) {
+	if web.CheckIfErrorRequest(ctx, &r) {
 		return
 	}
 
@@ -56,7 +56,7 @@ func (c *Warehouse) Update(ctx *gin.Context) {
 	}
 
 	var r warehouse.RequestWarehouseUpdate
-	if web.CheckIfErrorInRequest(ctx, &r) {
+	if web.CheckIfErrorRequest(ctx, &r) {
 		return
 	}
 	// if err := ctx.ShouldBindJSON(&r); err != nil {

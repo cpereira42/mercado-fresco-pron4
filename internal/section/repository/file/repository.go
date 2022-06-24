@@ -1,41 +1,49 @@
-package section
+package sectionRepository
 
 import (
+	"errors"
 	"fmt"
-
+	entites "github.com/cpereira42/mercado-fresco-pron4/internal/section/entites"
 	"github.com/cpereira42/mercado-fresco-pron4/pkg/store"
 	"github.com/fatih/structs"
 )
 
-func (r *repository) CreateSection(newSection Section) (Section, error) {
-	var sectionsList []Section
+
+type repository struct {
+	db store.Store
+}
+
+func (r *repository) CreateSection(newSection entites.Section) (entites.Section, error) {
+	var sectionsList []entites.Section
 	if err := r.db.Read(&sectionsList); err != nil {
-		return Section{}, err
+		return entites.Section{}, err
 	} 
-	lastID, _ := r.lastID()
+	lastID, _ := r.LastID()
 	lastID ++
 
 	newSection.Id = lastID
 	sectionsList = append(sectionsList, newSection)		
 	if err := r.db.Write(sectionsList); err != nil {
-		return Section{}, err
+		return entites.Section{}, err
 	}
 	return omitFieldId(newSection), nil
 }
-func (r *repository) ListarSectionAll() ([]Section, error) {
-	var sectionsList []Section
+
+func (r *repository) ListarSectionAll() ([]entites.Section, error) {
+	var sectionsList []entites.Section
 	if err := r.db.Read(&sectionsList); err != nil {
 		return sectionsList, err
 	}
 	return sectionsList, nil
 }
-func (r *repository) ListarSectionOne(id int) (Section, error) {
+
+func (r *repository) ListarSectionOne(id int) (entites.Section, error) {
 	var (
-		sectionList []Section
-		section     Section
+		sectionList []entites.Section
+		section     entites.Section
 	)
 	if err := r.db.Read(&sectionList); err != nil {
-		return Section{}, err
+		return entites.Section{}, err
 	}
 	for index := range sectionList {
 		if sectionList[index].Id == id {
@@ -43,16 +51,16 @@ func (r *repository) ListarSectionOne(id int) (Section, error) {
 			return section, nil
 		}
 	}
-	return Section{}, fmt.Errorf("Section is not registered")
+	return entites.Section{}, errors.New("section is not registered")
 }
 
-func (r *repository) UpdateSection(id int, sectionUp Section) (Section, error) {
+func (r *repository) UpdateSection(id int, sectionUp entites.Section) (entites.Section, error) {
 	var (
-		sectionList []Section
-		section Section = sectionUp
+		sectionList []entites.Section
+		section entites.Section = sectionUp
 	)
 	if err := r.db.Read(&sectionList); err != nil {
-		return Section{}, err
+		return entites.Section{}, err
 	} 
 	var updated, sectionEncontrado = false, false
 	strSection := structs.Map(sectionUp)
@@ -84,7 +92,7 @@ func (r *repository) UpdateSection(id int, sectionUp Section) (Section, error) {
 			sectionUp.Id = sectionList[index].Id
 			sectionList[index] = sectionUp
 			if err := r.db.Write(sectionList); err != nil {
-				return Section{}, err
+				return entites.Section{}, err
 			}
 			return omitFieldId(sectionUp), nil
 		}
@@ -93,15 +101,15 @@ func (r *repository) UpdateSection(id int, sectionUp Section) (Section, error) {
 	if sectionEncontrado {
 		return omitFieldId(section), nil
 	}
-	return Section{}, fmt.Errorf("unable to update section")
+	return entites.Section{}, fmt.Errorf("unable to update section")
 }
-func omitFieldId(section Section) Section {
+func omitFieldId(section entites.Section) entites.Section {
 	section.Id = 0
 	return section
 }
 
 func (r *repository) DeleteSection(id int) error {
-	var sectionsList []Section
+	var sectionsList []entites.Section
 	if err := r.db.Read(&sectionsList); err != nil {
 		return err
 	}
@@ -111,9 +119,9 @@ func (r *repository) DeleteSection(id int) error {
 	return nil
 }
 
-func (r *repository) lastID() (int, error) {
+func (r *repository) LastID() (int, error) {
 	var (
-		sectionsList  []Section
+		sectionsList  []entites.Section
 		erro          error
 		totalSections int
 	)
@@ -126,18 +134,18 @@ func (r *repository) lastID() (int, error) {
 	}
 	return 0, nil
 }
-func NewRepository(db store.Store) Repository {
+func NewRepository(db store.Store) entites.Repository {
 	return &repository{db: db}
 }
 
 //
 // HELPERS
 //
-func iterateAboutSectionList(rep *repository, sections []Section, id int) error {
+func iterateAboutSectionList(rep *repository, sections []entites.Section, id int) error {
 	for index := range sections {
 		if sections[index].Id == id {
 			if len(sections)-1 == index {
-				sections = append([]Section{}, sections[:index]...)
+				sections = append([]entites.Section{}, sections[:index]...)
 			} else {
 				sections = append(sections[:index], sections[index+1:]...)
 			}

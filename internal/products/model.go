@@ -15,17 +15,6 @@ type Product struct {
 	SellerId                       int     `json:"seller_id"`
 }
 
-type Repository interface {
-	GetAll() ([]Product, error)
-	GetId(id int) (Product, error)
-	Delete(id int) error
-	LastID() (int, error)
-	Create(p Product) (Product, error)
-	Update(id int, prod Product) (Product, error)
-	//UpdatePatch(id int, prod Product) (Product, error)
-	CheckCode(code string) error
-}
-
 type RequestProductsCreate struct {
 	ProductCode                    string  `json:"product_code" binding:"required"`
 	Description                    string  `json:"description" binding:"required"`

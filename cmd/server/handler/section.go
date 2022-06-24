@@ -4,16 +4,16 @@ import (
 	"net/http" 
 	"strconv"
 
-	"github.com/cpereira42/mercado-fresco-pron4/internal/section"
+	sectionEntites "github.com/cpereira42/mercado-fresco-pron4/internal/section/entites"
 	"github.com/cpereira42/mercado-fresco-pron4/pkg/web"
 	"github.com/gin-gonic/gin"
 )
 
 
 type SectionController struct {
-	service section.Service
+	service sectionEntites.Service
 }
-func NewSectionController(sectionService section.Service) *SectionController {
+func NewSectionController(sectionService sectionEntites.Service) *SectionController {
 	return &SectionController{service: sectionService}
 }
 func (controller *SectionController)ListarSectionAll() gin.HandlerFunc {
@@ -30,10 +30,9 @@ func (controller *SectionController)ListarSectionAll() gin.HandlerFunc {
 func (controller *SectionController) CreateSection() gin.HandlerFunc {
 	return func (context *gin.Context)  { 
 		
-		var newSection section.SectionRequestCreate
+		var newSection sectionEntites.SectionRequestCreate
 		
-		ok := web.CheckIfErrorInRequest(context,  &newSection) 
-		if ok {
+		if web.CheckIfErrorRequest(context,  &newSection) {
 			return
 		} 
 		
@@ -71,9 +70,8 @@ func (controller *SectionController) UpdateSection() gin.HandlerFunc{
 				web.NewResponse(http.StatusNotFound, nil, errconv.Error()))
 			return
 		}
-		var sectionUp section.SectionRequestUpdate
-		ok := web.CheckIfErrorInRequest(context, &sectionUp)
-		if ok {
+		var sectionUp sectionEntites.SectionRequestUpdate
+		if web.CheckIfErrorRequest(context, &sectionUp) {
 			return
 		}
 		updateSection,err := controller.service.UpdateSection(paramId, sectionUp)

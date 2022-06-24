@@ -8,11 +8,16 @@ type Seller struct {
 	Telephone   string `json:"telephone"`
 }
 
-type RepositorySeller interface {
-	GetAll() ([]Seller, error)
-	GetId(id int) (Seller, error)
-	Create(id, cid int, company, adress, telephone string) (Seller, error)
-	LastID() (int, error)
-	Update(id, cid int, company, adress, telephone string) (Seller, error)
-	Delete(id int) error
+type SellerRequestCreate struct {
+	Cid         int    `json:"cid" binding:"required"`
+	CompanyName string `json:"company_name" binding:"required"`
+	Adress      string `json:"address" binding:"required"`
+	Telephone   string `json:"telephone" binding:"required"`
+}
+
+type SellerRequestUpdate struct {
+	Cid         int    `json:"cid" binding:"omitempty,required"`
+	CompanyName string `json:"company_name" binding:"omitempty,required"`
+	Adress      string `json:"address" binding:"omitempty,required"`
+	Telephone   string `json:"telephone" binding:"omitempty,required"`
 }

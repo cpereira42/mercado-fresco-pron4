@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"reflect"
 	"strings"
+
 	//"github.com/cpereira42/mercado-fresco-pron4/internal/section"
 
 	"github.com/gin-gonic/gin"
@@ -40,72 +41,51 @@ func msgForTag(tag string) string {
 	return ""
 }
 
-func CheckIfErrorRequest(ctx *gin.Context, req any) bool {
-	if err := ctx.ShouldBind(&req); err != nil {
-		var ve validator.ValidationErrors
-		if errors.As(err, &ve) {
-			out := make([]RequestError, len(ve))
-			for i, fe := range ve {
-				out[i] = RequestError{fe.Field(), msgForTag(fe.Tag())}
-			}
-			ctx.JSON(http.StatusUnprocessableEntity, gin.H{
-				"code":  http.StatusUnprocessableEntity,
-				"error": out})
-		}
-		return true
-	}
-	return false
-}  
-
-/* 
-	Implementação de validação no bind das request em rotas post/patch
-	esse método contém melhorias seguindo a lógica do metodo acima no código
-*/
-func CheckIfErrorInRequest(ctx *gin.Context, request any) bool {
+func CheckIfErrorRequest(ctx *gin.Context, request any) bool {
 	var (
 		// type of errors
-		out []RequestError
+		out                 []RequestError
 		unmarshalFieldError *json.UnmarshalFieldError // this erro is deprecated
-		unmarshalTypeError *json.UnmarshalTypeError
-		validationErrors validator.ValidationErrors
+		unmarshalTypeError  *json.UnmarshalTypeError
+		validationErrors    validator.ValidationErrors
 	)
 	if err := ctx.ShouldBind(&request); err != nil {
 		switch {
 		case errors.As(err, &unmarshalFieldError):
-						
-			errString, sep  := unmarshalFieldError.Error(), ":"
+
+			errString, sep := unmarshalFieldError.Error(), ":"
 			strin := strings.Split(errString, sep)[1]
-			requestError := RequestError{ unmarshalFieldError.Field.Name, strings.TrimSpace(strin) } 
-			ctx.JSON(http.StatusUnprocessableEntity, 
+			requestError := RequestError{unmarshalFieldError.Field.Name, strings.TrimSpace(strin)}
+			ctx.JSON(http.StatusUnprocessableEntity,
 				Response{http.StatusUnprocessableEntity, requestError, ""})
 
 		case errors.As(err, &validationErrors):
-			
+
 			out = make([]RequestError, len(validationErrors))
 			typeAluno := reflect.TypeOf(request).Elem()
 			for i, fe := range validationErrors {
-				field, ok :=typeAluno.FieldByName(fe.Field())
+				field, ok := typeAluno.FieldByName(fe.Field())
 				if ok {
-					out[i] = RequestError{ field.Tag.Get("json"), msgForTag(fe.Tag())}
+					out[i] = RequestError{field.Tag.Get("json"), msgForTag(fe.Tag())}
 				}
 			}
-			ctx.JSON(http.StatusUnprocessableEntity, 
+			ctx.JSON(http.StatusUnprocessableEntity,
 				Response{http.StatusUnprocessableEntity, out, ""})
 
-		case  errors.As(err, &unmarshalTypeError) :
-			
+		case errors.As(err, &unmarshalTypeError):
+
 			strin := strings.Split(unmarshalTypeError.Error(), ":")[1]
-			requestError := RequestError{ unmarshalTypeError.Field, strings.TrimSpace(strin) }
+			requestError := RequestError{unmarshalTypeError.Field, strings.TrimSpace(strin)}
 			ctx.JSON(http.StatusUnprocessableEntity,
 				Response{http.StatusUnprocessableEntity, requestError, ""})
 
 		default:
-			
-			ctx.JSON(http.StatusUnprocessableEntity, 
+
+			ctx.JSON(http.StatusUnprocessableEntity,
 				Response{http.StatusUnprocessableEntity, nil, err.Error()})
 
 		}
 		return true
 	}
 	return false
-}
+} 

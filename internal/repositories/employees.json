@@ -21,17 +21,24 @@
   "warehouse_id": 2
  },
  {
-  "id": 6,
-  "card_number_id": "1121211",
-  "first_name": "Jhon",
-  "last_name": "silva",
-  "warehouse_id": 2
- },
- {
   "id": 7,
   "card_number_id": "1221",
   "first_name": "Edu",
   "last_name": "silva",
   "warehouse_id": 2
+ },
+ {
+  "id": 8,
+  "card_number_id": "6",
+  "first_name": "cezar",
+  "last_name": "pereira",
+  "warehouse_id": 4
+ },
+ {
+  "id": 9,
+  "card_number_id": "61",
+  "first_name": "cezar",
+  "last_name": "pereira",
+  "warehouse_id": 4
  }
 ]
