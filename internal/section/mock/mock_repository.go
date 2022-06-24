@@ -1,7 +1,7 @@
 package mocks
 
-import (
-	"github.com/cpereira42/mercado-fresco-pron4/internal/section"
+import ( 
+	"github.com/cpereira42/mercado-fresco-pron4/internal/section/entites"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -18,16 +18,16 @@ type SectionRepository struct {
 	DeleteSection(id int) error
 	LastID() (int, error)
 */
-func (sectionRepository *SectionRepository) ListarSectionAll()([]section.Section, error) {
+func (sectionRepository *SectionRepository) ListarSectionAll()([]entites.Section, error) {
 
 	args := sectionRepository.Called()
 
-	var sectionList []section.Section
-	if rf, ok := args.Get(0).(func() []section.Section); ok {
+	var sectionList []entites.Section
+	if rf, ok := args.Get(0).(func() []entites.Section); ok {
 		sectionList = rf()
 	} else {
 		if args.Get(0) != nil {
-			sectionList = args.Get(0).([]section.Section)
+			sectionList = args.Get(0).([]entites.Section)
 		}
 	}
 
@@ -41,15 +41,15 @@ func (sectionRepository *SectionRepository) ListarSectionAll()([]section.Section
 	}
 	return sectionList, err
 }
-func (sectionRepository *SectionRepository) ListarSectionOne(id int) (section.Section, error) {
+func (sectionRepository *SectionRepository) ListarSectionOne(id int) (entites.Section, error) {
 	var args = sectionRepository.Called(id)
 
-	var sectionObj section.Section
-	if rf, ok := args.Get(0).(func(int) section.Section); ok {
+	var sectionObj entites.Section
+	if rf, ok := args.Get(0).(func(int) entites.Section); ok {
 		sectionObj = rf(id)
 	} else {
 		if args.Get(0) != nil {
-			sectionObj = args.Get(0).(section.Section)
+			sectionObj = args.Get(0).(entites.Section)
 		}
 	}
 
@@ -63,20 +63,20 @@ func (sectionRepository *SectionRepository) ListarSectionOne(id int) (section.Se
 	}
 	return sectionObj, err
 }
-func (sectionRepository *SectionRepository) CreateSection(newSection section.Section) (section.Section, error) {
+func (sectionRepository *SectionRepository) CreateSection(newSection entites.Section) (entites.Section, error) {
 	var args = sectionRepository.Called(newSection)
 
-	var sectionObj section.Section
-	if rf, ok := args.Get(0).(func(section.Section) section.Section); ok {
+	var sectionObj entites.Section
+	if rf, ok := args.Get(0).(func(entites.Section) entites.Section); ok {
 		sectionObj = rf(newSection)
 	} else {
 		if args.Get(0) != nil {
-			sectionObj = args.Get(0).(section.Section)
+			sectionObj = args.Get(0).(entites.Section)
 		}
 	}
 
 	var err error
-	if rf, ok := args.Get(1).(func(section.Section) error); ok {
+	if rf, ok := args.Get(1).(func(entites.Section) error); ok {
 		err = rf(newSection)
 	} else {
 		if args.Get(1) != nil {
@@ -85,20 +85,20 @@ func (sectionRepository *SectionRepository) CreateSection(newSection section.Sec
 	}
 	return sectionObj, err 
 }
-func (sectionRepository *SectionRepository) UpdateSection(id int, sectionUp section.Section) (section.Section, error) {
+func (sectionRepository *SectionRepository) UpdateSection(id int, sectionUp entites.Section) (entites.Section, error) {
 	var args = sectionRepository.Called(id,sectionUp)
 
-	var sectionObj section.Section
-	if rf, ok := args.Get(0).(func(int,section.Section) section.Section); ok {
+	var sectionObj entites.Section
+	if rf, ok := args.Get(0).(func(int,entites.Section) entites.Section); ok {
 		sectionObj = rf(id,sectionObj)
 	} else {
 		if args.Get(0) != nil {
-			sectionObj = args.Get(0).(section.Section)
+			sectionObj = args.Get(0).(entites.Section)
 		}
 	}
 
 	var err error
-	if rf, ok := args.Get(1).(func(int,section.Section) error); ok {
+	if rf, ok := args.Get(1).(func(int,entites.Section) error); ok {
 		err = rf(id,sectionObj)
 	} else {
 		if args.Get(1) != nil {
