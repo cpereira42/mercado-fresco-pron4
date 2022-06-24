@@ -1,10 +1,8 @@
 package main
 
-import (
-	sectionController "github.com/cpereira42/mercado-fresco-pron4/cmd/server/handler/section"
+import ( 
 	sectionService "github.com/cpereira42/mercado-fresco-pron4/internal/section/service"
 	sectionRepository "github.com/cpereira42/mercado-fresco-pron4/internal/section/repository/file"
-
 
 	"github.com/cpereira42/mercado-fresco-pron4/cmd/server/handler"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/buyer"
@@ -36,7 +34,7 @@ func main() {
 	dbSection := store.New(store.FileType, "./internal/repositories/sections.json")
 	repSection := sectionRepository.NewRepository(dbSection)
 	serviceSection := sectionService.NewService(repSection)
-	sectionController := sectionController.NewSectionController(serviceSection)
+	sectionController := handler.NewSectionController(serviceSection)
 
 	dbSeller := store.New(store.FileType, "../mercado-fresco-pron4/internal/repositories/sellers.json")
 	repoSeller := seller.NewRepositorySeller(dbSeller)

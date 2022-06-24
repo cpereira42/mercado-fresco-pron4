@@ -185,50 +185,6 @@ func TestServiceCreateSection(t *testing.T) {
 
 func TestServiceUpdateSection(t *testing.T) {
 	t.Run("test servoce no metodo UpdateSection, caso de sucesso", func(t *testing.T) {
-		/*var sectionList []entites.Section = []entites.Section{
-			{
-				Id:                 1,
-				SectionNumber:      3,
-				CurrentTemperature: 79845,
-				MinimumTemperature: 4,
-				CurrentCapacity:    135,
-				MinimumCapacity:    23,
-				MaximumCapacity:    456,
-				WarehouseId:        78,
-				ProductTypeId:      456,
-			}, {
-				Id:                 2,
-				SectionNumber:      313,
-				CurrentTemperature: 745,
-				MinimumTemperature: 344,
-				CurrentCapacity:    1345,
-				MinimumCapacity:    243,
-				MaximumCapacity:    43456,
-				WarehouseId:        784,
-				ProductTypeId:      43456,
-			}, {
-				Id:                 3,
-				SectionNumber:      490,
-				CurrentTemperature: 795,
-				MinimumTemperature: 3,
-				CurrentCapacity:    15,
-				MinimumCapacity:    23,
-				MaximumCapacity:    3,
-				WarehouseId:        78,
-				ProductTypeId:      456,
-			}, {
-				Id:                 4,
-				SectionNumber:      495,
-				CurrentTemperature: 795,
-				MinimumTemperature: 3,
-				CurrentCapacity:    15,
-				MinimumCapacity:    23,
-				MaximumCapacity:    456,
-				WarehouseId:        78,
-				ProductTypeId:      456,
-			},
-		}*/
-		
 		mockRep := new(mocks.SectionRepository)
 		updateSection := entites.SectionRequestUpdate{
 			SectionNumber:      3,
