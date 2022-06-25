@@ -1,8 +1,14 @@
 package main
 
-import ( 
-	sectionService "github.com/cpereira42/mercado-fresco-pron4/internal/section/service"
+import (
+	"database/sql"
+	"fmt"
+	"log"
+	"os"
+
 	sectionRepository "github.com/cpereira42/mercado-fresco-pron4/internal/section/repository/file"
+	sectionService "github.com/cpereira42/mercado-fresco-pron4/internal/section/service"
+	"github.com/joho/godotenv"
 
 	"github.com/cpereira42/mercado-fresco-pron4/cmd/server/handler"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/buyer"
@@ -16,6 +22,17 @@ import (
 )
 
 func main() {
+	err := godotenv.Load("../../.env")
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	dataSource := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_NAME"))
+
+	conn, err := sql.Open("mysql", dataSource)
+	if err != nil {
+		log.Fatal(err, "Error connecting to database")
+	}
 
 	dbBuyers := store.New(store.FileType, "./internal/repositories/buyer.json")
 	repositoryBuyers := buyer.NewRepository(dbBuyers)
@@ -26,8 +43,10 @@ func main() {
 	repoProd := products.NewRepositoryProducts(dbProd)
 	serviceProd := products.NewService(repoProd)
 
-	dbWarehouse := store.New(store.FileType, "./internal/repositories/warehouse.json")
-	repoWarehouse := warehouse.NewRepository(dbWarehouse)
+	//dbWarehouse := store.New(store.FileType, "./internal/repositories/warehouse.json")
+	//repoWarehouse := warehouse.NewRepository(dbWarehouse)
+
+	repoWarehouse := warehouse.NewRepository(conn)
 	svcWarehouse := warehouse.NewService(repoWarehouse)
 	w := handler.NewWarehouse(svcWarehouse)
 
@@ -63,7 +82,7 @@ func main() {
 	sellers.POST("/", s.Create())
 	sellers.PATCH("/:id", s.Update())
 	sellers.DELETE("/:id", s.Delete())
-	
+
 	routesEmployees := r.Group("/api/v1/employees")
 	routesEmployees.GET("/", handlerEmployees.GetAll())
 	routesEmployees.GET("/:id", handlerEmployees.GetByID())

@@ -2,6 +2,7 @@ package warehouse
 
 import (
 	"errors"
+	"log"
 )
 
 type Service interface {
@@ -149,18 +150,21 @@ func (s *service) Delete(id int) error {
 	if err != nil {
 		return err
 	}
+	log.Println(wr)
 	delete := false
 	var index int
 	for i := range wr {
 		if wr[i].ID == id {
-			delete = true
+			log.Println(wr[i])
 			index = i
+			delete = true
 		}
 	}
 	if !delete {
 		return errors.New("Warehouse not found")
 	}
-	err = s.repository.Delete(index)
+	log.Println(index)
+	err = s.repository.Delete(id)
 	if err != nil {
 		return err
 	}
