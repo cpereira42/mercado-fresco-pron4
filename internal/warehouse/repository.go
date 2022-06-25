@@ -1,7 +1,10 @@
 package warehouse
 
 import (
-	"github.com/cpereira42/mercado-fresco-pron4/pkg/store"
+	"database/sql"
+	"log"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 type Repository interface {
@@ -13,47 +16,81 @@ type Repository interface {
 	Delete(id int) error
 }
 
-var wr []Warehouse
+const (
+	GetAll          = "SELECT id, address, telephone, warehouse_code, minimum_capacity, minimum_temperature FROM warehouse"
+	LastID          = "SELECT MAX(id) FROM warehouse"
+	CreateWarehouse = "INSERT INTO warehouse (address, telephone, warehouse_code, minimum_capacity, minimum_temperature) VALUES (?, ?, ?, ?, ?)"
+	UpdateWarehouse = "UPDATE warehouse SET address=?, telephone=?, warehouse_code=?, minimum_capacity=?, minimum_temperature=? WHERE id=?"
+	GetId           = "SELECT id, address, telephone, warehouse_code, minimum_capacity, minimum_temperature FROM warehouse WHERE id=?"
+	DeleteWarehouse = "DELETE FROM warehouse WHERE id=?"
+)
+
+//var wr []Warehouse
 var w Warehouse
 
 type repository struct {
-	db store.Store
+	db *sql.DB
 }
 
-func NewRepository(db store.Store) Repository {
+func NewRepository(db *sql.DB) Repository {
 	return &repository{
-		db: db,
-	}
+		db: db}
 }
 
 func (r *repository) GetAll() ([]Warehouse, error) {
-	if err := r.db.Read(&wr); err != nil {
-		return []Warehouse{}, err
 
+	var wr []Warehouse
+
+	rows, err := r.db.Query(GetAll)
+	if err != nil {
+		return []Warehouse{}, err
 	}
+	defer rows.Close()
+
+	for rows.Next() {
+
+		err := rows.Scan(&w.ID, &w.Address, &w.Telephone, &w.Warehouse_code, &w.Minimum_capacity, &w.Minimum_temperature)
+		if err != nil {
+			return []Warehouse{}, err
+		}
+		wr = append(wr, w)
+	}
+
 	return wr, nil
 }
 
 func (r *repository) LastID() (int, error) {
-	if err := r.db.Read(&wr); err != nil {
+	var maxCount int
+
+	row := r.db.QueryRow(LastID)
+	err := row.Scan(&maxCount)
+	if err != nil {
 		return 0, err
 	}
-	if len(wr) == 0 {
-		return 0, nil
-	}
-	return wr[len(wr)-1].ID, nil
+	return maxCount, nil
 }
 
 func (r *repository) Create(id int, address, telephone, warehouse_code string, minimum_capacity, minimum_temperature int) (Warehouse, error) {
-	if err := r.db.Read(&wr); err != nil {
-		return Warehouse{}, err
-	}
-	w := Warehouse{id, address, telephone, warehouse_code, minimum_capacity, minimum_temperature}
 
-	wr = append(wr, w)
-	if err := r.db.Write(&wr); err != nil {
+	w = Warehouse{id, address, telephone, warehouse_code, minimum_capacity, minimum_temperature}
+
+	stmt, err := r.db.Prepare(CreateWarehouse)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+
+	var result sql.Result
+
+	result, err = stmt.Exec(&w.Address, &w.Telephone, &w.Warehouse_code, &w.Minimum_capacity, &w.Minimum_temperature)
+	if err != nil {
 		return Warehouse{}, err
 	}
+	insertedId, err := result.LastInsertId()
+	if err != nil {
+		return Warehouse{}, err
+	}
+	w.ID = int(insertedId)
 	return w, nil
 
 }
@@ -61,7 +98,14 @@ func (r *repository) Create(id int, address, telephone, warehouse_code string, m
 func (r *repository) Update(id int, address, telephone, warehouse_code string, minimum_capacity, minimum_temperature int) (Warehouse, error) {
 	w := Warehouse{id, address, telephone, warehouse_code, minimum_capacity, minimum_temperature}
 
-	if err := r.db.Write(&wr); err != nil {
+	stmt, err := r.db.Prepare(UpdateWarehouse)
+	if err != nil {
+		return Warehouse{}, err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(&w.Address, &w.Telephone, &w.Warehouse_code, &w.Minimum_capacity, &w.Minimum_temperature, &w.ID)
+	if err != nil {
 		return Warehouse{}, err
 	}
 	return w, nil
@@ -69,32 +113,26 @@ func (r *repository) Update(id int, address, telephone, warehouse_code string, m
 
 func (r *repository) GetByID(id int) (Warehouse, error) {
 
-	if err := r.db.Read(&wr); err != nil {
+	stmt, err := r.db.Query(GetId, id)
+
+	if err != nil {
 		return Warehouse{}, err
 	}
+	defer stmt.Close()
 
-	// exists := false
-	// for i := range wr {
-	// 	if wr[i].ID == id {
-	// 		w = wr[i]
-	// 		exists = true
-	// 	}
-
-	// }
-	// if !exists {
-	// 	return Warehouse{}, errors.New("Warehouse not found")
-	// }
+	for stmt.Next() {
+		if err := stmt.Scan(&w.ID, &w.Address, &w.Telephone, &w.Warehouse_code, &w.Minimum_capacity, &w.Minimum_temperature); err != nil {
+			return Warehouse{}, err
+		}
+	}
 	return w, nil
 
 }
 
 func (r *repository) Delete(id int) error {
-	if err := r.db.Read(&wr); err != nil {
-		return err
-	}
 
-	wr = append(wr[:id], wr[id+1:]...)
-	if err := r.db.Write(&wr); err != nil {
+	_, err := r.db.Exec(DeleteWarehouse, id)
+	if err != nil {
 		return err
 	}
 	return nil
