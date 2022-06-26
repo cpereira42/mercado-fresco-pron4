@@ -1,8 +1,16 @@
 package main
 
-import ( 
+import (
+	"database/sql"
+	_ "github.com/go-sql-driver/mysql"
+
+	"fmt"
+	"log"
+	"os"
+
+	//sectionRepository "github.com/cpereira42/mercado-fresco-pron4/internal/section/repository/file"
+	sectionRepository "github.com/cpereira42/mercado-fresco-pron4/internal/section/repository/mariadb"
 	sectionService "github.com/cpereira42/mercado-fresco-pron4/internal/section/service"
-	sectionRepository "github.com/cpereira42/mercado-fresco-pron4/internal/section/repository/file"
 
 	"github.com/cpereira42/mercado-fresco-pron4/cmd/server/handler"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/buyer"
@@ -13,9 +21,22 @@ import (
 	"github.com/cpereira42/mercado-fresco-pron4/internal/warehouse"
 	"github.com/cpereira42/mercado-fresco-pron4/pkg/store"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
+
+
 )
 
 func main() {
+	
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatal(".Env cant be load")
+	}
+	conn, err := connection()
+	if err != nil {
+		log.Fatal(err)
+	}
+ 
 
 	dbBuyers := store.New(store.FileType, "./internal/repositories/buyer.json")
 	repositoryBuyers := buyer.NewRepository(dbBuyers)
@@ -31,8 +52,10 @@ func main() {
 	svcWarehouse := warehouse.NewService(repoWarehouse)
 	w := handler.NewWarehouse(svcWarehouse)
 
-	dbSection := store.New(store.FileType, "./internal/repositories/sections.json")
-	repSection := sectionRepository.NewRepository(dbSection)
+	//dbSection := store.New(store.FileType, "./internal/repositories/sections.json")
+	//repSection := sectionRepository.NewRepository(dbSection)
+	
+	repSection := sectionRepository.NewRepository(conn)	
 	serviceSection := sectionService.NewService(repSection)
 	sectionController := handler.NewSectionController(serviceSection)
 
@@ -93,4 +116,15 @@ func main() {
 	buyers.DELETE("/:id", hdBuyers.Delete())
 
 	r.Run()
+}
+
+func connection() (*sql.DB, error) {
+	user := os.Getenv("USER_DB")
+	pass := os.Getenv("PASS_DB")
+	port := os.Getenv("PORT_DB")
+	host := os.Getenv("HOST_DB")
+	database := os.Getenv("DATABASE")
+	dataSource := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", user, pass,host,port,database)
+	log.Println(dataSource)
+	return sql.Open("mysql", dataSource)
 }

@@ -12,7 +12,7 @@ type service struct {
 }
 
 func (s service) ListarSectionAll() ([]entites.Section, error){
-	sectionList, err := s.repository.ListarSectionAll()
+	sectionList, err := s.repository.ListarSectionAll() 
 	if err != nil {
 		return []entites.Section{}, errors.New("não há sections registrado")
 	}
