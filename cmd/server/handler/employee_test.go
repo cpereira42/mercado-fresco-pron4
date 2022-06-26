@@ -200,6 +200,29 @@ func TestHandlerCreate(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, errorMsg.Error(), employeeResponseJson.Error)
 	})
+	t.Run("If the CardNumberID already exists  is the Create request , it should return status code 409 and an error", func(t *testing.T) {
+		errorMsg := fmt.Errorf("employee with this card number id 123 exists")
+		serviceMock := &mocks.Service{}
+		serviceMock.On("Create",
+			tmock.AnythingOfType("string"),
+			tmock.AnythingOfType("string"),
+			tmock.AnythingOfType("string"),
+			tmock.AnythingOfType("int"),
+		).Return(employee.Employee{}, errorMsg)
+		rr := createServerEmployee(serviceMock, http.MethodPost, "/api/v1/employees/",
+			`{
+		"card_number_id": "123",
+		"first_name": "Gustavo",
+		"last_name" : "Junior",
+		"warehouse_id": 1
+			}`)
+
+		err := json.Unmarshal(rr.Body.Bytes(), &employeeResponseJson)
+
+		assert.Equal(t, 409, rr.Code)
+		assert.Nil(t, err)
+		assert.Equal(t, errorMsg.Error(), employeeResponseJson.Error)
+	})
 
 }
 
@@ -289,6 +312,29 @@ func TestHandlerUpdate(t *testing.T) {
 		err := json.Unmarshal(rr.Body.Bytes(), &employeeResponseJson)
 
 		assert.Equal(t, 404, rr.Code)
+		assert.Nil(t, err)
+		assert.Equal(t, errorMsg.Error(), employeeResponseJson.Error)
+	})
+	t.Run("If the CardNumberID already exists  is the Update request , it should return status code 409 and an error", func(t *testing.T) {
+		errorMsg := fmt.Errorf("employee with this card number id 123 exists")
+		serviceMock := &mocks.Service{}
+		serviceMock.On("Update", 2,
+			tmock.AnythingOfType("string"),
+			tmock.AnythingOfType("string"),
+			tmock.AnythingOfType("string"),
+			tmock.AnythingOfType("int"),
+		).Return(employee.Employee{}, errorMsg)
+		rr := createServerEmployee(serviceMock, http.MethodPatch, "/api/v1/employees/2",
+			`{
+		"card_number_id": "123",
+		"first_name": "Gustavo",
+		"last_name" : "Junior",
+		"warehouse_id": 1
+			}`)
+
+		err := json.Unmarshal(rr.Body.Bytes(), &employeeResponseJson)
+
+		assert.Equal(t, 409, rr.Code)
 		assert.Nil(t, err)
 		assert.Equal(t, errorMsg.Error(), employeeResponseJson.Error)
 	})

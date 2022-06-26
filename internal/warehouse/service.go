@@ -23,7 +23,11 @@ func NewService(r Repository) Service {
 }
 
 func (s *service) GetAll() ([]Warehouse, error) {
-	return s.repository.GetAll()
+	warehouse, err := s.repository.GetAll()
+	if err != nil {
+		return []Warehouse{}, err
+	}
+	return warehouse, nil
 }
 
 func (s *service) Create(address, telephone, warehouse_code string, minimum_capacity, minimum_temperature int) (Warehouse, error) {

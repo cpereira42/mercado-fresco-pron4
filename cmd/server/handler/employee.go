@@ -67,6 +67,11 @@ func (c *EmployeeController) Create() gin.HandlerFunc {
 		employee, err := c.service.Create(request.CardNumberID, request.FirstName, request.LastName, request.WarehouseID)
 
 		if err != nil {
+			employeeExists := fmt.Sprintf("employee with this card number id %s exists", request.CardNumberID)
+			if err.Error() == employeeExists {
+				ctx.JSON(409, web.NewResponse(409, nil, err.Error()))
+				return
+			}
 			ctx.JSON(http.StatusNotFound, web.NewResponse(http.StatusNotFound, nil, fmt.Sprintf("%v", err)))
 			return
 		}
@@ -91,6 +96,11 @@ func (c *EmployeeController) Update() gin.HandlerFunc {
 		employee, err := c.service.Update(id, request.CardNumberID, request.FirstName, request.LastName, request.WarehouseID)
 
 		if err != nil {
+			employeeExists := fmt.Sprintf("employee with this card number id %s exists", request.CardNumberID)
+			if err.Error() == employeeExists {
+				ctx.JSON(409, web.NewResponse(409, nil, err.Error()))
+				return
+			}
 			ctx.JSON(http.StatusNotFound, web.NewResponse(http.StatusNotFound, nil, fmt.Sprintf("%v", err)))
 			return
 		}

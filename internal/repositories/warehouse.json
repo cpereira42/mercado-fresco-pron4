@@ -1,53 +1,5 @@
 [
- {
-  "id": 6,
-  "address": "",
-  "telephone": "8808080",
-  "warehouse_code": "NEAW",
-  "minimum_capacity": 20,
-  "minimum_temperature": 20
- },
- {
-  "id": 7,
-  "address": "",
-  "telephone": "557778888",
-  "warehouse_code": "D",
-  "minimum_capacity": 20,
-  "minimum_temperature": 500
- },
- {
-  "id": 8,
-  "address": "",
-  "telephone": "557778888",
-  "warehouse_code": "DCDS",
-  "minimum_capacity": 500,
-  "minimum_temperature": 500
- },
- {
-  "id": 9,
-  "address": "",
-  "telephone": "557778888",
-  "warehouse_code": "DCdDS",
-  "minimum_capacity": 500,
-  "minimum_temperature": 500
- },
- {
-  "id": 10,
-  "address": "",
-  "telephone": "557778888",
-  "warehouse_code": "DMC",
-  "minimum_capacity": 20,
-  "minimum_temperature": 20
- },
- {
-  "id": 11,
-  "address": "Rua da Onça Pedra Furada",
-  "telephone": "8808080",
-  "warehouse_code": "TesSt",
-  "minimum_capacity": 20,
-  "minimum_temperature": 20
- },
- {
+  {
   "id": 12,
   "address": "Rua da Onça Pedra Furada",
   "telephone": "557778888",

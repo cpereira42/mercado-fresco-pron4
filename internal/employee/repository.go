@@ -4,9 +4,6 @@ import (
 	"github.com/cpereira42/mercado-fresco-pron4/pkg/store"
 )
 
-var employees []Employee
-var employee Employee
-
 type Repository interface {
 	GetAll() ([]Employee, error)
 	GetByID(id int) (Employee, error)
@@ -21,6 +18,7 @@ type repository struct {
 }
 
 func (r *repository) GetAll() ([]Employee, error) {
+	var employees []Employee
 	if err := r.db.Read(&employees); err != nil {
 		return []Employee{}, nil
 	}
@@ -28,6 +26,7 @@ func (r *repository) GetAll() ([]Employee, error) {
 }
 
 func (r *repository) LastID() (int, error) {
+	var employees []Employee
 	if err := r.db.Read(&employees); err != nil {
 		return 0, err
 	}
@@ -39,17 +38,25 @@ func (r *repository) LastID() (int, error) {
 }
 
 func (r *repository) GetByID(id int) (Employee, error) {
+	var employees []Employee
 	if err := r.db.Read(&employees); err != nil {
 		return Employee{}, nil
+	}
+	var employee Employee
+	for i := range employees {
+		if employees[i].ID == id {
+			employee = employees[i]
+		}
 	}
 	return employee, nil
 }
 
 func (r *repository) Create(id int, cardNumberID, firstName, lastName string, warehouseID int) (Employee, error) {
+	var employees []Employee
 	if err := r.db.Read(&employees); err != nil {
 		return Employee{}, err
 	}
-	employee = Employee{id, cardNumberID, firstName, lastName, warehouseID}
+	employee := Employee{id, cardNumberID, firstName, lastName, warehouseID}
 
 	employees = append(employees, employee)
 	if err := r.db.Write(employees); err != nil {
@@ -58,8 +65,19 @@ func (r *repository) Create(id int, cardNumberID, firstName, lastName string, wa
 	return employee, nil
 }
 func (r *repository) Update(id int, cardNumberID, firstName, lastName string, warehouseID int) (Employee, error) {
+	var employees []Employee
+	if err := r.db.Read(&employees); err != nil {
+		return Employee{}, err
+	}
 
 	employee := Employee{id, cardNumberID, firstName, lastName, warehouseID}
+
+	for i := range employees {
+		if employees[i].ID == id {
+			employees[i] = employee
+		}
+	}
+
 	if err := r.db.Write(employees); err != nil {
 		return Employee{}, err
 	}
@@ -68,6 +86,7 @@ func (r *repository) Update(id int, cardNumberID, firstName, lastName string, wa
 }
 
 func (r *repository) Delete(id int) error {
+	var employees []Employee
 	if err := r.db.Read(&employees); err != nil {
 		return err
 	}
