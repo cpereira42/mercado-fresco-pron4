@@ -32,10 +32,10 @@ func (s service) ListarSectionOne(id int) (entites.Section, error) {
 }
 
 func (s service) CreateSection(newSection entites.SectionRequestCreate) (entites.Section, error) {
-	dbWarehouse := store.New("file", "")
+	dbWarehouse := store.New("file", "./internal/repositories/warehouse.json")
 	repoWarehouse := warehouse.NewRepository(dbWarehouse)
 	serviceWarehouse := warehouse.NewService(repoWarehouse)
-	
+
 	_, err := serviceWarehouse.GetByID(newSection.WarehouseId)
 	if err != nil {
 		return entites.Section{}, err
