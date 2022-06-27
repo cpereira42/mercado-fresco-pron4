@@ -5,9 +5,9 @@ import "errors"
 type Service interface {
 	GetAll() ([]Seller, error)
 	GetId(id int) (Seller, error)
-	Create(cid int, company, adress, telephone string) (Seller, error)
-	CheckCid(cid int) (bool, error)
-	Update(id, cid int, company, adress, telephone string) (Seller, error)
+	Create(cid, company, address, telephone string, localityId int) (Seller, error)
+	CheckCid(cid string) (bool, error)
+	Update(id int, cid, company, address, telephone string, localityId int) (Seller, error)
 	Delete(id int) error
 }
 
@@ -21,26 +21,34 @@ func NewService(r RepositorySeller) Service {
 	}
 }
 
-func (s *service) Create(cid int, company, adress, telephone string) (Seller, error) {
-	checkCid, err1 := s.CheckCid(cid)
-	if err1 != nil {
-		return Seller{}, err1
+func (s *service) Create(cid, company, address, telephone string, localityId int) (Seller, error) {
+	checkCid, err := s.CheckCid(cid)
+	if err != nil {
+		return Seller{}, err
 	}
 	if !checkCid {
 		return Seller{}, errors.New("Cid already registered")
 	}
 
-	product, err3 := s.repository.Create(cid, company, adress, telephone)
-
-	if err3 != nil {
-		return Seller{}, err3
+	checkLocality, err := s.repository.CheckLocality(localityId)
+	if err != nil {
+		return Seller{}, err
+	}
+	if !checkLocality {
+		return Seller{}, errors.New("Cid already registered")
 	}
 
-	return product, nil
+	seller, err := s.repository.Create(cid, company, address, telephone, localityId)
+
+	if err != nil {
+		return Seller{}, err
+	}
+
+	return seller, nil
 
 }
 
-func (s service) CheckCid(cid int) (bool, error) {
+func (s service) CheckCid(cid string) (bool, error) {
 	sellers, err := s.repository.GetAll()
 	if err != nil {
 		return false, err
@@ -69,12 +77,45 @@ func (s *service) GetId(id int) (Seller, error) {
 	return ps, nil
 }
 
-func (s *service) Update(id, cid int, company, adress, telephone string) (Seller, error) {
-	seller, err := s.repository.Update(id, cid, company, adress, telephone)
+func (s *service) Update(id int, cid, company, address, telephone string, localityId int) (Seller, error) {
+	seller, err := s.repository.GetId(id)
 	if err != nil {
 		return Seller{}, err
 	}
-	return seller, err
+	sellerToUpdate := Seller{}
+	if cid == "" {
+		sellerToUpdate.Cid = seller.Cid
+	} else {
+		sellerToUpdate.Cid = cid
+	}
+	if company == "" {
+		sellerToUpdate.CompanyName = seller.CompanyName
+	} else {
+		sellerToUpdate.CompanyName = company
+	}
+	if address == "" {
+		sellerToUpdate.Address = seller.Address
+	} else {
+		sellerToUpdate.Address = address
+	}
+	if telephone == "" {
+		sellerToUpdate.Telephone = seller.Telephone
+	} else {
+		sellerToUpdate.Telephone = telephone
+	}
+	if localityId == 0 {
+		sellerToUpdate.LocalityId = seller.LocalityId
+	} else {
+		sellerToUpdate.LocalityId = localityId
+	}
+	if seller == sellerToUpdate {
+		return seller, nil
+	}
+	updatedSeller, err := s.repository.Update(id, sellerToUpdate.Cid, sellerToUpdate.CompanyName, sellerToUpdate.Address, sellerToUpdate.Telephone, sellerToUpdate.LocalityId)
+	if err != nil {
+		return Seller{}, err
+	}
+	return updatedSeller, nil
 }
 
 func (s *service) Delete(id int) error {

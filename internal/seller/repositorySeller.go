@@ -8,9 +8,10 @@ import (
 type RepositorySeller interface {
 	GetAll() ([]Seller, error)
 	GetId(id int) (Seller, error)
-	Create(cid int, company, adress, telephone string) (Seller, error)
-	Update(id, cid int, company, adress, telephone string) (Seller, error)
+	Create(cid, company, address, telephone string, localityId int) (Seller, error)
+	Update(id int, cid, company, adress, telephone string, localityId int) (Seller, error)
 	Delete(id int) error
+	CheckLocality(id int) (bool, error)
 }
 
 type repositorySeller struct {
@@ -23,13 +24,14 @@ func NewRepositorySeller(db *sql.DB) *repositorySeller {
 	}
 }
 
-func (r *repositorySeller) Create(cid int, company, adress, telephone string) (Seller, error) {
+func (r *repositorySeller) Create(cid, company, address, telephone string, localityId int) (Seller, error) {
 	stmt, err := r.db.Prepare(`INSERT INTO sellers 
 	(cid,
-	company,
-	adress,
-   	telephone) 
-   	VALUES(?,?,?,?)`)
+	company_name,
+	address,
+   	telephone,
+	locality_id) 
+   	VALUES(?,?,?,?,?)`)
 
 	if err != nil {
 		return Seller{}, err
@@ -39,8 +41,9 @@ func (r *repositorySeller) Create(cid int, company, adress, telephone string) (S
 	rows, err := stmt.Exec(
 		cid,
 		company,
-		adress,
+		address,
 		telephone,
+		localityId,
 	)
 	if err != nil {
 		return Seller{}, err
@@ -49,7 +52,7 @@ func (r *repositorySeller) Create(cid int, company, adress, telephone string) (S
 	if err != nil {
 		return Seller{}, err
 	}
-	newSeller := Seller{int(lastID), cid, company, adress, telephone}
+	newSeller := Seller{int(lastID), cid, company, address, telephone, localityId}
 	return newSeller, nil
 }
 
@@ -68,8 +71,9 @@ func (r *repositorySeller) GetAll() ([]Seller, error) {
 			&seller.Id,
 			&seller.Cid,
 			&seller.CompanyName,
-			&seller.Adress,
+			&seller.Address,
 			&seller.Telephone,
+			&seller.LocalityId,
 		)
 		if err != nil {
 			return sellerList, err
@@ -93,8 +97,9 @@ func (r *repositorySeller) GetId(id int) (Seller, error) {
 		&seller.Id,
 		&seller.Cid,
 		&seller.CompanyName,
-		&seller.Adress,
+		&seller.Address,
 		&seller.Telephone,
+		&seller.LocalityId,
 	)
 	if err != nil {
 		return seller, fmt.Errorf("Seller %d not found", id)
@@ -102,13 +107,14 @@ func (r *repositorySeller) GetId(id int) (Seller, error) {
 	return seller, nil
 }
 
-func (r *repositorySeller) Update(id, cid int, company, adress, telephone string) (Seller, error) {
+func (r *repositorySeller) Update(id int, cid, company, address, telephone string, localityId int) (Seller, error) {
+	updatedSeller := Seller{id, cid, company, address, telephone, localityId}
 	stmt, err := r.db.Prepare(`UPDATE sellers SET 
 	 	cid=?,
-	  	company=?,
-		adress=?,
+	  	company_name=?,
+		address=?,
 		telephone=?,
-		WHERE id=?`)
+		locality_id=? WHERE id=?`)
 	if err != nil {
 		return Seller{}, err
 	}
@@ -118,11 +124,12 @@ func (r *repositorySeller) Update(id, cid int, company, adress, telephone string
 	rows, err := stmt.Exec(
 		cid,
 		company,
-		adress,
+		address,
 		telephone,
+		localityId,
 		id)
 	if err != nil {
-		return Seller{}, fmt.Errorf("Seller %d not found", id)
+		return updatedSeller, err
 	}
 
 	totLines, err := rows.RowsAffected()
@@ -131,9 +138,8 @@ func (r *repositorySeller) Update(id, cid int, company, adress, telephone string
 	}
 
 	if totLines == 0 {
-		return Seller{}, fmt.Errorf("Seller %d not found", id)
+		return updatedSeller, err
 	}
-	updatedSeller := Seller{id, cid, company, adress, telephone}
 	return updatedSeller, nil
 }
 
@@ -154,4 +160,31 @@ func (r *repositorySeller) Delete(id int) error {
 		return fmt.Errorf("Seller %d not found", id)
 	}
 	return nil
+}
+
+func (r *repositorySeller) CheckLocality(id int) (bool, error) {
+
+	type Locality struct {
+		Id           int
+		LocalityName string
+		ProvinceId   int
+	}
+
+	stmt, err := r.db.Prepare("SELECT * FROM localities WHERE id = ?")
+	if err != nil {
+		return false, err
+	}
+	defer stmt.Close()
+
+	locality := Locality{}
+
+	err = stmt.QueryRow(id).Scan(
+		&locality.Id,
+		&locality.LocalityName,
+		&locality.ProvinceId,
+	)
+	if err != nil {
+		return false, fmt.Errorf("Locality %d not found", id)
+	}
+	return true, nil
 }

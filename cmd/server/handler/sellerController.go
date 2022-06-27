@@ -26,7 +26,7 @@ func (s *Seller) Create() gin.HandlerFunc {
 			return
 		}
 
-		seller, err := s.service.Create(req.Cid, req.CompanyName, req.Adress, req.Telephone)
+		seller, err := s.service.Create(req.Cid, req.CompanyName, req.Address, req.Telephone, req.LocalityId)
 
 		if err != nil {
 			ctx.JSON(
@@ -89,7 +89,7 @@ func (s *Seller) Update() gin.HandlerFunc {
 			return
 		}
 
-		seller, err := s.service.Update(int(id), req.Cid, req.CompanyName, req.Adress, req.Telephone)
+		seller, err := s.service.Update(int(id), req.Cid, req.CompanyName, req.Address, req.Telephone, req.LocalityId)
 		if err != nil {
 			ctx.JSON(http.StatusNotFound, web.NewResponse(http.StatusNotFound, nil, err.Error()))
 			return
@@ -114,11 +114,4 @@ func (s *Seller) Delete() gin.HandlerFunc {
 
 		ctx.JSON(http.StatusNoContent, web.NewResponse(http.StatusNoContent, nil, "Seller sucessfully removed"))
 	}
-}
-
-type sellerRequest struct {
-	Cid         int    `json:"cid"`
-	CompanyName string `json:"company_name"`
-	Adress      string `json:"address"`
-	Telephone   string `json:"telephone"`
 }
