@@ -1,133 +1,157 @@
 package seller
 
 import (
-	"errors"
+	"database/sql"
 	"fmt"
-
-	"github.com/cpereira42/mercado-fresco-pron4/pkg/store"
 )
 
 type RepositorySeller interface {
 	GetAll() ([]Seller, error)
 	GetId(id int) (Seller, error)
-	Create(id, cid int, company, adress, telephone string) (Seller, error)
-	LastID() (int, error)
+	Create(cid int, company, adress, telephone string) (Seller, error)
 	Update(id, cid int, company, adress, telephone string) (Seller, error)
 	Delete(id int) error
 }
 
 type repositorySeller struct {
-	db store.Store
+	db *sql.DB
 }
 
-var ps []Seller
-
-func NewRepositorySeller(db store.Store) *repositorySeller {
+func NewRepositorySeller(db *sql.DB) *repositorySeller {
 	return &repositorySeller{
 		db: db,
 	}
 }
 
-func (r *repositorySeller) LastID() (int, error) {
-	var ps []Seller
-	if err := r.db.Read(&ps); err != nil {
-		return 0, err
-	}
+func (r *repositorySeller) Create(cid int, company, adress, telephone string) (Seller, error) {
+	stmt, err := r.db.Prepare(`INSERT INTO sellers 
+	(cid,
+	company,
+	adress,
+   	telephone) 
+   	VALUES(?,?,?,?)`)
 
-	if len(ps) == 0 {
-		return 0, nil
-	}
-
-	return ps[len(ps)-1].Id, nil
-}
-
-func (r *repositorySeller) Create(id, cid int, company, adress, telephone string) (Seller, error) {
-	var ps []Seller
-	if err := r.db.Read(&ps); err != nil {
+	if err != nil {
 		return Seller{}, err
 	}
-	p := Seller{id, cid, company, adress, telephone}
-	ps = append(ps, p)
-	if err := r.db.Write(ps); err != nil {
+	defer stmt.Close()
+
+	rows, err := stmt.Exec(
+		cid,
+		company,
+		adress,
+		telephone,
+	)
+	if err != nil {
 		return Seller{}, err
 	}
-	return p, nil
+	lastID, err := rows.LastInsertId()
+	if err != nil {
+		return Seller{}, err
+	}
+	newSeller := Seller{int(lastID), cid, company, adress, telephone}
+	return newSeller, nil
 }
 
 func (r *repositorySeller) GetAll() ([]Seller, error) {
-	var ps []Seller
-	r.db.Read(&ps)
-	return ps, nil
+	var sellerList []Seller
+	rows, err := r.db.Query("SELECT * FROM sellers")
+	if err != nil {
+		return sellerList, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		seller := Seller{}
+
+		err := rows.Scan(
+			&seller.Id,
+			&seller.Cid,
+			&seller.CompanyName,
+			&seller.Adress,
+			&seller.Telephone,
+		)
+		if err != nil {
+			return sellerList, err
+		}
+		sellerList = append(sellerList, seller)
+	}
+
+	return sellerList, nil
 }
 
 func (r *repositorySeller) GetId(id int) (Seller, error) {
-	var ps []Seller
-	r.db.Read(&ps)
-	for i := range ps {
-		if ps[i].Id == id {
-			return ps[i], nil
-		}
-	}
-	return Seller{}, fmt.Errorf("Seller %d not found", id)
-}
-
-func (r *repositorySeller) Update(id, cid int, company, adress, telephone string) (Seller, error) {
-	var ps []Seller
-	r.db.Read(&ps)
-	seller := Seller{id, cid, company, adress, telephone}
-	updated := false
-	for i := range ps {
-		if ps[i].Id != id && ps[i].Cid == cid {
-			return Seller{}, errors.New("Cid already registered")
-		}
-	}
-
-	for i := range ps {
-		if ps[i].Id == id {
-			seller.Id = id
-			if cid == 0 {
-				seller.Id = ps[i].Id
-			}
-			if company == "" {
-				seller.CompanyName = ps[i].CompanyName
-			}
-			if adress == "" {
-				seller.Adress = ps[i].Adress
-			}
-			if telephone == "" {
-				seller.Telephone = ps[i].Telephone
-			}
-			ps[i] = seller
-			updated = true
-		}
-	}
-	if !updated {
-		return Seller{}, fmt.Errorf("Seller %d not found", id)
-	}
-	if err := r.db.Write(ps); err != nil {
+	stmt, err := r.db.Prepare("SELECT * FROM sellers WHERE id = ?")
+	if err != nil {
 		return Seller{}, err
+	}
+	defer stmt.Close()
+
+	seller := Seller{}
+
+	err = stmt.QueryRow(id).Scan(
+		&seller.Id,
+		&seller.Cid,
+		&seller.CompanyName,
+		&seller.Adress,
+		&seller.Telephone,
+	)
+	if err != nil {
+		return seller, fmt.Errorf("Seller %d not found", id)
 	}
 	return seller, nil
 }
 
-func (r *repositorySeller) Delete(id int) error {
-	var ps []Seller
-	r.db.Read(&ps)
-	deleted := false
-	var index int
-	for i := range ps {
-		if ps[i].Id == id {
-			index = i
-			deleted = true
-		}
-	}
-	if !deleted {
-		return fmt.Errorf("Seller %d not found", id)
+func (r *repositorySeller) Update(id, cid int, company, adress, telephone string) (Seller, error) {
+	stmt, err := r.db.Prepare(`UPDATE sellers SET 
+	 	cid=?,
+	  	company=?,
+		adress=?,
+		telephone=?,
+		WHERE id=?`)
+	if err != nil {
+		return Seller{}, err
 	}
 
-	ps = append(ps[:index], ps[index+1:]...)
-	if err := r.db.Write(ps); err != nil {
+	defer stmt.Close()
+
+	rows, err := stmt.Exec(
+		cid,
+		company,
+		adress,
+		telephone,
+		id)
+	if err != nil {
+		return Seller{}, fmt.Errorf("Seller %d not found", id)
+	}
+
+	totLines, err := rows.RowsAffected()
+	if err != nil {
+		return Seller{}, err
+	}
+
+	if totLines == 0 {
+		return Seller{}, fmt.Errorf("Seller %d not found", id)
+	}
+	updatedSeller := Seller{id, cid, company, adress, telephone}
+	return updatedSeller, nil
+}
+
+func (r *repositorySeller) Delete(id int) error {
+	stmt, err := r.db.Prepare("DELETE FROM sellers WHERE id=?")
+	if err != nil {
 		return err
+	}
+
+	defer stmt.Close()
+
+	res, err := stmt.Exec(id)
+	if err != nil {
+		return err
+	}
+	RowsAffected, _ := res.RowsAffected()
+	if RowsAffected == 0 {
+		return fmt.Errorf("Seller %d not found", id)
 	}
 	return nil
 }

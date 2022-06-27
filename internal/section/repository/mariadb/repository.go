@@ -6,7 +6,6 @@ import (
 	"log"
 
 	entites "github.com/cpereira42/mercado-fresco-pron4/internal/section/entites"
-	
 )
 
 type repository struct {
@@ -14,7 +13,7 @@ type repository struct {
 }
 
 func (r *repository) CreateSection(newSection entites.Section) (entites.Section, error) {
-	  
+
 	stmt, err := r.db.Prepare(`INSERT INTO sections 
 	 	(section_number,
 	  	current_temperature,
@@ -24,7 +23,7 @@ func (r *repository) CreateSection(newSection entites.Section) (entites.Section,
 		maximum_capacity,
 		warehouse_id,
 		product_type_id) VALUES(?,?,?,?,?,?,?,?)`)
-		
+
 	if err != nil {
 		return entites.Section{}, err
 	}
@@ -44,7 +43,7 @@ func (r *repository) CreateSection(newSection entites.Section) (entites.Section,
 	if err != nil {
 		return entites.Section{}, err
 	}
-	
+
 	lastID, err := rows.LastInsertId()
 	if err != nil {
 		return entites.Section{}, err
@@ -53,8 +52,8 @@ func (r *repository) CreateSection(newSection entites.Section) (entites.Section,
 	// if err != nil {
 	// 	return entites.Section{}, err
 	// }
-	
-	newSection.Id=int(lastID)
+
+	newSection.Id = int(lastID)
 	return newSection, nil
 }
 
@@ -94,7 +93,7 @@ func (r *repository) ListarSectionAll() ([]entites.Section, error) {
 }
 
 func (r *repository) ListarSectionOne(id int) (entites.Section, error) {
-  	stmt, err := r.db.Prepare("SELECT * FROM sections WHERE id = ?") 
+	stmt, err := r.db.Prepare("SELECT * FROM sections WHERE id = ?")
 	if err != nil {
 		return entites.Section{}, err
 	}
@@ -188,9 +187,9 @@ func (r *repository) LastID() (int, error) {
 	return 0, nil
 }
 
-func (r *repository) SearchWarehouseById(id int ) (int, error) {
-	result :=r.db.QueryRow("SELECT id FROM warehouses WHERE id = ?", id)
-	 
+func (r *repository) SearchWarehouseById(id int) (int, error) {
+	result := r.db.QueryRow("SELECT id FROM warehouses WHERE id = ?", id)
+
 	var warehouseId int
 	err := result.Scan(&warehouseId)
 	if err != nil {
@@ -199,11 +198,6 @@ func (r *repository) SearchWarehouseById(id int ) (int, error) {
 	return warehouseId, nil
 }
 
-
 func NewRepository(db *sql.DB) entites.Repository {
 	return &repository{db: db}
 }
-
-
-
-

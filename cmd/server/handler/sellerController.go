@@ -31,7 +31,7 @@ func (s *Seller) Create() gin.HandlerFunc {
 		if err != nil {
 			ctx.JSON(
 				http.StatusConflict,
-				web.NewResponse(http.StatusConflict, nil, "Cid already registered"),
+				web.NewResponse(http.StatusConflict, nil, err.Error()),
 			)
 			return
 		}

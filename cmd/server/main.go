@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+
 	_ "github.com/go-sql-driver/mysql"
 
 	"fmt"
@@ -22,14 +23,12 @@ import (
 	"github.com/cpereira42/mercado-fresco-pron4/pkg/store"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-
-
 )
 
 var Conn *sql.DB
 
 func main() {
-	
+
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal(".Env cant be load")
@@ -38,7 +37,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
- 
 
 	dbBuyers := store.New(store.FileType, "./internal/repositories/buyer.json")
 	repositoryBuyers := buyer.NewRepository(dbBuyers)
@@ -56,13 +54,13 @@ func main() {
 
 	//dbSection := store.New(store.FileType, "./internal/repositories/sections.json")
 	//repSection := sectionRepository.NewRepository(dbSection)
-	
-	repSection := sectionRepository.NewRepository(Conn)	
+
+	repSection := sectionRepository.NewRepository(Conn)
 	serviceSection := sectionService.NewService(repSection)
 	sectionController := handler.NewSectionController(serviceSection)
 
-	dbSeller := store.New(store.FileType, "../mercado-fresco-pron4/internal/repositories/sellers.json")
-	repoSeller := seller.NewRepositorySeller(dbSeller)
+	// dbSeller := store.New(store.FileType, "../mercado-fresco-pron4/internal/repositories/sellers.json")
+	repoSeller := seller.NewRepositorySeller(Conn)
 	serviceSeller := seller.NewService(repoSeller)
 
 	dbEmployees := store.New(store.FileType, "./internal/repositories/employees.json")
@@ -88,7 +86,7 @@ func main() {
 	sellers.POST("/", s.Create())
 	sellers.PATCH("/:id", s.Update())
 	sellers.DELETE("/:id", s.Delete())
-	
+
 	routesEmployees := r.Group("/api/v1/employees")
 	routesEmployees.GET("/", handlerEmployees.GetAll())
 	routesEmployees.GET("/:id", handlerEmployees.GetByID())
@@ -126,7 +124,7 @@ func connection() (*sql.DB, error) {
 	port := os.Getenv("PORT_DB")
 	host := os.Getenv("HOST_DB")
 	database := os.Getenv("DATABASE")
-	dataSource := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", user, pass,host,port,database)
+	dataSource := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", user, pass, host, port, database)
 	log.Println(dataSource)
 	return sql.Open("mysql", dataSource)
 }

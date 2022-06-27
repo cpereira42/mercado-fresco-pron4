@@ -29,15 +29,8 @@ func (s *service) Create(cid int, company, adress, telephone string) (Seller, er
 	if !checkCid {
 		return Seller{}, errors.New("Cid already registered")
 	}
-	lastID, err2 := s.repository.LastID()
 
-	if err2 != nil {
-		return Seller{}, err2
-	}
-
-	lastID++
-
-	product, err3 := s.repository.Create(lastID, cid, company, adress, telephone)
+	product, err3 := s.repository.Create(cid, company, adress, telephone)
 
 	if err3 != nil {
 		return Seller{}, err3
@@ -50,7 +43,7 @@ func (s *service) Create(cid int, company, adress, telephone string) (Seller, er
 func (s service) CheckCid(cid int) (bool, error) {
 	sellers, err := s.repository.GetAll()
 	if err != nil {
-		return false, errors.New("Could not read file")
+		return false, err
 	}
 	for _, seller := range sellers {
 		if seller.Cid == cid {
