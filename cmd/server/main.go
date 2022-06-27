@@ -35,11 +35,15 @@ func main() {
 	serviceBuyers := buyer.NewService(repositoryBuyers)
 	hdBuyers := handler.NewBuyer(serviceBuyers)
 
+	dbSeller := store.New(store.FileType, "../mercado-fresco-pron4/internal/repositories/sellers.json")
+	repoSeller := seller.NewRepositorySeller(dbSeller)
+	serviceSeller := seller.NewService(repoSeller)
+
 	repoProd := products.NewRepositoryProductsDB(conn)
 
 	//dbProd := store.New(store.FileType, "./internal/repositories/products.json")
 	//repoProd := products.NewRepositoryProductsDB(conn)
-	serviceProd := products.NewService(repoProd)
+	serviceProd := products.NewService(repoProd, repoSeller)
 
 	dbWarehouse := store.New(store.FileType, "./internal/repositories/warehouse.json")
 	repoWarehouse := warehouse.NewRepository(dbWarehouse)
@@ -50,10 +54,6 @@ func main() {
 	repSection := section.NewRepository(dbSection)
 	serviceSection := section.NewService(repSection)
 	sectionController := handler.NewSectionController(serviceSection)
-
-	dbSeller := store.New(store.FileType, "../mercado-fresco-pron4/internal/repositories/sellers.json")
-	repoSeller := seller.NewRepositorySeller(dbSeller)
-	serviceSeller := seller.NewService(repoSeller)
 
 	dbEmployees := store.New(store.FileType, "./internal/repositories/employees.json")
 	repositoryEmployees := employee.NewRepository(dbEmployees)

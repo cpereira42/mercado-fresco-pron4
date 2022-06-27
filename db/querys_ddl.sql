@@ -9,11 +9,11 @@ SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
 
-CREATE DATABASE `mercadofresco`;
+CREATE DATABASE `mercadofresco3`;
 
-ALTER SCHEMA `mercadofresco`  DEFAULT CHARACTER SET utf8  DEFAULT COLLATE utf8_general_ci ;
+ALTER SCHEMA `mercadofresco3`  DEFAULT CHARACTER SET utf8  DEFAULT COLLATE utf8_general_ci ;
 
-CREATE TABLE IF NOT EXISTS `mercadofresco`.`sellers` (
+CREATE TABLE IF NOT EXISTS `mercadofresco3`.`sellers` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `cid` INT(11) NOT NULL,
   `company_name` VARCHAR(100) NOT NULL,
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`sellers` (
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
 
-CREATE TABLE IF NOT EXISTS `mercadofresco`.`warehouses` (
+CREATE TABLE IF NOT EXISTS `mercadofresco3`.`warehouses` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `address` VARCHAR(50) NOT NULL,
   `telephone` VARCHAR(20) NOT NULL,
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`warehouses` (
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
 
-CREATE TABLE IF NOT EXISTS `mercadofresco`.`sections` (
+CREATE TABLE IF NOT EXISTS `mercadofresco3`.`sections` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `section_number` INT(11) NOT NULL,
   `current_temperature` INT(11) NOT NULL,
@@ -48,13 +48,13 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`sections` (
   INDEX `fk2_warehouse_id_idx` (`warehouse_id` ASC) VISIBLE,
   CONSTRAINT `fk2_warehouse_id`
     FOREIGN KEY (`warehouse_id`)
-    REFERENCES `mercadofresco`.`warehouses` (`id`)
+    REFERENCES `mercadofresco3`.`warehouses` (`id`)
     ON DELETE CASCADE
     ON UPDATE CASCADE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
 
-CREATE TABLE IF NOT EXISTS `mercadofresco`.`products` (
+CREATE TABLE IF NOT EXISTS `mercadofresco3`.`products` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `product_code` VARCHAR(45) NOT NULL,
   `description` VARCHAR(45) NOT NULL,
@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`products` (
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
 
-CREATE TABLE IF NOT EXISTS `mercadofresco`.`employees` (
+CREATE TABLE IF NOT EXISTS `mercadofresco3`.`employees` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `card_number_id` INT(11) NOT NULL,
   `first_name` VARCHAR(50) NOT NULL,
@@ -81,13 +81,13 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`employees` (
   INDEX `fk1_warehouse_id_idx` (`warehouse_id` ASC) VISIBLE,
   CONSTRAINT `fk1_warehouse_id`
     FOREIGN KEY (`warehouse_id`)
-    REFERENCES `mercadofresco`.`warehouses` (`id`)
+    REFERENCES `mercadofresco3`.`warehouses` (`id`)
     ON DELETE CASCADE
     ON UPDATE CASCADE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
 
-CREATE TABLE IF NOT EXISTS `mercadofresco`.`buyers` (
+CREATE TABLE IF NOT EXISTS `mercadofresco3`.`buyers` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `card_number_id` INT(11) NOT NULL,
   `first_name` VARCHAR(45) NOT NULL,

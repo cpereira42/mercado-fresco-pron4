@@ -5,7 +5,8 @@
 *.so
 *.dylib
 *.DS_Store
-*.env
+.env
+.data/
 
 # Test binary, built with `go test -c`
 *.test

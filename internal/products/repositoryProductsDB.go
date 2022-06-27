@@ -163,6 +163,8 @@ func (r *repositoryDB) Create(p Product) (Product, error) {
 	if RowsAffected == 0 {
 		return Product{}, fmt.Errorf("Fail to save")
 	}
+	lastId, _ := res.LastInsertId()
+	p.Id = int(lastId)
 	return p, nil
 }
 
