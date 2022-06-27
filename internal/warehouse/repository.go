@@ -123,15 +123,20 @@ func (r *repository) Update(id int, address, telephone, warehouse_code string, m
 
 func (r *repository) GetByID(id int) (Warehouse, error) {
 
-	stmt, err := r.db.Query(GetId, id)
+	stmt, err := r.db.Prepare(GetId)
+	if err != nil {
+		return Warehouse{}, err
+	}
+	defer stmt.Close()
+	res, err := r.db.Query(GetId, id)
 
 	if err != nil {
 		return Warehouse{}, err
 	}
 	defer stmt.Close()
 
-	for stmt.Next() {
-		if err := stmt.Scan(&w.ID, &w.Address, &w.Telephone, &w.Warehouse_code, &w.Minimum_capacity, &w.Minimum_temperature); err != nil {
+	for res.Next() {
+		if err := res.Scan(&w.ID, &w.Address, &w.Telephone, &w.Warehouse_code, &w.Minimum_capacity, &w.Minimum_temperature); err != nil {
 			return Warehouse{}, err
 		}
 	}
