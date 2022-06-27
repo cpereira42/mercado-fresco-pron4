@@ -1,6 +1,11 @@
 package main
 
 import (
+	"database/sql"
+	"fmt"
+	"log"
+	"os"
+
 	"github.com/cpereira42/mercado-fresco-pron4/cmd/server/handler"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/buyer"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/employee"
@@ -10,17 +15,30 @@ import (
 	"github.com/cpereira42/mercado-fresco-pron4/internal/warehouse"
 	"github.com/cpereira42/mercado-fresco-pron4/pkg/store"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatal(".Env cant be load")
+	}
+
+	conn, err2 := ConnectDB()
+	if err2 != nil {
+		log.Fatal("could not open the conection: ", err2)
+	}
 
 	dbBuyers := store.New(store.FileType, "./internal/repositories/buyer.json")
 	repositoryBuyers := buyer.NewRepository(dbBuyers)
 	serviceBuyers := buyer.NewService(repositoryBuyers)
 	hdBuyers := handler.NewBuyer(serviceBuyers)
 
-	dbProd := store.New(store.FileType, "./internal/repositories/products.json")
-	repoProd := products.NewRepositoryProducts(dbProd)
+	repoProd := products.NewRepositoryProductsDB(conn)
+
+	//dbProd := store.New(store.FileType, "./internal/repositories/products.json")
+	//repoProd := products.NewRepositoryProductsDB(conn)
 	serviceProd := products.NewService(repoProd)
 
 	dbWarehouse := store.New(store.FileType, "./internal/repositories/warehouse.json")
@@ -60,7 +78,7 @@ func main() {
 	sellers.POST("/", s.Create())
 	sellers.PATCH("/:id", s.Update())
 	sellers.DELETE("/:id", s.Delete())
-	
+
 	routesEmployees := r.Group("/api/v1/employees")
 	routesEmployees.GET("/", handlerEmployees.GetAll())
 	routesEmployees.GET("/:id", handlerEmployees.GetByID())
@@ -90,4 +108,27 @@ func main() {
 	buyers.DELETE("/:id", hdBuyers.Delete())
 
 	r.Run()
+}
+
+func ConnectDB() (*sql.DB, error) {
+	user := os.Getenv("USER_DB")
+	pass := os.Getenv("PASS_DB")
+	host := os.Getenv("HOST_DB")
+	port := os.Getenv("PORT_DB")
+	table := os.Getenv("DATABASE")
+
+	dataSource := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", user, pass, host, port, table)
+	log.Println(dataSource)
+	db, err := sql.Open("mysql", dataSource)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := db.Ping(); err != nil {
+		log.Fatal("could not ping the database: ", err)
+		return nil, err
+	}
+
+	log.Println("connected")
+	return db, nil
 }
