@@ -6,8 +6,7 @@ import (
 	"log"
 
 	entites "github.com/cpereira42/mercado-fresco-pron4/internal/section/entites"
-	// "github.com/cpereira42/mercado-fresco-pron4/pkg/store"
-	// "github.com/fatih/structs"
+	
 )
 
 type repository struct {
@@ -15,7 +14,7 @@ type repository struct {
 }
 
 func (r *repository) CreateSection(newSection entites.Section) (entites.Section, error) {
-	 
+	  
 	stmt, err := r.db.Prepare(`INSERT INTO sections 
 	 	(section_number,
 	  	current_temperature,
@@ -42,13 +41,21 @@ func (r *repository) CreateSection(newSection entites.Section) (entites.Section,
 		newSection.WarehouseId,
 		newSection.ProductTypeId,
 	)
-
+	if err != nil {
+		return entites.Section{}, err
+	}
+	
+	lastID, err := rows.LastInsertId()
 	if err != nil {
 		return entites.Section{}, err
 	}
 
-
-	return omitFieldId(newSection), nil
+	// if err != nil {
+	// 	return entites.Section{}, err
+	// }
+	
+	newSection.Id=int(lastID)
+	return newSection, nil
 }
 
 func (r *repository) ListarSectionAll() ([]entites.Section, error) {
@@ -87,7 +94,7 @@ func (r *repository) ListarSectionAll() ([]entites.Section, error) {
 }
 
 func (r *repository) ListarSectionOne(id int) (entites.Section, error) {
-	stmt, err := r.db.Prepare("SELECT * FROM sections WHERE id = ?")
+  	stmt, err := r.db.Prepare("SELECT * FROM sections WHERE id = ?") 
 	if err != nil {
 		return entites.Section{}, err
 	}
@@ -153,10 +160,10 @@ func (r *repository) UpdateSection(id int, sectionUp entites.Section) (entites.S
 	return sectionUp, nil
 }
 
-func omitFieldId(section entites.Section) entites.Section {
-	section.Id = 0
-	return section
-}
+// func omitFieldId(section entites.Section) entites.Section {
+// 	section.Id = 0
+// 	return section
+// }
 
 func (r *repository) DeleteSection(id int) error {
 	stmt, err := r.db.Prepare("DELETE FROM sections WHERE id=?")
@@ -178,42 +185,25 @@ func (r *repository) DeleteSection(id int) error {
 }
 
 func (r *repository) LastID() (int, error) {
-	// var (
-	// 	sectionsList  []entites.Section
-	// 	erro          error
-	// 	totalSections int
-	// )
-	// if erro = r.db.Read(&sectionsList); erro != nil {
-	// 	return 0, erro
-	// }
-	// totalSections = len(sectionsList)
-	// if totalSections > 0 {
-	// 	return sectionsList[totalSections-1].Id, nil
-	// }
 	return 0, nil
 }
 
-// arquivo
+func (r *repository) SearchWarehouseById(id int ) (int, error) {
+	result :=r.db.QueryRow("SELECT id FROM warehouses WHERE id = ?", id)
+	 
+	var warehouseId int
+	err := result.Scan(&warehouseId)
+	if err != nil {
+		return 0, err
+	}
+	return warehouseId, nil
+}
+
+
 func NewRepository(db *sql.DB) entites.Repository {
 	return &repository{db: db}
 }
 
-//
-// HELPERS
-//
-// func iterateAboutSectionList(rep *repository, sections []entites.Section, id int) error {
-// 	for index := range sections {
-// 		if sections[index].Id == id {
-// 			if len(sections)-1 == index {
-// 				sections = append([]entites.Section{}, sections[:index]...)
-// 			} else {
-// 				sections = append(sections[:index], sections[index+1:]...)
-// 			}
-// 			if err := rep.db.Write(sections); err != nil {
-// 				return err
-// 			}
-// 			return nil
-// 		}
-// 	}
-// 	return fmt.Errorf("section is not registered")
-// }
+
+
+

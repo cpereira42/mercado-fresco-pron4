@@ -38,7 +38,8 @@ var prod1 = products.Product{
 	RecommendedFreezingTemperature: 6.6,
 	Width:                          7.7,
 	ProductTypeId:                  8,
-	SellerId:                       9}
+	SellerId:                       9,
+}
 
 var prod2 = products.Product{
 	Id:                             2,
@@ -52,7 +53,8 @@ var prod2 = products.Product{
 	RecommendedFreezingTemperature: 6.6,
 	Width:                          7.7,
 	ProductTypeId:                  8,
-	SellerId:                       9}
+	SellerId:                       9,
+}
 
 var prod3 = products.Product{
 	Description:                    "prod3",
@@ -65,7 +67,9 @@ var prod3 = products.Product{
 	RecommendedFreezingTemperature: 6.6,
 	Width:                          7.7,
 	ProductTypeId:                  8,
-	SellerId:                       9}
+	SellerId:                       9,
+}
+
 var prodNew = products.RequestProductsCreate{
 	Description:                    "prod1",
 	ExpirationRate:                 1,
@@ -77,7 +81,8 @@ var prodNew = products.RequestProductsCreate{
 	RecommendedFreezingTemperature: 6.6,
 	Width:                          7.7,
 	ProductTypeId:                  8,
-	SellerId:                       9}
+	SellerId:                       9,
+}
 
 func createRequestTest(method string, url string, body string) (*http.Request, *httptest.ResponseRecorder) {
 	req := httptest.NewRequest(method, url, bytes.NewBuffer([]byte(body)))
@@ -104,7 +109,6 @@ func Test_RepositoryGetAll(t *testing.T) {
 	produtos := []products.Product{prod1, prod2}
 
 	t.Run("Get All", func(t *testing.T) {
-
 		serv := &mocks.Service{}
 		serv.On("GetAll").Return(produtos, nil)
 		rr := createServer(serv, http.MethodGet, "/api/v1/products/", "")
@@ -163,7 +167,6 @@ func Test_RepositoryGetId(t *testing.T) {
 }
 
 func Test_RepositoryDelete(t *testing.T) {
-
 	t.Run("Delete Ok", func(t *testing.T) {
 		serv := &mocks.Service{}
 
@@ -173,7 +176,6 @@ func Test_RepositoryDelete(t *testing.T) {
 	})
 
 	t.Run("Delete Fail id = A", func(t *testing.T) {
-
 		serv := &mocks.Service{}
 
 		rr := createServer(serv, http.MethodDelete, "/api/v1/products/A", "")
@@ -201,7 +203,6 @@ func Test_RepositoryDelete(t *testing.T) {
 }
 
 func Test_RepositoryCreate(t *testing.T) {
-
 	t.Run("Creat Ok", func(t *testing.T) {
 		serv := &mocks.Service{}
 		serv.On("Create", prodNew).Return(prod1, nil)
@@ -254,7 +255,6 @@ func Test_RepositoryCreate(t *testing.T) {
 	})
 
 	t.Run("Creat Fail - Duplicated", func(t *testing.T) {
-
 		serv := &mocks.Service{}
 		serv.On("Create", prodNew).Return(products.Product{}, fmt.Errorf("Product prod1 already registred"))
 		rr := createServer(serv, http.MethodPost, "/api/v1/products/", `{
@@ -278,7 +278,6 @@ func Test_RepositoryCreate(t *testing.T) {
 	})
 
 	t.Run("Creat Fail", func(t *testing.T) {
-
 		serv := &mocks.Service{}
 
 		serv.On("Create", prodNew).Return(products.Product{}, fmt.Errorf("Error to save"))
@@ -300,9 +299,8 @@ func Test_RepositoryCreate(t *testing.T) {
 }
 
 func Test_RepositoryUpdate(t *testing.T) {
-
 	t.Run("Update Ok", func(t *testing.T) {
-		var prodNew = products.RequestProductsUpdate{
+		prodNew := products.RequestProductsUpdate{
 			Description: "prod10",
 		}
 
@@ -323,7 +321,7 @@ func Test_RepositoryUpdate(t *testing.T) {
 	})
 
 	t.Run("Update ID A", func(t *testing.T) {
-		var prodNew = products.RequestProductsUpdate{
+		prodNew := products.RequestProductsUpdate{
 			Description: "prod10",
 		}
 		serv := &mocks.Service{}
@@ -341,7 +339,7 @@ func Test_RepositoryUpdate(t *testing.T) {
 	})
 
 	t.Run("Update ID non exist", func(t *testing.T) {
-		var prodNew = products.RequestProductsUpdate{
+		prodNew := products.RequestProductsUpdate{
 			Description: "prod10",
 		}
 
@@ -359,7 +357,7 @@ func Test_RepositoryUpdate(t *testing.T) {
 	})
 
 	t.Run("Update Fail", func(t *testing.T) {
-		var prodNew = products.RequestProductsUpdate{
+		prodNew := products.RequestProductsUpdate{
 			Description: "prod10",
 		}
 
@@ -378,7 +376,6 @@ func Test_RepositoryUpdate(t *testing.T) {
 	})
 
 	t.Run("Update Fail - invalid args", func(t *testing.T) {
-
 		serv := &mocks.Service{}
 		rr := createServer(serv, http.MethodPatch, "/api/v1/products/99", `{
 			"Description":                    10
@@ -396,5 +393,4 @@ func Test_RepositoryUpdate(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, "description", objRes.Data.Field)
 	})
-
 }

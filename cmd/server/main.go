@@ -26,13 +26,15 @@ import (
 
 )
 
+var Conn *sql.DB
+
 func main() {
 	
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal(".Env cant be load")
 	}
-	conn, err := connection()
+	Conn, err = connection()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -55,7 +57,7 @@ func main() {
 	//dbSection := store.New(store.FileType, "./internal/repositories/sections.json")
 	//repSection := sectionRepository.NewRepository(dbSection)
 	
-	repSection := sectionRepository.NewRepository(conn)	
+	repSection := sectionRepository.NewRepository(Conn)	
 	serviceSection := sectionService.NewService(repSection)
 	sectionController := handler.NewSectionController(serviceSection)
 
