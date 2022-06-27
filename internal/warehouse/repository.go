@@ -2,6 +2,7 @@ package warehouse
 
 import (
 	"database/sql"
+	"errors"
 	"log"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -104,10 +105,19 @@ func (r *repository) Update(id int, address, telephone, warehouse_code string, m
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(&w.Address, &w.Telephone, &w.Warehouse_code, &w.Minimum_capacity, &w.Minimum_temperature, &w.ID)
+	rows, err := stmt.Exec(&w.Address, &w.Telephone, &w.Warehouse_code, &w.Minimum_capacity, &w.Minimum_temperature, &w.ID)
 	if err != nil {
 		return Warehouse{}, err
 	}
+
+	lines, err := rows.RowsAffected()
+	if err != nil {
+		return Warehouse{}, err
+	}
+	if lines == 0 {
+		return Warehouse{}, sql.ErrNoRows
+	}
+
 	return w, nil
 }
 
@@ -131,9 +141,23 @@ func (r *repository) GetByID(id int) (Warehouse, error) {
 
 func (r *repository) Delete(id int) error {
 
-	_, err := r.db.Exec(DeleteWarehouse, id)
+	stmt, err := r.db.Prepare(DeleteWarehouse)
 	if err != nil {
 		return err
 	}
+	defer stmt.Close()
+
+	res, err := r.db.Exec(DeleteWarehouse, id)
+	if err != nil {
+		return err
+	}
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return errors.New("no rows affected")
+	}
+
 	return nil
 }
