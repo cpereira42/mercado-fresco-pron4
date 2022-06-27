@@ -51,6 +51,7 @@ type Repository interface {
 	UpdateSection(id int, section Section) (Section, error)
 	DeleteSection(id int) error
 	LastID() (int, error)
+	SearchWarehouseById(id int ) (int, error)
 }
 
 /*
