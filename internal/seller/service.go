@@ -35,7 +35,7 @@ func (s *service) Create(cid, company, address, telephone string, localityId int
 		return Seller{}, err
 	}
 	if !checkLocality {
-		return Seller{}, errors.New("Cid already registered")
+		return Seller{}, errors.New("Locality not found")
 	}
 
 	seller, err := s.repository.Create(cid, company, address, telephone, localityId)
@@ -107,9 +107,6 @@ func (s *service) Update(id int, cid, company, address, telephone string, locali
 		sellerToUpdate.LocalityId = seller.LocalityId
 	} else {
 		sellerToUpdate.LocalityId = localityId
-	}
-	if seller == sellerToUpdate {
-		return seller, nil
 	}
 	updatedSeller, err := s.repository.Update(id, sellerToUpdate.Cid, sellerToUpdate.CompanyName, sellerToUpdate.Address, sellerToUpdate.Telephone, sellerToUpdate.LocalityId)
 	if err != nil {
