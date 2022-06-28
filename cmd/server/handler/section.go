@@ -4,7 +4,7 @@ import (
 	"net/http" 
 	"strconv"
 
-	sectionEntites "github.com/cpereira42/mercado-fresco-pron4/internal/section/entites"
+	sectionEntites "github.com/cpereira42/mercado-fresco-pron4/internal/section"
 	"github.com/cpereira42/mercado-fresco-pron4/pkg/web"
 	"github.com/gin-gonic/gin"
 )
