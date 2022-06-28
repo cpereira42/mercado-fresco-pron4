@@ -32,48 +32,15 @@ DEFAULT CHARACTER SET = utf8mb3;
 
 
 -- -----------------------------------------------------
--- Table `mercadofresco`.`countries`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `mercadofresco`.`countries` (
-  `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `country_name` VARCHAR(255) NOT NULL,
-  PRIMARY KEY (`id`))
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8mb3;
-
-
--- -----------------------------------------------------
--- Table `mercadofresco`.`provinces`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `mercadofresco`.`provinces` (
-  `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `province_name` VARCHAR(255) NOT NULL,
-  `id_contry_fk` INT(11) NOT NULL,
-  PRIMARY KEY (`id`),
-  INDEX `fk_provinces_contries1_idx` (`id_contry_fk` ASC) VISIBLE,
-  CONSTRAINT `fk_provinces_contries1`
-    FOREIGN KEY (`id_contry_fk`)
-    REFERENCES `mercadofresco`.`countries` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8mb3;
-
-
--- -----------------------------------------------------
 -- Table `mercadofresco`.`localities`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mercadofresco`.`localities` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `locality_name` VARCHAR(255) NOT NULL,
-  `province_id` INT(11) NOT NULL,
+  `province_name` VARCHAR(255) NOT NULL,
+  `country_name` VARCHAR(255) NOT NULL,
   PRIMARY KEY (`id`),
-  INDEX `fk_localities_provinces1_idx` (`province_id` ASC) VISIBLE,
-  CONSTRAINT `fk_localities_provinces1`
-    FOREIGN KEY (`province_id`)
-    REFERENCES `mercadofresco`.`provinces` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+  INDEX `fk_localities_provinces1_idx` (`province_id` ASC) VISIBLE
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 
