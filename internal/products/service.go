@@ -3,6 +3,7 @@ package products
 import (
 	"fmt"
 
+	"github.com/cpereira42/mercado-fresco-pron4/internal/seller"
 	"github.com/fatih/structs"
 )
 
@@ -13,20 +14,23 @@ type Service interface {
 	Create(p RequestProductsCreate) (Product, error)
 	Update(id int, p RequestProductsUpdate) (Product, error)
 	CheckCode(id int, code string) bool
+	GetProductsTypes(id int) (string, error)
 }
 
 type service struct {
-	repository Repository
+	rep Repository
+	res seller.RepositorySeller
 }
 
-func NewService(r Repository) Service {
+func NewService(r Repository, res seller.RepositorySeller) Service {
 	return &service{
-		repository: r,
+		rep: r,
+		res: res,
 	}
 }
 
 func (s *service) GetAll() ([]Product, error) {
-	ps, err := s.repository.GetAll()
+	ps, err := s.rep.GetAll()
 	if err != nil {
 		return nil, err
 	}
@@ -34,20 +38,21 @@ func (s *service) GetAll() ([]Product, error) {
 }
 
 func (s *service) GetId(id int) (Product, error) {
-	ps, err := s.repository.GetId(id)
+
+	ps, err := s.rep.GetId(id)
 	if err != nil {
-		return Product{}, err
+		return Product{}, fmt.Errorf("Product not Foun22d")
 	}
 	return ps, nil
 }
 
 func (s *service) Delete(id int) error {
-	return s.repository.Delete(id)
+	return s.rep.Delete(id)
 }
 
 func (s *service) CheckCode(id int, code string) bool {
 
-	ps, _ := s.repository.GetAll()
+	ps, _ := s.rep.GetAll()
 	for i := range ps {
 		if ps[i].ProductCode == code && ps[i].Id != id {
 			return true
@@ -56,20 +61,26 @@ func (s *service) CheckCode(id int, code string) bool {
 	return false
 }
 
+func (s *service) GetProductsTypes(id int) (string, error) {
+	return s.rep.GetProductsTypes(id)
+}
+
 func (s *service) Create(p RequestProductsCreate) (Product, error) {
-
 	var prod Product
-	if s.CheckCode(0, p.ProductCode) {
-		return Product{}, fmt.Errorf("code Product %s already registred", p.ProductCode)
-	}
 
-	lastID, err := s.repository.LastID()
+	_, err := s.res.GetId(p.SellerId)
 	if err != nil {
 		return Product{}, err
 	}
 
-	lastID++
-	prod.Id = lastID
+	_, err = s.rep.GetProductsTypes(p.ProductTypeId)
+	if err != nil {
+		return Product{}, err
+	}
+
+	if s.CheckCode(0, p.ProductCode) {
+		return Product{}, fmt.Errorf("code Product %s already registred", p.ProductCode)
+	}
 	prod.ProductCode = p.ProductCode
 	prod.Description = p.Description
 	prod.Width = p.Width
@@ -81,7 +92,7 @@ func (s *service) Create(p RequestProductsCreate) (Product, error) {
 	prod.FreezingRate = p.FreezingRate
 	prod.ProductTypeId = p.ProductTypeId
 	prod.SellerId = p.SellerId
-	product, err := s.repository.Create(prod)
+	product, err := s.rep.Create(prod)
 	if err != nil {
 		return Product{}, err
 	}
@@ -92,7 +103,7 @@ func (s *service) Create(p RequestProductsCreate) (Product, error) {
 func (s *service) Update(id int, p RequestProductsUpdate) (Product, error) {
 
 	list := []string{"ProductCode", "Description", "Width", "Length", "Height", "NetWeight", "ExpirationRate", "RecommendedFreezingTemperature", "FreezingRate", "ProductTypeId", "SellerId"}
-	prodUp, err := s.repository.GetId(id)
+	prodUp, err := s.rep.GetId(id)
 	if err != nil {
 		return Product{}, fmt.Errorf("Product not found")
 	}
@@ -122,6 +133,6 @@ func (s *service) Update(id int, p RequestProductsUpdate) (Product, error) {
 	prodUp.FreezingRate = m2["FreezingRate"].(float64)
 	prodUp.ProductTypeId = m2["ProductTypeId"].(int)
 	prodUp.SellerId = m2["SellerId"].(int)
-	s.repository.Update(id, prodUp)
+	s.rep.Update(id, prodUp)
 	return prodUp, nil
 }
