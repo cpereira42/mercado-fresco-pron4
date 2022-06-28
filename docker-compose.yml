@@ -1,4 +1,4 @@
-version: '3.9'
+version: "3.9"
 
 services:
   mariadb:
@@ -6,8 +6,8 @@ services:
     container_name: prona-db
     hostname: prona-db
     volumes:
-      - ./:/docker-entrypoint-initdb.d
-      - ./.data:/var/lib/mysql
+      - ./db/:/docker-entrypoint-initdb.d
+      - ./db/.data:/var/lib/mysql
     ports:
       - 3306:3306
     environment:
