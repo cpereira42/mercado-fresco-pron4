@@ -16,7 +16,7 @@ type SectionController struct {
 func NewSectionController(sectionService sectionEntites.Service) *SectionController {
 	return &SectionController{service: sectionService}
 }
-func (controller *SectionController)ListarSectionAll() gin.HandlerFunc {
+func (controller *SectionController) ListarSectionAll() gin.HandlerFunc {
 	return func (context *gin.Context)  {
 		sections, err := controller.service.ListarSectionAll()
 		if err != nil {

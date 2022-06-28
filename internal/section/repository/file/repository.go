@@ -1,8 +1,10 @@
 package sectionRepository
 
 import (
+	 
 	"errors"
 	"fmt"
+
 	entites "github.com/cpereira42/mercado-fresco-pron4/internal/section/entites"
 	"github.com/cpereira42/mercado-fresco-pron4/pkg/store"
 	"github.com/fatih/structs"
@@ -134,9 +136,12 @@ func (r *repository) LastID() (int, error) {
 	}
 	return 0, nil
 }
+
+// arquivo
 func NewRepository(db store.Store) entites.Repository {
 	return &repository{db: db}
 }
+
 
 //
 // HELPERS

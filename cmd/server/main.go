@@ -2,13 +2,24 @@ package main
 
 import (
 	"database/sql"
+<<<<<<< HEAD
+=======
+	_ "github.com/go-sql-driver/mysql"
+
+>>>>>>> sprint_3
 	"fmt"
 	"log"
 	"os"
 
+<<<<<<< HEAD
 	sectionRepository "github.com/cpereira42/mercado-fresco-pron4/internal/section/repository/file"
 	sectionService "github.com/cpereira42/mercado-fresco-pron4/internal/section/service"
 	"github.com/joho/godotenv"
+=======
+	//sectionRepository "github.com/cpereira42/mercado-fresco-pron4/internal/section/repository/file"
+	sectionRepository "github.com/cpereira42/mercado-fresco-pron4/internal/section/repository/mariadb"
+	sectionService "github.com/cpereira42/mercado-fresco-pron4/internal/section/service"
+>>>>>>> sprint_3
 
 	"github.com/cpereira42/mercado-fresco-pron4/cmd/server/handler"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/buyer"
@@ -19,20 +30,24 @@ import (
 	"github.com/cpereira42/mercado-fresco-pron4/internal/warehouse"
 	"github.com/cpereira42/mercado-fresco-pron4/pkg/store"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
+
+
 )
 
+var Conn *sql.DB
+
 func main() {
+	
 	err := godotenv.Load(".env")
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Fatal(".Env cant be load")
 	}
-
-	dataSource := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_NAME"))
-
-	conn, err := sql.Open("mysql", dataSource)
+	Conn, err = connection()
 	if err != nil {
-		log.Fatal(err, "Error connecting to database")
+		log.Fatal(err)
 	}
+ 
 
 	dbBuyers := store.New(store.FileType, "./internal/repositories/buyer.json")
 	repositoryBuyers := buyer.NewRepository(dbBuyers)
@@ -46,12 +61,14 @@ func main() {
 	//dbWarehouse := store.New(store.FileType, "./internal/repositories/warehouse.json")
 	//repoWarehouse := warehouse.NewRepository(dbWarehouse)
 
-	repoWarehouse := warehouse.NewRepository(conn)
+	repoWarehouse := warehouse.NewRepository(Conn)
 	svcWarehouse := warehouse.NewService(repoWarehouse)
 	w := handler.NewWarehouse(svcWarehouse)
 
-	dbSection := store.New(store.FileType, "./internal/repositories/sections.json")
-	repSection := sectionRepository.NewRepository(dbSection)
+	//dbSection := store.New(store.FileType, "./internal/repositories/sections.json")
+	//repSection := sectionRepository.NewRepository(dbSection)
+	
+	repSection := sectionRepository.NewRepository(Conn)	
 	serviceSection := sectionService.NewService(repSection)
 	sectionController := handler.NewSectionController(serviceSection)
 
@@ -112,4 +129,15 @@ func main() {
 	buyers.DELETE("/:id", hdBuyers.Delete())
 
 	r.Run()
+}
+
+func connection() (*sql.DB, error) {
+	user := os.Getenv("USER_DB")
+	pass := os.Getenv("PASS_DB")
+	port := os.Getenv("PORT_DB")
+	host := os.Getenv("HOST_DB")
+	database := os.Getenv("DATABASE")
+	dataSource := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", user, pass,host,port,database)
+	log.Println(dataSource)
+	return sql.Open("mysql", dataSource)
 }
