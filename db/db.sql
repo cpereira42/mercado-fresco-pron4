@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`localities` (
   `province_name` VARCHAR(255) NOT NULL,
   `country_name` VARCHAR(255) NOT NULL,
   PRIMARY KEY (`id`),
-  INDEX `fk_localities_provinces1_idx` (`province_id` ASC) VISIBLE
+  INDEX `fk_localities_provinces1_idx` (`province_id` ASC) VISIBLE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 
@@ -425,7 +425,7 @@ SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 
 
 INSERT INTO `localities` VALUES
-(1,'São Paulo','SP',Brazil);
+(1,'São Paulo','SP','Brazil');
 
 INSERT INTO `sellers` VALUES
 (1,'cid1','Mercado','rua 1','111',1);
