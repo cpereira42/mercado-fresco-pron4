@@ -17,7 +17,7 @@ import (
 	tmock "github.com/stretchr/testify/mock"
 )
 
-var seller1 seller.Seller = seller.Seller{Id: 1, Cid: 200, CompanyName: "MELI", Adress: "Rua B", Telephone: "9999-8888"}
+var seller1 seller.Seller = seller.Seller{Id: 1, Cid: "200", CompanyName: "MELI", Address: "Rua B", Telephone: "9999-8888", LocalityId: 1}
 
 var sListSuccess []seller.Seller = []seller.Seller{
 	seller1,
@@ -211,19 +211,21 @@ func TestControllerCreateSeller(t *testing.T) {
 		"Test Create - OK", func(t *testing.T) {
 			req, rr := createRequestTest(http.MethodPost, "/api/v1/sellers/",
 				`{
-				"cid": 200, 
+				"cid": "200", 
 				"company_name": "MELI", 
 				"address": "Rua B", 
-				"telephone": "9999-8888"
+				"telephone": "9999-8888",
+				"locality_id": 1
 				}`)
 			serviceMock := new(mocks.Service)
 			s := handler.NewSeller(serviceMock)
 			r := gin.Default()
 			serviceMock.On("Create",
-				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("string")).
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("int")).
 				Return(seller1, nil)
 			sellers := r.Group("/api/v1/sellers")
 			sellers.POST("/", s.Create())
@@ -241,7 +243,7 @@ func TestControllerCreateSeller(t *testing.T) {
 		"Test Create - Requisition Body error - without Telephone", func(t *testing.T) {
 			req, rr := createRequestTest(http.MethodPost, "/api/v1/sellers/",
 				`{
-					"cid": 200, 
+					"cid": "200", 
 					"company_name": "MELI", 
 					"address": "Rua B"
 					}`)
@@ -268,19 +270,21 @@ func TestControllerCreateSeller(t *testing.T) {
 		"Test Create - CID already registered", func(t *testing.T) {
 			req, rr := createRequestTest(http.MethodPost, "/api/v1/sellers/",
 				`{
-						"cid": 200, 
+						"cid": "200", 
 						"company_name": "MELI", 
 						"address": "Rua B",
-						"telephone": "9999-8888"
+						"telephone": "9999-8888",
+						"locality_id": 1
 						}`)
 			serviceMock := new(mocks.Service)
 			s := handler.NewSeller(serviceMock)
 			r := gin.Default()
 			serviceMock.On("Create",
-				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("string")).
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("int")).
 				Return(seller.Seller{}, fmt.Errorf("Cid already registered"))
 			sellers := r.Group("/api/v1/sellers")
 			sellers.POST("/", s.Create())
@@ -302,20 +306,23 @@ func TestControllerUpdateSeller(t *testing.T) {
 		"Test Update - OK", func(t *testing.T) {
 			req, rr := createRequestTest(http.MethodPatch, "/api/v1/sellers/1",
 				`{
-				"cid": 200, 
+				"cid": "200", 
 				"company_name": "MELI", 
 				"address": "Rua B", 
-				"telephone": "9999-8888"
+				"telephone": "9999-8888",
+				"locality_id": 1
 				}`)
 			serviceMock := new(mocks.Service)
 			s := handler.NewSeller(serviceMock)
 			r := gin.Default()
+
 			serviceMock.On("Update",
 				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("string")).
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("int")).
 				Return(seller1, nil)
 			sellers := r.Group("/api/v1/sellers")
 			sellers.PATCH("/:id", s.Update())
@@ -333,10 +340,11 @@ func TestControllerUpdateSeller(t *testing.T) {
 		"Test Update - Invalid ID", func(t *testing.T) {
 			req, rr := createRequestTest(http.MethodPatch, "/api/v1/sellers/a",
 				`{
-					"cid": 200, 
+					"cid": "200", 
 					"company_name": "MELI", 
 					"address": "Rua B", 
-					"telephone": "9999-8888"
+					"telephone": "9999-8888",
+					"locality_id": 1
 					}`)
 			serviceMock := new(mocks.Service)
 			s := handler.NewSeller(serviceMock)
@@ -381,20 +389,22 @@ func TestControllerUpdateSeller(t *testing.T) {
 		"Test Update - ID not found", func(t *testing.T) {
 			req, rr := createRequestTest(http.MethodPatch, "/api/v1/sellers/2",
 				`{
-					"cid": 200, 
+					"cid": "200", 
 					"company_name": "MELI", 
 					"address": "Rua B", 
-					"telephone": "9999-8888"
+					"telephone": "9999-8888",
+					"locality_id": 1
 					}`)
 			serviceMock := new(mocks.Service)
 			s := handler.NewSeller(serviceMock)
 			r := gin.Default()
 			serviceMock.On("Update",
 				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("string")).
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("string"),
+				tmock.AnythingOfType("int")).
 				Return(seller.Seller{}, fmt.Errorf("Seller 2 not found"))
 			sellers := r.Group("/api/v1/sellers")
 			sellers.PATCH("/:id", s.Update())
