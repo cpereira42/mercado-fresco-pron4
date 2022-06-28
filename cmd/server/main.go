@@ -10,6 +10,7 @@ import (
 	"github.com/cpereira42/mercado-fresco-pron4/internal/buyer"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/employee"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/products"
+	"github.com/cpereira42/mercado-fresco-pron4/internal/productsRecords"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/section"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/seller"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/warehouse"
@@ -35,7 +36,7 @@ func main() {
 	serviceBuyers := buyer.NewService(repositoryBuyers)
 	hdBuyers := handler.NewBuyer(serviceBuyers)
 
-	dbSeller := store.New(store.FileType, "../mercado-fresco-pron4/internal/repositories/sellers.json")
+	dbSeller := store.New(store.FileType, "./internal/repositories/sellers.json")
 	repoSeller := seller.NewRepositorySeller(dbSeller)
 	serviceSeller := seller.NewService(repoSeller)
 
@@ -43,7 +44,11 @@ func main() {
 
 	//dbProd := store.New(store.FileType, "./internal/repositories/products.json")
 	//repoProd := products.NewRepositoryProductsDB(conn)
+
 	serviceProd := products.NewService(repoProd, repoSeller)
+	repoProdRecord := productsRecords.NewRepositoryProductsRecordsDB(conn)
+
+	serviceProdRecord := productsRecords.NewService(repoProdRecord, repoProd)
 
 	dbWarehouse := store.New(store.FileType, "./internal/repositories/warehouse.json")
 	repoWarehouse := warehouse.NewRepository(dbWarehouse)
@@ -62,6 +67,8 @@ func main() {
 
 	s := handler.NewSeller(serviceSeller)
 	p := handler.NewProduct(serviceProd)
+	pRecord := handler.NewProductRecords(serviceProdRecord)
+
 	r := gin.Default()
 
 	pr := r.Group("/api/v1/products")
@@ -71,6 +78,10 @@ func main() {
 	pr.POST("/", p.Create())
 	pr.PUT("/:id", p.Update())
 	pr.PATCH("/:id", p.Update())
+
+	prec := r.Group("/api/v1/productsRecords")
+	prec.GET("/:id", pRecord.GetId())
+	prec.POST("/", pRecord.Create())
 
 	sellers := r.Group("/api/v1/sellers")
 	sellers.GET("/", s.GetAll())

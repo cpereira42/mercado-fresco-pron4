@@ -17,10 +17,10 @@ func NewRepositoryProductsRecordsDB(db *sql.DB) Repository {
 	}
 }
 
-func (r *repository) GetId(id int) (ProductRecords, error) {
+func (r *repository) GetIdRecords(id int) (ProductRecords, error) {
 	var ProductRecords ProductRecords
 
-	stmt, err := r.db.Prepare("SELECT * FROM products_records Where id = ?")
+	stmt, err := r.db.Prepare("SELECT * FROM product_records Where id = ?")
 	if err != nil {
 		return ProductRecords, err
 	}
@@ -28,11 +28,11 @@ func (r *repository) GetId(id int) (ProductRecords, error) {
 		&ProductRecords.LastUpdateDate,
 		&ProductRecords.PurchasePrice,
 		&ProductRecords.SalePrice,
-		&ProductRecords.productTypeId)
+		&ProductRecords.ProductId)
 	defer stmt.Close()
 
 	if err != nil {
-		return ProductRecords, err
+		return ProductRecords, fmt.Errorf("Product not Found")
 	}
 	return ProductRecords, nil
 }
@@ -53,7 +53,7 @@ func (r *repository) GetId(id int) (ProductRecords, error) {
 
 func (r *repository) Create(p ProductRecords) (ProductRecords, error) {
 
-	stmt, err := r.db.Prepare(`INSERT INTO products_records (
+	stmt, err := r.db.Prepare(`INSERT INTO product_records (
 		last_update_date, 
 		purchase_price, 
 		sale_price,
@@ -69,7 +69,7 @@ func (r *repository) Create(p ProductRecords) (ProductRecords, error) {
 		p.LastUpdateDate,
 		p.PurchasePrice,
 		p.SalePrice,
-		p.productTypeId)
+		p.ProductId)
 	if err != nil {
 		return ProductRecords{}, err
 	}

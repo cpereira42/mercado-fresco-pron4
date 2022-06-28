@@ -193,9 +193,9 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`products` (
    `recommended_freezing_temperature` DECIMAL(19,2) NOT NULL,
   `freezing_rate` DECIMAL(19,2) NOT NULL,
   `product_type_id` INT(11) NOT NULL,
-  `sellers_id` INT(11) NOT NULL,
+  `seller_id` INT(11) NOT NULL,
   PRIMARY KEY (`id`),
-  INDEX `fk_product_sellers1_idx` (`sellers_id` ASC) VISIBLE,
+  INDEX `fk_product_sellers1_idx` (`seller_id` ASC) VISIBLE,
   INDEX `fk_product_products_types1_idx` (`product_type_id` ASC) VISIBLE,
   CONSTRAINT `fk_product_products_types1`
     FOREIGN KEY (`product_type_id`)
@@ -203,7 +203,7 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`products` (
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_product_sellers1`
-    FOREIGN KEY (`sellers_id`)
+    FOREIGN KEY (`seller_id`)
     REFERENCES `mercadofresco`.`sellers` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)

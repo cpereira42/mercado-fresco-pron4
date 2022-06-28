@@ -5,7 +5,7 @@ import (
 )
 
 type Service interface {
-	GetId(id int) (ProductRecords, error)
+	GetIdRecords(id int) (ProductRecords, error)
 	Create(p RequestProductRecordsCreate) (ProductRecords, error)
 }
 
@@ -21,41 +21,25 @@ func NewService(r Repository, repositoryProducts products.Repository) Service {
 	}
 }
 
-func (s *service) GetId(id int) (ProductRecords, error) {
-	ps, err := s.repositoryRecords.GetId(id)
+func (s *service) GetIdRecords(id int) (ProductRecords, error) {
+	ps, err := s.repositoryRecords.GetIdRecords(id)
 	if err != nil {
 		return ProductRecords{}, err
 	}
 	return ps, nil
 }
 
-/*func (s *service) CheckCode(id int, code string) bool {
-
-	ps, _ := s.rep.GetAll()
-	for i := range ps {
-		if ps[i].ProductCode == code && ps[i].Id != id {
-			return true
-		}
-	}
-	return false
-}*/
-
 func (s *service) Create(p RequestProductRecordsCreate) (ProductRecords, error) {
 	var prod ProductRecords
 
-	_, err := s.repositoryProducts.GetId(p.productTypeId)
+	_, err := s.repositoryProducts.GetId(p.ProductId)
 	if err != nil {
 		return ProductRecords{}, err
 	}
-
-	/*if s.CheckCode(0, p.ProductCode) {
-		return Product{}, fmt.Errorf("code Product %s already registred", p.ProductCode)
-	}*/
-
 	prod.LastUpdateDate = p.LastUpdateDate
 	prod.PurchasePrice = p.PurchasePrice
 	prod.SalePrice = p.SalePrice
-	prod.productTypeId = p.productTypeId
+	prod.ProductId = p.ProductId
 	product, err := s.repositoryRecords.Create(prod)
 	if err != nil {
 		return ProductRecords{}, err

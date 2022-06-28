@@ -3,11 +3,12 @@ package products
 import (
 	"database/sql"
 	"fmt"
+	"log"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
-type RepositoryDB interface {
+type Repository interface {
 	GetAll() ([]Product, error)
 	GetId(id int) (Product, error)
 	Delete(id int) error
@@ -15,19 +16,20 @@ type RepositoryDB interface {
 	Create(p Product) (Product, error)
 	Update(id int, prod Product) (Product, error)
 	CheckCode(code string) error
+	GetProductsTypes(id int) (string, error)
 }
 
-type repositoryDB struct {
+type repository struct {
 	db *sql.DB
 }
 
-func NewRepositoryProductsDB(db *sql.DB) RepositoryDB {
-	return &repositoryDB{
+func NewRepositoryProductsDB(db *sql.DB) Repository {
+	return &repository{
 		db: db,
 	}
 }
 
-func (r *repositoryDB) GetAll() ([]Product, error) {
+func (r *repository) GetAll() ([]Product, error) {
 	var products []Product
 
 	rows, err := r.db.Query("SELECT * FROM products")
@@ -61,7 +63,7 @@ func (r *repositoryDB) GetAll() ([]Product, error) {
 	return products, nil
 }
 
-func (r *repositoryDB) GetId(id int) (Product, error) {
+func (r *repository) GetId(id int) (Product, error) {
 	var product Product
 
 	stmt, err := r.db.Prepare("SELECT * FROM products Where id = ?")
@@ -83,12 +85,12 @@ func (r *repositoryDB) GetId(id int) (Product, error) {
 	defer stmt.Close()
 
 	if err != nil {
-		return Product{}, err
+		return Product{}, fmt.Errorf("Product id %d not found", id)
 	}
 	return product, nil
 }
 
-func (r *repositoryDB) CheckCode(code string) error {
+func (r *repository) CheckCode(code string) error {
 
 	stmt, err := r.db.Prepare("SELECT product_code FROM products Where product_code = ?")
 	if err != nil {
@@ -102,7 +104,7 @@ func (r *repositoryDB) CheckCode(code string) error {
 	return nil
 }
 
-func (r *repositoryDB) Delete(id int) error {
+func (r *repository) Delete(id int) error {
 
 	stmt, err := r.db.Prepare("DELETE FROM products WHERE id=?")
 	if err != nil {
@@ -123,8 +125,9 @@ func (r *repositoryDB) Delete(id int) error {
 	return nil
 }
 
-func (r *repositoryDB) Create(p Product) (Product, error) {
+func (r *repository) Create(p Product) (Product, error) {
 
+	log.Println("err", p.SellerId)
 	stmt, err := r.db.Prepare(`INSERT INTO products (
 		product_code, 
 		description, 
@@ -168,7 +171,24 @@ func (r *repositoryDB) Create(p Product) (Product, error) {
 	return p, nil
 }
 
-func (r *repositoryDB) LastID() (int, error) {
+func (r *repository) GetProductsTypes(id int) (string, error) {
+	var description string
+
+	stmt, err := r.db.Prepare("SELECT description FROM products_types Where id = ?")
+	if err != nil {
+		return "", fmt.Errorf("Products Types not Found")
+	}
+	defer stmt.Close()
+
+	err = stmt.QueryRow(id).Scan(&description)
+
+	if err != nil {
+		return "", fmt.Errorf("Products Types not Found")
+	}
+	return description, nil
+}
+
+func (r *repository) LastID() (int, error) {
 	/*var ps []Product
 	if err := r.db.Read(&ps); err != nil {
 		return 0, err
@@ -179,7 +199,7 @@ func (r *repositoryDB) LastID() (int, error) {
 	return 0, nil
 }
 
-func (r *repositoryDB) Update(id int, p Product) (Product, error) {
+func (r *repository) Update(id int, p Product) (Product, error) {
 	stmt, err := r.db.Prepare(`UPDATE products SET 
 		product_code=?,
 		description=?, 

@@ -14,6 +14,7 @@ type Service interface {
 	Create(p RequestProductsCreate) (Product, error)
 	Update(id int, p RequestProductsUpdate) (Product, error)
 	CheckCode(id int, code string) bool
+	GetProductsTypes(id int) (string, error)
 }
 
 type service struct {
@@ -37,9 +38,10 @@ func (s *service) GetAll() ([]Product, error) {
 }
 
 func (s *service) GetId(id int) (Product, error) {
+
 	ps, err := s.rep.GetId(id)
 	if err != nil {
-		return Product{}, err
+		return Product{}, fmt.Errorf("Product not Foun22d")
 	}
 	return ps, nil
 }
@@ -59,6 +61,10 @@ func (s *service) CheckCode(id int, code string) bool {
 	return false
 }
 
+func (s *service) GetProductsTypes(id int) (string, error) {
+	return s.rep.GetProductsTypes(id)
+}
+
 func (s *service) Create(p RequestProductsCreate) (Product, error) {
 	var prod Product
 
@@ -67,17 +73,14 @@ func (s *service) Create(p RequestProductsCreate) (Product, error) {
 		return Product{}, err
 	}
 
-	if s.CheckCode(0, p.ProductCode) {
-		return Product{}, fmt.Errorf("code Product %s already registred", p.ProductCode)
-	}
-
-	/*lastID, err := s.repository.LastID()
+	_, err = s.rep.GetProductsTypes(p.ProductTypeId)
 	if err != nil {
 		return Product{}, err
 	}
 
-	lastID++*/
-	//prod.Id = 0
+	if s.CheckCode(0, p.ProductCode) {
+		return Product{}, fmt.Errorf("code Product %s already registred", p.ProductCode)
+	}
 	prod.ProductCode = p.ProductCode
 	prod.Description = p.Description
 	prod.Width = p.Width
