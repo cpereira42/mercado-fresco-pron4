@@ -167,7 +167,8 @@ func (r *repositorySeller) CheckLocality(id int) (bool, error) {
 	type Locality struct {
 		Id           int
 		LocalityName string
-		ProvinceId   int
+		ProvinceName string
+		CountryName  string
 	}
 
 	stmt, err := r.db.Prepare("SELECT * FROM localities WHERE id = ?")
@@ -181,7 +182,8 @@ func (r *repositorySeller) CheckLocality(id int) (bool, error) {
 	err = stmt.QueryRow(id).Scan(
 		&locality.Id,
 		&locality.LocalityName,
-		&locality.ProvinceId,
+		&locality.ProvinceName,
+		&locality.CountryName,
 	)
 	if err != nil {
 		return false, fmt.Errorf("Locality %d not found", id)
