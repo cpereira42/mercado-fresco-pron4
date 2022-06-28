@@ -423,14 +423,9 @@ SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 
-INSERT INTO `countries` VALUES
-(1,'Brazil');
-
-INSERT INTO `provinces` VALUES
-(1,'Sao Paulo',1);
 
 INSERT INTO `localities` VALUES
-(1,'São Paulo',1);
+(1,'São Paulo','SP',Brazil);
 
 INSERT INTO `sellers` VALUES
 (1,'cid1','Mercado','rua 1','111',1);
