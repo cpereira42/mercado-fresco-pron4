@@ -2,15 +2,24 @@ package main
 
 import (
 	"database/sql"
+<<<<<<< HEAD
+=======
 	_ "github.com/go-sql-driver/mysql"
 
+>>>>>>> sprint_3
 	"fmt"
 	"log"
 	"os"
 
+<<<<<<< HEAD
+	sectionRepository "github.com/cpereira42/mercado-fresco-pron4/internal/section/repository/file"
+	sectionService "github.com/cpereira42/mercado-fresco-pron4/internal/section/service"
+	"github.com/joho/godotenv"
+=======
 	//sectionRepository "github.com/cpereira42/mercado-fresco-pron4/internal/section/repository/file"
 	sectionRepository "github.com/cpereira42/mercado-fresco-pron4/internal/section/repository/mariadb"
 	sectionService "github.com/cpereira42/mercado-fresco-pron4/internal/section/service"
+>>>>>>> sprint_3
 
 	"github.com/cpereira42/mercado-fresco-pron4/cmd/server/handler"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/buyer"
@@ -49,8 +58,10 @@ func main() {
 	repoProd := products.NewRepositoryProducts(dbProd)
 	serviceProd := products.NewService(repoProd)
 
-	dbWarehouse := store.New(store.FileType, "./internal/repositories/warehouse.json")
-	repoWarehouse := warehouse.NewRepository(dbWarehouse)
+	//dbWarehouse := store.New(store.FileType, "./internal/repositories/warehouse.json")
+	//repoWarehouse := warehouse.NewRepository(dbWarehouse)
+
+	repoWarehouse := warehouse.NewRepository(Conn)
 	svcWarehouse := warehouse.NewService(repoWarehouse)
 	w := handler.NewWarehouse(svcWarehouse)
 
@@ -88,7 +99,7 @@ func main() {
 	sellers.POST("/", s.Create())
 	sellers.PATCH("/:id", s.Update())
 	sellers.DELETE("/:id", s.Delete())
-	
+
 	routesEmployees := r.Group("/api/v1/employees")
 	routesEmployees.GET("/", handlerEmployees.GetAll())
 	routesEmployees.GET("/:id", handlerEmployees.GetByID())
