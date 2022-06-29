@@ -1,30 +1,22 @@
 package mocks
 
 import (
-	"github.com/cpereira42/mercado-fresco-pron4/internal/section/entites"
+	"github.com/cpereira42/mercado-fresco-pron4/internal/section"
 	"github.com/stretchr/testify/mock"
 )
-
-/*
-	ListarSectionAll() ([]Section, error)
-	ListarSectionOne(id int) (Section, error)
-	CreateSection(section SectionRequestCreate) (Section, error)
-	UpdateSection(id int, sectionUp SectionRequestUpdate) (Section, error)
-	DeleteSection(id int) error
-*/
 
 type SectionService struct {
 	mock.Mock
 }
-func (sectionService *SectionService) ListarSectionAll() ([]entites.Section, error) {
+func (sectionService *SectionService) ListarSectionAll() ([]section.Section, error) {
 	args := sectionService.Called()
 
-	var sectionList []entites.Section
-	if rf, ok := args.Get(0).(func() []entites.Section); ok {
+	var sectionList []section.Section
+	if rf, ok := args.Get(0).(func() []section.Section); ok {
 		sectionList = rf()
 	} else {
 		if args.Get(0) != nil {
-			sectionList = args.Get(0).([]entites.Section)
+			sectionList = args.Get(0).([]section.Section)
 		}
 	}
 
@@ -38,20 +30,20 @@ func (sectionService *SectionService) ListarSectionAll() ([]entites.Section, err
 	}
 	return sectionList, err
 }
-func (sectionService *SectionService) ListarSectionOne(id int) (entites.Section, error) {
+func (sectionService *SectionService) ListarSectionOne(id int64) (section.Section, error) {
 	args := sectionService.Called(id)
 
-	var sectionOne entites.Section
-	if rf, ok := args.Get(0).(func(int) entites.Section); ok {
+	var sectionOne section.Section
+	if rf, ok := args.Get(0).(func(int64) section.Section); ok {
 		sectionOne = rf(id)
 	} else {
 		if args.Get(0) != nil {
-			sectionOne = args.Get(0).(entites.Section)
+			sectionOne = args.Get(0).(section.Section)
 		}
 	}
 
 	var err error 
-	if rf, ok := args.Get(1).(func(int) error); ok {
+	if rf, ok := args.Get(1).(func(int64) error); ok {
 		err = rf(id)
 	} else {
 		if args.Get(1) != nil {
@@ -60,20 +52,20 @@ func (sectionService *SectionService) ListarSectionOne(id int) (entites.Section,
 	}
 	return sectionOne, err
 }
-func (sectionService *SectionService) CreateSection(sectionNew entites.SectionRequestCreate) (entites.Section, error) {
+func (sectionService *SectionService) CreateSection(sectionNew section.SectionRequestCreate) (section.Section, error) {
 	args := sectionService.Called(sectionNew)
 
-	var sectionObj entites.Section
-	if rf, ok := args.Get(0).(func(entites.SectionRequestCreate) entites.Section); ok {
+	var sectionObj section.Section
+	if rf, ok := args.Get(0).(func(section.SectionRequestCreate) section.Section); ok {
 		sectionObj = rf(sectionNew)
 	} else {
 		if args.Get(0) != nil {
-			sectionObj = args.Get(0).(entites.Section)
+			sectionObj = args.Get(0).(section.Section)
 		}
 	}
 
 	var err error 
-	if rf, ok := args.Get(1).(func(entites.SectionRequestCreate) error); ok {
+	if rf, ok := args.Get(1).(func(section.SectionRequestCreate) error); ok {
 		err = rf(sectionNew)
 	} else {
 		if args.Get(1) != nil {
@@ -82,21 +74,21 @@ func (sectionService *SectionService) CreateSection(sectionNew entites.SectionRe
 	}
 	return sectionObj, err
 }
-func (sectionService *SectionService) UpdateSection(id int, sectionUp entites.SectionRequestUpdate) (entites.Section, error) {
+func (sectionService *SectionService) UpdateSection(id int64, sectionUp section.SectionRequestUpdate) (section.Section, error) {
 	args := sectionService.Called(id, sectionUp)
 
-	var sectionObj entites.Section
-	if rf, ok := args.Get(0).(func(int,entites.SectionRequestUpdate) entites.Section); ok {
-		sectionObj = rf(id,sectionUp)
+	var sectionObj section.Section
+	if rf, ok := args.Get(0).(func(int64,section.SectionRequestUpdate) section.Section); ok {
+		sectionObj = rf(id, sectionUp)
 	} else {
 		if args.Get(0) != nil {
-			sectionObj = args.Get(0).(entites.Section)
+			sectionObj = args.Get(0).(section.Section)
 		}
 	}
 
 	var err error 
-	if rf, ok := args.Get(1).(func(int,entites.SectionRequestUpdate) error); ok {
-		err = rf(id,sectionUp)
+	if rf, ok := args.Get(1).(func(int64, section.SectionRequestUpdate) error); ok {
+		err = rf(id, sectionUp)
 	} else {
 		if args.Get(1) != nil {
 			err = args.Error(1)
@@ -104,11 +96,11 @@ func (sectionService *SectionService) UpdateSection(id int, sectionUp entites.Se
 	}
 	return sectionObj, err
 }
-func (sectionService *SectionService) DeleteSection(id int) error {
+func (sectionService *SectionService) DeleteSection(id int64) error {
 	args := sectionService.Called(id)
 
 	var err error 
-	if rf, ok := args.Get(0).(func(int) error); ok {
+	if rf, ok := args.Get(0).(func(int64) error); ok {
 		err = rf(id)
 	} else {
 		if args.Get(0) != nil {
