@@ -39,7 +39,8 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`localities` (
   `locality_name` VARCHAR(255) NOT NULL,
   `province_name` VARCHAR(255) NOT NULL,
   `country_name` VARCHAR(255) NOT NULL,
-  PRIMARY KEY (`id`))
+  PRIMARY KEY (`id`),
+  CONSTRAINT `locality_name_unique` UNIQUE (`locality_name`))
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 
