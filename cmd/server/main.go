@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-
 	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/cpereira42/mercado-fresco-pron4/internal/section"
@@ -41,8 +40,10 @@ func main() {
 	repoProd := products.NewRepositoryProducts(dbProd)
 	serviceProd := products.NewService(repoProd)
 
-	dbWarehouse := store.New(store.FileType, "./internal/repositories/warehouse.json")
-	repoWarehouse := warehouse.NewRepository(dbWarehouse)
+	//dbWarehouse := store.New(store.FileType, "./internal/repositories/warehouse.json")
+	//repoWarehouse := warehouse.NewRepository(dbWarehouse)
+
+	repoWarehouse := warehouse.NewRepository(Conn)
 	svcWarehouse := warehouse.NewService(repoWarehouse)
 	w := handler.NewWarehouse(svcWarehouse)
 
