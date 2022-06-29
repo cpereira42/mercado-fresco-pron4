@@ -32,48 +32,15 @@ DEFAULT CHARACTER SET = utf8mb3;
 
 
 -- -----------------------------------------------------
--- Table `mercadofresco`.`countries`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `mercadofresco`.`countries` (
-  `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `country_name` VARCHAR(255) NOT NULL,
-  PRIMARY KEY (`id`))
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8mb3;
-
-
--- -----------------------------------------------------
--- Table `mercadofresco`.`provinces`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `mercadofresco`.`provinces` (
-  `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `province_name` VARCHAR(255) NOT NULL,
-  `id_contry_fk` INT(11) NOT NULL,
-  PRIMARY KEY (`id`),
-  INDEX `fk_provinces_contries1_idx` (`id_contry_fk` ASC) VISIBLE,
-  CONSTRAINT `fk_provinces_contries1`
-    FOREIGN KEY (`id_contry_fk`)
-    REFERENCES `mercadofresco`.`countries` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8mb3;
-
-
--- -----------------------------------------------------
 -- Table `mercadofresco`.`localities`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mercadofresco`.`localities` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `locality_name` VARCHAR(255) NOT NULL,
-  `province_id` INT(11) NOT NULL,
+  `province_name` VARCHAR(255) NOT NULL,
+  `country_name` VARCHAR(255) NOT NULL,
   PRIMARY KEY (`id`),
-  INDEX `fk_localities_provinces1_idx` (`province_id` ASC) VISIBLE,
-  CONSTRAINT `fk_localities_provinces1`
-    FOREIGN KEY (`province_id`)
-    REFERENCES `mercadofresco`.`provinces` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+  CONSTRAINT `locality_name_unique` UNIQUE (`locality_name`))
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 
@@ -109,7 +76,7 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`warehouse` (
   `warehouse_code` VARCHAR(255) NOT NULL,
   `locality_id` INT(11) NOT NULL,
   `minimum_capacity` INT NOT NULL,
-  `minimum_temperatura` DECIMAL(19,2) NOT NULL,
+  `minimum_temperature` INT (11) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE,
   UNIQUE INDEX `warehouse_code_UNIQUE` (`warehouse_code` ASC) VISIBLE,
@@ -193,9 +160,9 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`products` (
    `recommended_freezing_temperature` DECIMAL(19,2) NOT NULL,
   `freezing_rate` DECIMAL(19,2) NOT NULL,
   `product_type_id` INT(11) NOT NULL,
-  `sellers_id` INT(11) NOT NULL,
+  `seller_id` INT(11) NOT NULL,
   PRIMARY KEY (`id`),
-  INDEX `fk_product_sellers1_idx` (`sellers_id` ASC) VISIBLE,
+  INDEX `fk_product_sellers1_idx` (`seller_id` ASC) VISIBLE,
   INDEX `fk_product_products_types1_idx` (`product_type_id` ASC) VISIBLE,
   CONSTRAINT `fk_product_products_types1`
     FOREIGN KEY (`product_type_id`)
@@ -203,7 +170,7 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`products` (
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_product_sellers1`
-    FOREIGN KEY (`sellers_id`)
+    FOREIGN KEY (`seller_id`)
     REFERENCES `mercadofresco`.`sellers` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
@@ -456,18 +423,27 @@ SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 
-INSERT INTO `countries` VALUES
-(1,'Brazil');
 
-INSERT INTO `provinces` VALUES
-(1,'Sao Paulo',1);
-
-INSERT INTO `localities` VALUES
-(1,'São Paulo',1);
+INSERT INTO `localities` (id, locality_name, province_name, country_name) VALUES
+(1,'São Paulo','SP','Brazil'),
+(2,'Rio de Janeiro','RJ','Brazil'),
+(3,'Nova York','NY','EUA');
 
 INSERT INTO `sellers` VALUES
-(1,'cid1','Mercado','rua 1','111',1);
-
+(1,'cid1','Mercado','rua 1','111',1),
+(2,'cid2','Mercado','rua 1','111',1),
+(3,'cid3','Mercado','rua 1','111',1),
+(4,'cid4','Mercado','rua 1','111',2),
+(5,'cid5','Mercado','rua 1','111',2),
+(6,'cid6','Mercado','rua 1','111',2),
+(7,'cid7','Mercado','rua 1','111',2),
+(8,'cid8','Mercado','rua 1','111',2),
+(9,'cid9','Mercado','rua 1','111',3),
+(10,'cid10','Mercado','rua 1','111',3),
+(11,'cid11','Mercado','rua 1','111',3),
+(12,'cid12','Mercado','rua 1','111',1),
+(13,'cid13','Mercado','rua 1','111',2),
+(14,'cid14','Mercado','rua 1','111',2);
 
 INSERT INTO `products_types` VALUES
 (1,'description 1');
@@ -513,22 +489,3 @@ INSERT INTO `purchase_orders` VALUES
 
 INSERT INTO `order_details` VALUES
 (1,'teste',15,15.00,1,1);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

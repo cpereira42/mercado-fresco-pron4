@@ -10,6 +10,7 @@ import (
 	"os"
 
 	//sectionRepository "github.com/cpereira42/mercado-fresco-pron4/internal/section/repository/file"
+	"github.com/cpereira42/mercado-fresco-pron4/internal/locality"
 	sectionRepository "github.com/cpereira42/mercado-fresco-pron4/internal/section/repository/mariadb"
 	sectionService "github.com/cpereira42/mercado-fresco-pron4/internal/section/service"
 
@@ -63,6 +64,10 @@ func main() {
 	repoSeller := seller.NewRepositorySeller(Conn)
 	serviceSeller := seller.NewService(repoSeller)
 
+	repoLocality := locality.NewRepositoryLocality(Conn)
+	serviceLocality := locality.NewService(repoLocality)
+	l := handler.NewLocality(serviceLocality)
+
 	dbEmployees := store.New(store.FileType, "./internal/repositories/employees.json")
 	repositoryEmployees := employee.NewRepository(dbEmployees)
 	serviceEmployees := employee.NewService(repositoryEmployees)
@@ -114,6 +119,11 @@ func main() {
 	buyers.POST("/", hdBuyers.Create())
 	buyers.PATCH("/:id", hdBuyers.Update())
 	buyers.DELETE("/:id", hdBuyers.Delete())
+
+	localities := r.Group("/api/v1/localities")
+	localities.POST("/", l.Create())
+	localities.GET("/", l.GenerateReportAll())
+	localities.GET("/:id", l.GenerateReportById())
 
 	r.Run()
 }
