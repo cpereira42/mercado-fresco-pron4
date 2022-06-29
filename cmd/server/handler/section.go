@@ -109,9 +109,9 @@ func (controller *SectionController) DeleteSection() gin.HandlerFunc {
 } 
 
 
-func getRequestId(context *gin.Context) (paramId int, err error) {
+func getRequestId(context *gin.Context) (paramId int64, err error) {
 	id := context.Param("id")
-	paramId, err = strconv.Atoi(id)
+	paramId, err = strconv.ParseInt(id, 16,64)
 	return
 }
 

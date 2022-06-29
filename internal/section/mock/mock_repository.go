@@ -40,11 +40,11 @@ func (sectionRepository *SectionRepository) ListarSectionAll() ([]section.Sectio
 	return sectionList, err
 }
 
-func (sectionRepository *SectionRepository) ListarSectionOne(id int) (section.Section, error) {
+func (sectionRepository *SectionRepository) ListarSectionOne(id int64) (section.Section, error) {
 	args := sectionRepository.Called(id)
 
 	var sectionObj section.Section
-	if rf, ok := args.Get(0).(func(int) section.Section); ok {
+	if rf, ok := args.Get(0).(func(int64) section.Section); ok {
 		sectionObj = rf(id)
 	} else {
 		if args.Get(0) != nil {
@@ -53,7 +53,7 @@ func (sectionRepository *SectionRepository) ListarSectionOne(id int) (section.Se
 	}
 
 	var err error
-	if rf, ok := args.Get(1).(func(int) error); ok {
+	if rf, ok := args.Get(1).(func(int64) error); ok {
 		err = rf(id)
 	} else {
 		if args.Get(1) != nil {
@@ -86,11 +86,11 @@ func (sectionRepository *SectionRepository) CreateSection(newSection section.Sec
 	return sectionObj, err
 }
 
-func (sectionRepository *SectionRepository) UpdateSection(id int, sectionUp section.Section) (section.Section, error) {
+func (sectionRepository *SectionRepository) UpdateSection(id int64, sectionUp section.Section) (section.Section, error) {
 	args := sectionRepository.Called(id, sectionUp)
 
 	var sectionObj section.Section
-	if rf, ok := args.Get(0).(func(int, section.Section) section.Section); ok {
+	if rf, ok := args.Get(0).(func(int64, section.Section) section.Section); ok {
 		sectionObj = rf(id, sectionObj)
 	} else {
 		if args.Get(0) != nil {
@@ -99,7 +99,7 @@ func (sectionRepository *SectionRepository) UpdateSection(id int, sectionUp sect
 	}
 
 	var err error
-	if rf, ok := args.Get(1).(func(int, section.Section) error); ok {
+	if rf, ok := args.Get(1).(func(int64, section.Section) error); ok {
 		err = rf(id, sectionObj)
 	} else {
 		if args.Get(1) != nil {
@@ -109,11 +109,11 @@ func (sectionRepository *SectionRepository) UpdateSection(id int, sectionUp sect
 	return sectionObj, err
 }
 
-func (sectionRepository *SectionRepository) DeleteSection(id int) error {
+func (sectionRepository *SectionRepository) DeleteSection(id int64) error {
 	args := sectionRepository.Called(id)
 
 	var err error
-	if rf, ok := args.Get(0).(func(int) error); ok {
+	if rf, ok := args.Get(0).(func(int64) error); ok {
 		err = rf(id)
 	} else {
 		if args.Get(0) != nil {
