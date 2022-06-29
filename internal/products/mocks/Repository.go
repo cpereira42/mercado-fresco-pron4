@@ -12,13 +12,13 @@ type Repository struct {
 	mock.Mock
 }
 
-// CheckCode provides a mock function with given fields: code
-func (_m *Repository) CheckCode(code string) error {
-	ret := _m.Called(code)
+// CheckCode provides a mock function with given fields: id, code
+func (_m *Repository) CheckCode(id int, code string) error {
+	ret := _m.Called(id, code)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(string) error); ok {
-		r0 = rf(code)
+	if rf, ok := ret.Get(0).(func(int, string) error); ok {
+		r0 = rf(id, code)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -93,6 +93,27 @@ func (_m *Repository) GetId(id int) (products.Product, error) {
 		r0 = rf(id)
 	} else {
 		r0 = ret.Get(0).(products.Product)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(int) error); ok {
+		r1 = rf(id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetProductsTypes provides a mock function with given fields: id
+func (_m *Repository) GetProductsTypes(id int) (string, error) {
+	ret := _m.Called(id)
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func(int) string); ok {
+		r0 = rf(id)
+	} else {
+		r0 = ret.Get(0).(string)
 	}
 
 	var r1 error

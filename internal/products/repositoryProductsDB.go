@@ -15,7 +15,7 @@ type Repository interface {
 	LastID() (int, error)
 	Create(p Product) (Product, error)
 	Update(id int, prod Product) (Product, error)
-	CheckCode(code string) error
+	CheckCode(id int, code string) error
 	GetProductsTypes(id int) (string, error)
 }
 
@@ -90,14 +90,14 @@ func (r *repository) GetId(id int) (Product, error) {
 	return product, nil
 }
 
-func (r *repository) CheckCode(code string) error {
+func (r *repository) CheckCode(id int, code string) error {
 
-	stmt, err := r.db.Prepare("SELECT product_code FROM products Where product_code = ?")
+	stmt, err := r.db.Prepare("SELECT product_code FROM products Where product_code = ? and id != ?")
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
-	err = stmt.QueryRow(code).Scan(&code)
+	err = stmt.QueryRow(code, id).Scan(&code)
 	if err != nil {
 		return fmt.Errorf("Product already registred")
 	}

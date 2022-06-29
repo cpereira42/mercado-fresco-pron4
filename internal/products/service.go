@@ -41,7 +41,7 @@ func (s *service) GetId(id int) (Product, error) {
 
 	ps, err := s.rep.GetId(id)
 	if err != nil {
-		return Product{}, fmt.Errorf("Product not Foun22d")
+		return Product{}, fmt.Errorf("Product not Found")
 	}
 	return ps, nil
 }
@@ -52,11 +52,9 @@ func (s *service) Delete(id int) error {
 
 func (s *service) CheckCode(id int, code string) bool {
 
-	ps, _ := s.rep.GetAll()
-	for i := range ps {
-		if ps[i].ProductCode == code && ps[i].Id != id {
-			return true
-		}
+	err := s.rep.CheckCode(id, code)
+	if err != nil {
+		return true
 	}
 	return false
 }

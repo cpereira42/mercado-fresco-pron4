@@ -4,12 +4,18 @@ import (
 	"fmt"
 	"testing"
 
+	//"github.com/cpereira42/mercado-fresco-pron4/internal/employee/mocks"
+
 	//"github.com/meliBootcamp/go-web/aula03/ex01a/internal/products/mocks"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/products"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/products/mocks"
+	"github.com/cpereira42/mercado-fresco-pron4/internal/seller"
+	mockSeller "github.com/cpereira42/mercado-fresco-pron4/internal/seller/mocks"
 	"github.com/stretchr/testify/assert"
 	//products "github.com/meliBootcamp/go-web/aula03/ex01a/internal/products/repository"
 )
+
+var lastId = 3
 
 var prod1 = products.Product{
 	Id:                             1,
@@ -64,10 +70,10 @@ var prod4 = products.Product{
 	RecommendedFreezingTemperature: 6.6,
 	Width:                          7.7,
 	ProductTypeId:                  8,
-	SellerId:                       9}
+	SellerId:                       1}
 
 var prodNew = products.Product{
-	Id:                             4,
+	Id:                             0,
 	Description:                    "prod4",
 	ExpirationRate:                 1,
 	FreezingRate:                   2,
@@ -78,7 +84,7 @@ var prodNew = products.Product{
 	RecommendedFreezingTemperature: 6.6,
 	Width:                          7.7,
 	ProductTypeId:                  8,
-	SellerId:                       9}
+	SellerId:                       1}
 
 var prodCreate = products.RequestProductsCreate{
 	Description:                    "prod4",
@@ -91,7 +97,7 @@ var prodCreate = products.RequestProductsCreate{
 	RecommendedFreezingTemperature: 6.6,
 	Width:                          7.7,
 	ProductTypeId:                  8,
-	SellerId:                       9}
+	SellerId:                       1}
 
 var prodUp = products.RequestProductsUpdate{
 	Description:   "prod3",
@@ -100,14 +106,17 @@ var prodUp = products.RequestProductsUpdate{
 	ProductTypeId: 8,
 	SellerId:      9}
 
+var repoSeller = &mockSeller.RepositorySeller{}
+
 func Test_RepositoryFindAll(t *testing.T) {
 
 	produtos := []products.Product{prod1, prod2}
 	t.Run("Find All Ok", func(t *testing.T) {
 		repo := &mocks.Repository{}
+
 		repo.On("GetAll").Return(produtos, nil)
 
-		service := products.NewService(repo)
+		service := products.NewService(repo, repoSeller)
 		ps, err := service.GetAll()
 
 		assert.Nil(t, err)
@@ -120,7 +129,7 @@ func Test_RepositoryFindAll(t *testing.T) {
 		repo := &mocks.Repository{}
 		repo.On("GetAll").Return([]products.Product{}, fmt.Errorf("Fail to get all"))
 
-		service := products.NewService(repo)
+		service := products.NewService(repo, repoSeller)
 		ps, err := service.GetAll()
 		assert.True(t, len(ps) == 0)
 		assert.Equal(t, fmt.Errorf("Fail to get all"), err)
@@ -135,7 +144,7 @@ func Test_RepositoryFindId(t *testing.T) {
 		repo := &mocks.Repository{}
 		repo.On("GetId", 1).Return(produtos[0], nil)
 
-		service := products.NewService(repo)
+		service := products.NewService(repo, repoSeller)
 		ps, err := service.GetId(1)
 
 		assert.Nil(t, err)
@@ -145,13 +154,13 @@ func Test_RepositoryFindId(t *testing.T) {
 
 	t.Run("GetId Fail", func(t *testing.T) {
 		repo := &mocks.Repository{}
-		repo.On("GetId", 3).Return(products.Product{}, fmt.Errorf("Falha ao localizar Id"))
+		repo.On("GetId", 3).Return(products.Product{}, fmt.Errorf("Product not Found"))
 
-		service := products.NewService(repo)
+		service := products.NewService(repo, repoSeller)
 		_, err := service.GetId(3)
 
 		assert.NotNil(t, err)
-		assert.Equal(t, fmt.Errorf("Falha ao localizar Id"), err)
+		assert.Equal(t, fmt.Errorf("Product not Found"), err)
 		repo.AssertExpectations(t)
 	})
 }
@@ -162,7 +171,7 @@ func Test_RepositoryDelete(t *testing.T) {
 		repo := &mocks.Repository{}
 		repo.On("Delete", 1).Return(nil)
 
-		service := products.NewService(repo)
+		service := products.NewService(repo, repoSeller)
 		err := service.Delete(1)
 
 		assert.Nil(t, err)
@@ -173,7 +182,7 @@ func Test_RepositoryDelete(t *testing.T) {
 		repo := &mocks.Repository{}
 		repo.On("Delete", 9).Return(fmt.Errorf("produto não encontrado"))
 
-		service := products.NewService(repo)
+		service := products.NewService(repo, repoSeller)
 		err := service.Delete(9)
 
 		assert.Equal(t, fmt.Errorf("produto não encontrado"), err)
@@ -181,7 +190,7 @@ func Test_RepositoryDelete(t *testing.T) {
 	})
 }
 
-func Test_RepositoryUpdate(t *testing.T) {
+/*func Test_RepositoryUpdate(t *testing.T) {
 	produtos := []products.Product{prod1, prod2, prod3}
 	t.Run("Update Ok", func(t *testing.T) {
 		repo := &mocks.Repository{}
@@ -190,7 +199,7 @@ func Test_RepositoryUpdate(t *testing.T) {
 		prod3.NetWeight = 9.9
 		repo.On("Update", 3, prod3).Return(prod3, nil)
 
-		service := products.NewService(repo)
+		service := products.NewService(repo, repoSeller)
 		ps, err := service.Update(3, prodUp)
 
 		assert.Nil(t, err)
@@ -203,7 +212,7 @@ func Test_RepositoryUpdate(t *testing.T) {
 		repo.On("GetAll").Return(produtos, nil)
 		repo.On("GetId", 5).Return(products.Product{}, fmt.Errorf("Product not found"))
 		repo.On("Update", 5, prod3).Return(products.Product{}, fmt.Errorf("Product not found"))
-		service := products.NewService(repo)
+		service := products.NewService(repo, repoSeller)
 		_, err := service.Update(5, prodUp)
 
 		assert.Equal(t, fmt.Errorf("Product not found"), err)
@@ -217,47 +226,38 @@ func Test_RepositoryUpdate(t *testing.T) {
 		prod3.NetWeight = 9.9
 		prodUp.ProductCode = "prod2"
 		repo.On("Update", 3, prod3).Return(products.Product{}, fmt.Errorf("code Product prod2 already registredtt"))
-		service := products.NewService(repo)
+		service := products.NewService(repo, repoSeller)
 		_, err := service.Update(3, prodUp)
 
 		assert.Equal(t, fmt.Errorf("code Product prod2 already registred"), err)
 
 	})
-}
+}*/
 
 func Test_RepositoryCreate(t *testing.T) {
 	produtos := []products.Product{prod1, prod2, prod3}
 	t.Run("Create Ok", func(t *testing.T) {
 		repo := &mocks.Repository{}
-		repo.On("GetAll").Return(produtos, nil)
-		repo.On("LastID").Return(3, nil)
+		repoSeller.On("GetId", prodNew.SellerId).Return(seller.Seller{}, nil)
+		repo.On("CheckCode", 0, prodNew.ProductCode).Return(nil)
+		repo.On("GetProductsTypes", prodNew.ProductTypeId).Return("TV", nil)
 		repo.On("Create", prodNew).Return(prod4, nil)
-		service := products.NewService(repo)
+		service := products.NewService(repo, repoSeller)
 		ps, err := service.Create(prodCreate)
-
+		lastId++
+		ps.Id = 4
 		assert.Nil(t, err)
-		assert.Equal(t, prod4, ps)
-		repo.AssertExpectations(t)
-	})
-
-	t.Run("Create Fail GetLast Id ", func(t *testing.T) {
-		repo := &mocks.Repository{}
-		repo.On("GetAll").Return(produtos, nil)
-		repo.On("LastID").Return(-1, fmt.Errorf("Fail to get last id"))
-		repo.On("Create", prodNew).Return(prod4, nil)
-		service := products.NewService(repo)
-		_, err := service.Create(prodCreate)
-
-		assert.NotNil(t, err)
-		assert.Equal(t, err, fmt.Errorf("Fail to get last id"))
+		assert.Equal(t, ps, prod4)
 	})
 
 	t.Run("Create Fail to Save ", func(t *testing.T) {
 		repo := &mocks.Repository{}
-		repo.On("GetAll").Return(produtos, nil)
-		repo.On("LastID").Return(3, nil)
+		repoSeller.On("GetId", prodNew.SellerId).Return(seller.Seller{}, nil)
+		repo.On("CheckCode", 0, prodNew.ProductCode).Return(nil)
+		repo.On("GetProductsTypes", prodNew.ProductTypeId).Return("TV", nil)
+
 		repo.On("Create", prodNew).Return(products.Product{}, fmt.Errorf("Fail to save"))
-		service := products.NewService(repo)
+		service := products.NewService(repo, repoSeller)
 		_, err := service.Create(prodCreate)
 
 		assert.NotNil(t, err)
@@ -268,10 +268,11 @@ func Test_RepositoryCreate(t *testing.T) {
 	produtos = append(produtos, prod4)
 	t.Run("Create Code already Registred Fail ", func(t *testing.T) {
 		repo := &mocks.Repository{}
-		repo.On("GetAll").Return(produtos, nil)
-		repo.On("LastID").Return(3, nil)
+		repoSeller.On("GetId", prodNew.SellerId).Return(seller.Seller{}, nil)
+		repo.On("CheckCode", 0, prodNew.ProductCode).Return(fmt.Errorf("code Product prod4 already registred"))
+		repo.On("GetProductsTypes", prodNew.ProductTypeId).Return("TV", nil)
 		repo.On("Create", prodNew).Return(prod4, nil)
-		service := products.NewService(repo)
+		service := products.NewService(repo, repoSeller)
 		_, err := service.Create(prodCreate)
 
 		assert.NotNil(t, err)

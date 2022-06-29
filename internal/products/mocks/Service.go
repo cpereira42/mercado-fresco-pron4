@@ -105,6 +105,27 @@ func (_m *Service) GetId(id int) (products.Product, error) {
 	return r0, r1
 }
 
+// GetProductsTypes provides a mock function with given fields: id
+func (_m *Service) GetProductsTypes(id int) (string, error) {
+	ret := _m.Called(id)
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func(int) string); ok {
+		r0 = rf(id)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(int) error); ok {
+		r1 = rf(id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Update provides a mock function with given fields: id, p
 func (_m *Service) Update(id int, p products.RequestProductsUpdate) (products.Product, error) {
 	ret := _m.Called(id, p)
