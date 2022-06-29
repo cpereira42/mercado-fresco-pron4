@@ -108,7 +108,7 @@ func (r *repository) CheckCode(id int, code string) error {
 
 func (r *repository) Delete(id int) error {
 
-	stmt, err := r.db.Prepare("DELETE FROM products WHERE id=?")
+	stmt, err := r.db.Prepare("DELETE FROM products WHERE id=? ")
 	if err != nil {
 		return err
 	}

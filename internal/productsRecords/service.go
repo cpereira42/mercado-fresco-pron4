@@ -6,6 +6,7 @@ import (
 
 type Service interface {
 	GetIdRecords(id int) (ReturnProductRecords, error)
+	GetAllRecords() ([]ReturnProductRecords, error)
 	Create(p RequestProductRecordsCreate) (ProductRecords, error)
 }
 
@@ -25,6 +26,14 @@ func (s *service) GetIdRecords(id int) (ReturnProductRecords, error) {
 	ps, err := s.repositoryRecords.GetIdRecords(id)
 	if err != nil {
 		return ReturnProductRecords{}, err
+	}
+	return ps, nil
+}
+
+func (s *service) GetAllRecords() ([]ReturnProductRecords, error) {
+	ps, err := s.repositoryRecords.GetAllRecords()
+	if err != nil {
+		return []ReturnProductRecords{}, err
 	}
 	return ps, nil
 }

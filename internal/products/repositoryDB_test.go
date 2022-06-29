@@ -2,6 +2,7 @@ package products_test
 
 import (
 	"database/sql"
+	"regexp"
 	"testing"
 
 	//"github.com/meliBootcamp/go-web/aula03/ex01a/internal/products/mocks"
@@ -137,10 +138,10 @@ func TestGetId(t *testing.T) {
 
 	productsRepo := products.NewRepositoryProductsDB(db)
 
-	query := "SELECT \\* FROM products Where id =?"
+	query := "SELECT * FROM products Where id = ?"
 
 	t.Run("Get ID - OK", func(t *testing.T) {
-		rows := []string{
+		rows := sqlmock.NewRows([]string{
 			"Id",
 			"ProductCode",
 			"Description",
@@ -153,16 +154,32 @@ func TestGetId(t *testing.T) {
 			"FreezingRate",
 			"ProductTypeId",
 			"SellerId",
-		}
+		}).AddRow(
+			prod1DB.Id,
+			prod1DB.ProductCode,
+			prod1DB.Description,
+			prod1DB.Width,
+			prod1DB.Length,
+			prod1DB.Height,
+			prod1DB.NetWeight,
+			prod1DB.ExpirationRate,
+			prod1DB.RecommendedFreezingTemperature,
+			prod1DB.FreezingRate,
+			prod1DB.ProductTypeId,
+			prod1DB.SellerId,
+		)
 
-		mock.ExpectQuery(query).
-			WithArgs(1).
-			WillReturnRows(sqlmock.NewRows(rows).AddRow(prod1DB))
+		stmt := mock.ExpectPrepare(regexp.QuoteMeta(query))
+		stmt.ExpectQuery().WithArgs(1).WillReturnRows(rows)
 
-		result, err := productsRepo.GetId(1)
+		/*mock.ExpectQuery(query).
+		WithArgs(1).
+		WillReturnRows(rows)*/
+
+		result, _ := productsRepo.GetId(1)
 		assert.NoError(t, err)
 
-		assert.Equal(t, result.Description, produtos[0].Description)
+		assert.Equal(t, produtos[0].Description, result.Description)
 
 	})
 

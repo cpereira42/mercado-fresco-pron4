@@ -19,12 +19,33 @@ func NewProductRecords(p productsRecords.Service) *ProductRecords {
 
 func (c *ProductRecords) GetId() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		id, err := strconv.ParseInt(ctx.Query("id"), 10, 64)
-		if err != nil {
-			ctx.JSON(404, web.NewResponse(404, nil, "Invalid ID"))
-			return
+
+		if ctx.Query("id") == "" {
+			p, err := c.service.GetAllRecords()
+			if err != nil {
+				ctx.JSON(404, web.NewResponse(404, nil, "Invalid ID"))
+				return
+			}
+			ctx.JSON(200, web.NewResponse(200, p, ""))
+		} else {
+			id, err := strconv.ParseInt(ctx.Query("id"), 10, 64)
+			if err != nil {
+				ctx.JSON(404, web.NewResponse(404, nil, "Invalid ID"))
+				return
+			}
+			p, err := c.service.GetIdRecords(int(id))
+			if err != nil {
+				ctx.JSON(404, web.NewResponse(404, nil, err.Error()))
+				return
+			}
+			ctx.JSON(200, web.NewResponse(200, p, ""))
 		}
-		p, err := c.service.GetIdRecords(int(id))
+	}
+}
+
+func (c *ProductRecords) GetAll() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		p, err := c.service.GetAllRecords()
 		if err != nil {
 			ctx.JSON(404, web.NewResponse(404, nil, err.Error()))
 			return
