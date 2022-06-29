@@ -182,12 +182,12 @@ DEFAULT CHARACTER SET = utf8;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mercadofresco`.`sections` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `section_number` VARCHAR(255) NOT NULL,
+  `section_number` INT(11) NOT NULL,
   `current_capacity` INT(11) NOT NULL,
-  `current_temperature` DECIMAL(19,2) NOT NULL,
+  `current_temperature` INT(11) NOT NULL,
   `maximum_capacity` INT(11) NOT NULL,
   `minimum_capacity` INT(11) NOT NULL,
-  `minimum_temperature` DECIMAL(19,2) NOT NULL,
+  `minimum_temperature` INT(11) NOT NULL,
   `product_type_id` INT(11) NOT NULL,
   `warehouse_id` INT(10) UNSIGNED NOT NULL,
   PRIMARY KEY (`id`),
