@@ -85,7 +85,7 @@ func (r *repository) GetId(id int) (Product, error) {
 	defer stmt.Close()
 
 	if err != nil {
-		return Product{}, fmt.Errorf("Product id %d not found", id)
+		return Product{}, fmt.Errorf("Product not found")
 	}
 	return product, nil
 }
@@ -93,12 +93,14 @@ func (r *repository) GetId(id int) (Product, error) {
 func (r *repository) CheckCode(id int, code string) error {
 
 	stmt, err := r.db.Prepare("SELECT product_code FROM products Where product_code = ? and id != ?")
+
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
 	err = stmt.QueryRow(code, id).Scan(&code)
-	if err != nil {
+
+	if err == nil {
 		return fmt.Errorf("Product already registred")
 	}
 	return nil
@@ -119,7 +121,7 @@ func (r *repository) Delete(id int) error {
 	}
 	RowsAffected, _ := res.RowsAffected()
 	if RowsAffected == 0 {
-		return fmt.Errorf("product %d not found", id)
+		return fmt.Errorf("product not found")
 	}
 
 	return nil

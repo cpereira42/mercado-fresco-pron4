@@ -5,7 +5,7 @@ import (
 )
 
 type Service interface {
-	GetIdRecords(id int) (ProductRecords, error)
+	GetIdRecords(id int) (ReturnProductRecords, error)
 	Create(p RequestProductRecordsCreate) (ProductRecords, error)
 }
 
@@ -21,10 +21,10 @@ func NewService(r Repository, repositoryProducts products.Repository) Service {
 	}
 }
 
-func (s *service) GetIdRecords(id int) (ProductRecords, error) {
+func (s *service) GetIdRecords(id int) (ReturnProductRecords, error) {
 	ps, err := s.repositoryRecords.GetIdRecords(id)
 	if err != nil {
-		return ProductRecords{}, err
+		return ReturnProductRecords{}, err
 	}
 	return ps, nil
 }

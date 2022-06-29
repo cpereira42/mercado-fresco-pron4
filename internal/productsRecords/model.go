@@ -16,8 +16,14 @@ type RequestProductRecordsCreate struct {
 	ProductId      int     `json:"product_id" binding:"required"`
 }
 
+type ReturnProductRecords struct {
+	ProductId    int    `json:"product_id"`
+	RecordsCount int    `json:"records_count"`
+	Description  string `json:"description"`
+}
+
 type Repository interface {
-	GetIdRecords(id int) (ProductRecords, error)
+	GetIdRecords(id int) (ReturnProductRecords, error)
 	Create(p ProductRecords) (ProductRecords, error)
 	//CheckCode(code string) error
 }

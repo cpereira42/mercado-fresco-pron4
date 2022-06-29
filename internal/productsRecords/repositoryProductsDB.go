@@ -3,6 +3,7 @@ package productsRecords
 import (
 	"database/sql"
 	"fmt"
+	"log"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -17,39 +18,58 @@ func NewRepositoryProductsRecordsDB(db *sql.DB) Repository {
 	}
 }
 
-func (r *repository) GetIdRecords(id int) (ProductRecords, error) {
-	var ProductRecords ProductRecords
+func (r *repository) GetIdRecords(id int) (ReturnProductRecords, error) {
 
-	stmt, err := r.db.Prepare("SELECT * FROM product_records Where id = ?")
+	var ProductRecords ReturnProductRecords
+
+	stmt, err := r.db.Prepare("SELECT product_id FROM product_records Where id = ?")
 	if err != nil {
 		return ProductRecords, err
 	}
-	err = stmt.QueryRow(id).Scan(&ProductRecords.Id,
-		&ProductRecords.LastUpdateDate,
-		&ProductRecords.PurchasePrice,
-		&ProductRecords.SalePrice,
-		&ProductRecords.ProductId)
+	err = stmt.QueryRow(id).Scan(&ProductRecords.ProductId)
+	if err != nil {
+		return ProductRecords, fmt.Errorf("ProductRecord not Found")
+	}
+
+	stmt, err = r.db.Prepare("SELECT description FROM products Where id = ?")
+	if err != nil {
+		return ProductRecords, err
+	}
+	err = stmt.QueryRow(ProductRecords.ProductId).Scan(&ProductRecords.Description)
+	if err != nil {
+		return ProductRecords, fmt.Errorf("Products not Found")
+	}
+
 	defer stmt.Close()
 
+	/*stmt, err = r.db.Prepare(`SELECT products.id, products.description, COUNT(product_records.product_id)
+	  FROM mercadofresco.products
+	  INNER JOIN product_records ON products.id = product_records.product_id
+	  WHERE product_records.id = ?
+	  GROUP BY product_id`)*/
+
+	stmt, err = r.db.Prepare(`SELECT pr.product_id, p.description, COUNT(pr.product_id) AS records_count
+	FROM product_records pr 
+	JOIN products p ON p.id = pr.product_id
+	WHERE pr.product_id = ?
+	GROUP BY pr.product_id`)
+
 	if err != nil {
-		return ProductRecords, fmt.Errorf("Product not Found")
+		log.Fatal("err", err)
+		return ProductRecords, fmt.Errorf("Products not sssFound")
+	}
+
+	err = stmt.QueryRow(id).Scan(
+		&ProductRecords.ProductId,
+		&ProductRecords.Description,
+		&ProductRecords.RecordsCount,
+	)
+
+	if err != nil {
+		return ProductRecords, fmt.Errorf("Products not wwwFound")
 	}
 	return ProductRecords, nil
 }
-
-/*func (r *repositoryDB) CheckCode(code string) error {
-
-	stmt, err := r.db.Prepare("SELECT product_code FROM products Where product_code = ?")
-	if err != nil {
-		return err
-	}
-	defer stmt.Close()
-	err = stmt.QueryRow(code).Scan(&code)
-	if err != nil {
-		return fmt.Errorf("Product already registred")
-	}
-	return nil
-}*/
 
 func (r *repository) Create(p ProductRecords) (ProductRecords, error) {
 
@@ -78,5 +98,8 @@ func (r *repository) Create(p ProductRecords) (ProductRecords, error) {
 	if RowsAffected == 0 {
 		return ProductRecords{}, fmt.Errorf("Fail to save")
 	}
+
+	lastId, _ := res.LastInsertId()
+	p.Id = int(lastId)
 	return p, nil
 }

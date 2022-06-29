@@ -82,9 +82,10 @@ func main() {
 	pr.POST("/", p.Create())
 	pr.PUT("/:id", p.Update())
 	pr.PATCH("/:id", p.Update())
+	pr.GET("/reportRecords/", pRecord.GetId())
 
 	prec := r.Group("/api/v1/productsRecords")
-	prec.GET("/:id", pRecord.GetId())
+	//prec.GET("/:id", pRecord.GetId())
 	prec.POST("/", pRecord.Create())
 
 	sellers := r.Group("/api/v1/sellers")
