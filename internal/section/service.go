@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/cpereira42/mercado-fresco-pron4/internal/warehouse"
+	"github.com/fatih/structs"
 )
 
 type service struct {
@@ -71,7 +72,7 @@ func (s service) UpdateSection(id int64, sectionUp SectionRequestUpdate) (Sectio
 			return Section{}, fmt.Errorf("this section_number %v is already registered", sectionUp.SectionNumber)
 		}
 	}
-	newSectionRequest := factorySectionUpdate(id, sectionUp)
+	newSectionRequest := factorySectionUpdate(&s, id, sectionUp)
 
 	return s.repository.UpdateSection(newSectionRequest)
 }
@@ -90,23 +91,56 @@ func (s service) DeleteSection(id int64) error {
 
 func factorySection(sectionRequest SectionRequestCreate) Section {
 	return Section{
-		SectionNumber: sectionRequest.SectionNumber, CurrentTemperature: sectionRequest.CurrentTemperature,
-		MinimumTemperature: sectionRequest.MinimumTemperature, CurrentCapacity: sectionRequest.CurrentCapacity,
-		MinimumCapacity: sectionRequest.MinimumCapacity, MaximumCapacity: sectionRequest.MaximumCapacity,
-		WarehouseId: sectionRequest.WarehouseId, ProductTypeId: sectionRequest.ProductTypeId,
-	}
-}
-
-func factorySectionUpdate(id int64, sectionRequest SectionRequestUpdate) Section {
-	return Section{
-		Id:                 id,
 		SectionNumber:      sectionRequest.SectionNumber,
-		CurrentTemperature: sectionRequest.CurrentTemperature,
-		MinimumTemperature: sectionRequest.MinimumTemperature,
 		CurrentCapacity:    sectionRequest.CurrentCapacity,
-		MinimumCapacity:    sectionRequest.MinimumCapacity,
+		CurrentTemperature: sectionRequest.CurrentTemperature,
 		MaximumCapacity:    sectionRequest.MaximumCapacity,
+		MinimumCapacity:    sectionRequest.MinimumCapacity,
+		MinimumTemperature: sectionRequest.MinimumTemperature,
 		WarehouseId:        sectionRequest.WarehouseId,
 		ProductTypeId:      sectionRequest.ProductTypeId,
 	}
+}
+
+func factorySectionUpdate(s *service, id int64, sectionRequest SectionRequestUpdate) Section {
+	fieldSection := []string{
+		"SectionNumber",
+		"CurrentCapacity",
+		"CurrentTemperature",
+		"MaximumCapacity",
+		"MinimumCapacity",
+		"MinimumTemperature",
+		"WarehouseId",
+		"ProductTypeId",
+	}
+	sec, _ := s.ListarSectionOne(id)
+	sectionMapCurrent := structs.Map(sec)
+	sectionMapModify := structs.Map(sectionRequest)
+
+	for _, value := range fieldSection {
+		if sectionMapModify[value] != 0 && sectionMapModify[value] != sectionMapCurrent[value] {
+			switch value {
+			case "WarehouseId":
+				fmt.Println(value)
+				sectionMapCurrent[value] = sectionMapModify[value]
+			case "ProductTypeId":
+				fmt.Println(value)
+				sectionMapCurrent[value] = sectionMapModify[value]
+			default:
+				sectionMapCurrent[value] = sectionMapModify[value]
+			}
+		}
+	}
+	objetoSec := Section{
+		Id:                 id,
+		SectionNumber:      sectionMapCurrent["SectionNumber"].(int),
+		CurrentCapacity:    sectionMapCurrent["CurrentCapacity"].(int),
+		CurrentTemperature: sectionMapCurrent["CurrentTemperature"].(int),
+		MaximumCapacity:    sectionMapCurrent["MaximumCapacity"].(int),
+		MinimumCapacity:    sectionMapCurrent["MinimumCapacity"].(int),
+		MinimumTemperature: sectionMapCurrent["MinimumTemperature"].(int),
+		WarehouseId:        sectionMapCurrent["WarehouseId"].(int64),
+		ProductTypeId:      sectionMapCurrent["ProductTypeId"].(int64),
+	}
+	return objetoSec
 }

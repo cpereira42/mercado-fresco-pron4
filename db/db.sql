@@ -447,7 +447,7 @@ INSERT INTO `warehouse` VALUES
 (1,'rua 1','11','1',1,1,2.00);
 
 INSERT INTO `sections` VALUES
-(1,'sec1',1,1.00,1,1,1.00,1,1);
+(1,1,1,1,1,1,1,1,1);
 
 INSERT INTO `products_batches` VALUES
 (1,'1',1,1.00,'2008-11-11 13:23:44',1,'2008-11-11 13:23:44','2008-11-11 13:23:44',1.00,1,1);
