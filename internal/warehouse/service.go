@@ -2,14 +2,13 @@ package warehouse
 
 import (
 	"errors"
-	"log"
 )
 
 type Service interface {
 	GetAll() ([]Warehouse, error)
-	Create(address, telephone, warehouse_code string, minimum_capacity, minimum_temperature, locality_id int) (Warehouse, error)
+	Create(address, telephone, warehouse_code string, minimum_capacity, minimum_temperature int) (Warehouse, error)
 	GetByID(id int) (Warehouse, error)
-	Update(id int, address, telephone, warehouse_code string, minimum_capacity, minimum_temperature, locality_Id int) (Warehouse, error)
+	Update(id int, address, telephone, warehouse_code string, minimum_capacity, minimum_temperature int) (Warehouse, error)
 	Delete(id int) error
 }
 
@@ -31,29 +30,30 @@ func (s *service) GetAll() ([]Warehouse, error) {
 	return warehouse, nil
 }
 
-func (s *service) Create(address, telephone, warehouse_code string, minimum_capacity, minimum_temperature, locality_Id int) (Warehouse, error) {
+func (s *service) Create(address, telephone, warehouse_code string, minimum_capacity, minimum_temperature int) (Warehouse, error) {
+	lastID, err := s.repository.LastID()
+	if err != nil {
+		return Warehouse{}, err
+	}
+
+	lastID++
 
 	wr, err := s.repository.GetAll()
 	if err != nil {
 		return Warehouse{}, err
 	}
 
-	warehouseExists := false
-
+	exists := false
 	for i := range wr {
 		if wr[i].Warehouse_code == warehouse_code {
-			warehouseExists = true
+			exists = true
 		}
 	}
-	if warehouseExists {
+	if exists {
 		return Warehouse{}, errors.New("Warehouse already exists")
 	}
 
-	if _, err := s.repository.CheckLocality(locality_Id); err != nil {
-		return Warehouse{}, errors.New("locality not found")
-	}
-
-	warehouse, err := s.repository.Create(0, address, telephone, warehouse_code, minimum_capacity, minimum_temperature, locality_Id)
+	warehouse, err := s.repository.Create(lastID, address, telephone, warehouse_code, minimum_capacity, minimum_temperature)
 	if err != nil {
 		return Warehouse{}, err
 	}
@@ -62,7 +62,7 @@ func (s *service) Create(address, telephone, warehouse_code string, minimum_capa
 
 }
 
-func (s *service) Update(id int, address, telephone, warehouse_code string, minimum_capacity, minimum_temperature, locality_id int) (Warehouse, error) {
+func (s *service) Update(id int, address, telephone, warehouse_code string, minimum_capacity, minimum_temperature int) (Warehouse, error) {
 	wr, err := s.repository.GetAll()
 	if err != nil {
 		return Warehouse{}, err
@@ -88,7 +88,7 @@ func (s *service) Update(id int, address, telephone, warehouse_code string, mini
 	if exists {
 		return Warehouse{}, errors.New("Warehouse code already exists")
 	}
-	w := Warehouse{id, address, telephone, warehouse_code, minimum_capacity, minimum_temperature, locality_id}
+	w := Warehouse{id, address, telephone, warehouse_code, minimum_capacity, minimum_temperature}
 	for i := range wr {
 		if wr[i].ID == id {
 			w.ID = id
@@ -107,9 +107,6 @@ func (s *service) Update(id int, address, telephone, warehouse_code string, mini
 			if minimum_temperature == 0 {
 				w.Minimum_temperature = wr[i].Minimum_temperature
 			}
-			if locality_id == 0 {
-				w.Locality_id = wr[i].Locality_id
-			}
 			wr[i] = w
 			exists = true
 		}
@@ -117,10 +114,7 @@ func (s *service) Update(id int, address, telephone, warehouse_code string, mini
 	// if !update {
 	// 	return Warehouse{}, errors.New("invalid id")
 	// }
-	if _, err := s.repository.CheckLocality(w.Locality_id); err != nil {
-		return Warehouse{}, errors.New("locality not found")
-	}
-	w, err = s.repository.Update(w.ID, w.Address, w.Telephone, w.Warehouse_code, w.Minimum_capacity, w.Minimum_temperature, w.Locality_id)
+	w, err = s.repository.Update(w.ID, w.Address, w.Telephone, w.Warehouse_code, w.Minimum_capacity, w.Minimum_temperature)
 	if err != nil {
 		return Warehouse{}, err
 	}
@@ -155,21 +149,18 @@ func (s *service) Delete(id int) error {
 	if err != nil {
 		return err
 	}
-	log.Println(wr)
 	delete := false
 	var index int
 	for i := range wr {
 		if wr[i].ID == id {
-			log.Println(wr[i])
-			index = i
 			delete = true
+			index = i
 		}
 	}
 	if !delete {
 		return errors.New("Warehouse not found")
 	}
-	log.Println(index)
-	err = s.repository.Delete(id)
+	err = s.repository.Delete(index)
 	if err != nil {
 		return err
 	}

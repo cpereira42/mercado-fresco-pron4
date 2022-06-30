@@ -37,8 +37,6 @@ func msgForTag(tag string) string {
 		return "This field is required"
 	case "numeric":
 		return "This field only accepts numbers"
-	case "ascii":
-		return "This field has an invalid date value"
 	}
 	return ""
 }
@@ -90,4 +88,4 @@ func CheckIfErrorRequest(ctx *gin.Context, request any) bool {
 		return true
 	}
 	return false
-}
+} 

@@ -18,11 +18,11 @@ import (
 )
 
 var (
-	warehouse1                              = warehouse.Warehouse{ID: 1, Address: "Rua 1", Telephone: "11111-1111", Warehouse_code: "W1", Minimum_capacity: 10, Minimum_temperature: 20, Locality_id: 1}
-	warehouse2                              = warehouse.Warehouse{ID: 2, Address: "Rua 2", Telephone: "22222-2222", Warehouse_code: "W2", Minimum_capacity: 20, Minimum_temperature: 30, Locality_id: 2}
-	warehouse3                              = warehouse.Warehouse{ID: 3, Address: "Rua 3", Telephone: "33333-3333", Warehouse_code: "W3", Minimum_capacity: 30, Minimum_temperature: 40, Locality_id: 3}
-	warehouse1Updated warehouse.Warehouse   = warehouse.Warehouse{ID: 1, Address: "Rua 4", Telephone: "11111-1111", Warehouse_code: "W1", Minimum_capacity: 10, Minimum_temperature: 20, Locality_id: 1}
-	warehouse4        warehouse.Warehouse   = warehouse.Warehouse{ID: 4, Address: "Rua 4", Telephone: "11111-1111", Warehouse_code: "W4", Minimum_capacity: 10, Minimum_temperature: 20, Locality_id: 1}
+	warehouse1                              = warehouse.Warehouse{ID: 1, Address: "Rua 1", Telephone: "11111-1111", Warehouse_code: "W1", Minimum_capacity: 10, Minimum_temperature: 20}
+	warehouse2                              = warehouse.Warehouse{ID: 2, Address: "Rua 2", Telephone: "22222-2222", Warehouse_code: "W2", Minimum_capacity: 20, Minimum_temperature: 30}
+	warehouse3                              = warehouse.Warehouse{ID: 3, Address: "Rua 3", Telephone: "33333-3333", Warehouse_code: "W3", Minimum_capacity: 30, Minimum_temperature: 40}
+	warehouse1Updated warehouse.Warehouse   = warehouse.Warehouse{ID: 1, Address: "Rua 4", Telephone: "11111-1111", Warehouse_code: "W1", Minimum_capacity: 10, Minimum_temperature: 20}
+	warehouse4        warehouse.Warehouse   = warehouse.Warehouse{ID: 4, Address: "Rua 4", Telephone: "11111-1111", Warehouse_code: "W4", Minimum_capacity: 10, Minimum_temperature: 20}
 	warehouseList     []warehouse.Warehouse = []warehouse.Warehouse{warehouse1, warehouse2, warehouse3}
 )
 
@@ -82,8 +82,7 @@ func TestControllerUpdate(t *testing.T) {
 				"telephone": "11111111",
 				"warehouse_code": "W1",
 				"minimum_capacity": 10,
-				"minimum_temperature": 20,
-				"locality_id": 1
+				"minimum_temperature": 20
 			}`)
 			serviceMock := new(mocks.Service)
 			w := handler.NewWarehouse(serviceMock)
@@ -93,7 +92,6 @@ func TestControllerUpdate(t *testing.T) {
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("int")).
 				Return(warehouse1Updated, nil)
@@ -117,8 +115,7 @@ func TestControllerUpdate(t *testing.T) {
 				"telephone": "11111111",
 				"warehouse_code": "W1",
 				"minimum_capacity": 10,
-				"minimum_temperature": 20,
-				"locality_id": 1
+				"minimum_temperature": 20
 			}`)
 			serviceMock := new(mocks.Service)
 			w := handler.NewWarehouse(serviceMock)
@@ -142,8 +139,7 @@ func TestControllerUpdate(t *testing.T) {
 				"telephone": "11111111"
 				"warehouse_code": "W1",
 				"minimum_capacity": 10,
-				"minimum_temperature": 20,
-				"locality_id": 1
+				"minimum_temperature": 20
 			}`)
 			serviceMock := new(mocks.Service)
 			w := handler.NewWarehouse(serviceMock)
@@ -169,8 +165,7 @@ func TestControllerUpdate(t *testing.T) {
 				"telephone": "11111111",
 				"warehouse_code": "W1",
 				"minimum_capacity": 10,
-				"minimum_temperature": 20,
-				"locality_id": 1
+				"minimum_temperature": 20
 			}`)
 			serviceMock := new(mocks.Service)
 			w := handler.NewWarehouse(serviceMock)
@@ -181,7 +176,6 @@ func TestControllerUpdate(t *testing.T) {
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("int")).
 				Return(warehouse.Warehouse{}, msgError)
@@ -325,8 +319,7 @@ func TestControllerCreate(t *testing.T) {
 				"telephone": "11111111",
 				"warehouse_code": "W1",
 				"minimum_capacity": 10,
-				"minimum_temperature": 20,
-				"locality_id": 1
+				"minimum_temperature": 20
 			}`)
 			serviceMock := new(mocks.Service)
 			w := handler.NewWarehouse(serviceMock)
@@ -335,7 +328,6 @@ func TestControllerCreate(t *testing.T) {
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("int")).
 				Return(warehouse1, nil)
@@ -356,11 +348,10 @@ func TestControllerCreate(t *testing.T) {
 		"Test Create - Request Body error - without Telephone", func(t *testing.T) {
 			req, rr := createRequestTests(http.MethodPost, "/api/v1/warehouse/",
 				`{
-				"address": "Rua 4",
+				"address": "Rua 1",
 				"warehouse_code": "W1",
 				"minimum_capacity": 10,
-				"minimum_temperature": 20,
-				"locality_id": 1
+				"minimum_temperature": 20
 			}`)
 			serviceMock := new(mocks.Service)
 			w := handler.NewWarehouse(serviceMock)
@@ -389,8 +380,7 @@ func TestControllerCreate(t *testing.T) {
 				"telephone": "11111111",
 				"warehouse_code": "W1",
 				"minimum_capacity": 10,
-				"minimum_temperature": 20,
-				"locality_id": 1
+				"minimum_temperature": 20
 			}`)
 			serviceMock := new(mocks.Service)
 			w := handler.NewWarehouse(serviceMock)
@@ -400,7 +390,6 @@ func TestControllerCreate(t *testing.T) {
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("int")).
 				Return(warehouse.Warehouse{}, msgError)
@@ -424,8 +413,7 @@ func TestControllerCreate(t *testing.T) {
 				"telephone": "11111111",
 				"warehouse_code": "W1",
 				"minimum_capacity": 10,
-				"minimum_temperature": 20,
-				"locality_id": 1
+				"minimum_temperature": 20
 			}`)
 			serviceMock := new(mocks.Service)
 			w := handler.NewWarehouse(serviceMock)
@@ -435,7 +423,6 @@ func TestControllerCreate(t *testing.T) {
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("int")).
 				Return(warehouse.Warehouse{}, msgError)

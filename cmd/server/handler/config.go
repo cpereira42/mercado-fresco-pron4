@@ -1,12 +1,11 @@
-package handler
+package handler 
 
 import (
 	"bytes"
 	"net/http"
 	"net/http/httptest"
 
-	"github.com/cpereira42/mercado-fresco-pron4/internal/productbatch"
-	mocks "github.com/cpereira42/mercado-fresco-pron4/internal/section/mock"
+	"github.com/cpereira42/mercado-fresco-pron4/internal/section/mock"
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,7 +20,7 @@ func CreateRequestServer(method, url, body string) (*http.Request, *httptest.Res
 	return req, httptest.NewRecorder()
 }
 
-/*
+/* 
  * cria um server
  * @param mock mocks.SectionService
  * @param method string
@@ -29,9 +28,7 @@ func CreateRequestServer(method, url, body string) (*http.Request, *httptest.Res
  * @param body string
  */
 func CreateServerSection(serv *mocks.SectionService, method, url, body string) *httptest.ResponseRecorder {
-	repoPB := productbatch.NewRepositoryProductBatches(nil)
-	servicePB := productbatch.NewServiceProductBatches(repoPB)
-	sectionController := NewSectionController(serv, servicePB)
+	sectionController :=  NewSectionController(serv)
 	router := gin.Default()
 	gp := router.Group("/api/v1/sections")
 	gp.GET("/", sectionController.ListarSectionAll())
@@ -44,8 +41,10 @@ func CreateServerSection(serv *mocks.SectionService, method, url, body string) *
 	return rr
 }
 
+
 var ObjetoResponse struct {
-	Code  int   `json:"code"`
-	Data  any   `json:"data"`
+	Code int `json:"code"`
+	Data any `json:"data"`
 	Error error `json:"error"`
 }
+

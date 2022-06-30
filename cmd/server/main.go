@@ -2,14 +2,15 @@ package main
 
 import (
 	"database/sql"
+	_ "github.com/go-sql-driver/mysql"
+
 	"fmt"
 	"log"
 	"os"
 
-	_ "github.com/go-sql-driver/mysql"
-
-	"github.com/cpereira42/mercado-fresco-pron4/internal/productbatch"
-	"github.com/cpereira42/mercado-fresco-pron4/internal/section"
+	//sectionRepository "github.com/cpereira42/mercado-fresco-pron4/internal/section/repository/file"
+	sectionRepository "github.com/cpereira42/mercado-fresco-pron4/internal/section/repository/mariadb"
+	sectionService "github.com/cpereira42/mercado-fresco-pron4/internal/section/service"
 
 	"github.com/cpereira42/mercado-fresco-pron4/cmd/server/handler"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/buyer"
@@ -21,17 +22,23 @@ import (
 	"github.com/cpereira42/mercado-fresco-pron4/pkg/store"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+
+
 )
 
+var Conn *sql.DB
+
 func main() {
+	
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal(".Env cant be load")
 	}
-	conn, err := connection()
+	Conn, err = connection()
 	if err != nil {
 		log.Fatal(err)
 	}
+ 
 
 	dbBuyers := store.New(store.FileType, "./internal/repositories/buyer.json")
 	repositoryBuyers := buyer.NewRepository(dbBuyers)
@@ -42,18 +49,17 @@ func main() {
 	repoProd := products.NewRepositoryProducts(dbProd)
 	serviceProd := products.NewService(repoProd)
 
-	// dbWarehouse := store.New(store.FileType, "./internal/repositories/warehouse.json")
-	// repoWarehouse := warehouse.NewRepository(dbWarehouse)
-
-	repoWarehouse := warehouse.NewRepository(conn)
+	dbWarehouse := store.New(store.FileType, "./internal/repositories/warehouse.json")
+	repoWarehouse := warehouse.NewRepository(dbWarehouse)
 	svcWarehouse := warehouse.NewService(repoWarehouse)
 	w := handler.NewWarehouse(svcWarehouse)
 
-	repoPB := productbatch.NewRepositoryProductBatches(conn)
-	servicePB := productbatch.NewServiceProductBatches(repoPB)
-	repSection := section.NewRepository(conn)
-	serviceSection := section.NewService(repSection, repoWarehouse)
-	sectionController := handler.NewSectionController(serviceSection, servicePB)
+	//dbSection := store.New(store.FileType, "./internal/repositories/sections.json")
+	//repSection := sectionRepository.NewRepository(dbSection)
+	
+	repSection := sectionRepository.NewRepository(Conn)	
+	serviceSection := sectionService.NewService(repSection)
+	sectionController := handler.NewSectionController(serviceSection)
 
 	dbSeller := store.New(store.FileType, "../mercado-fresco-pron4/internal/repositories/sellers.json")
 	repoSeller := seller.NewRepositorySeller(dbSeller)
@@ -82,7 +88,7 @@ func main() {
 	sellers.POST("/", s.Create())
 	sellers.PATCH("/:id", s.Update())
 	sellers.DELETE("/:id", s.Delete())
-
+	
 	routesEmployees := r.Group("/api/v1/employees")
 	routesEmployees.GET("/", handlerEmployees.GetAll())
 	routesEmployees.GET("/:id", handlerEmployees.GetByID())
@@ -91,13 +97,11 @@ func main() {
 	routesEmployees.DELETE("/:id", handlerEmployees.Delete())
 
 	section := r.Group("/api/v1/sections")
-	section.GET("/", sectionController.ListarSectionAll())
-	section.GET("/:id", sectionController.ListarSectionOne())
-	section.POST("/", sectionController.CreateSection())
-	section.PATCH("/:id", sectionController.UpdateSection())
-	section.DELETE("/:id", sectionController.DeleteSection())
-	section.GET("/reportProducts", sectionController.ReadPB())     // new
-	r.POST("/api/v1/productBatches", sectionController.CreatePB()) // new
+	section.GET("/", sectionController.ListarSectionAll())    // lista todos recursos
+	section.GET("/:id", sectionController.ListarSectionOne()) // buscar recurso por id
+	section.POST("/", sectionController.CreateSection())      // cria um novo recurso
+	section.PATCH("/:id", sectionController.UpdateSection())  // modifica recursos
+	section.DELETE("/:id", sectionController.DeleteSection()) // remove recursos
 
 	wr := r.Group("api/v1/warehouse")
 	wr.GET("/", w.GetAll)
@@ -122,11 +126,7 @@ func connection() (*sql.DB, error) {
 	port := os.Getenv("PORT_DB")
 	host := os.Getenv("HOST_DB")
 	database := os.Getenv("DATABASE")
-	dataSource := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", user, pass, host, port, database)
-	log.Println("conection Success")
-	conn, err := sql.Open("mysql", dataSource)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return conn, nil
+	dataSource := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", user, pass,host,port,database)
+	log.Println(dataSource)
+	return sql.Open("mysql", dataSource)
 }
