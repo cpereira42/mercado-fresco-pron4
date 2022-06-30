@@ -3,6 +3,7 @@ package sectionService
 import (
 	"fmt"
 	"testing"
+
 	"github.com/cpereira42/mercado-fresco-pron4/internal/section/entites"
 	mocks "github.com/cpereira42/mercado-fresco-pron4/internal/section/mock"
 	"github.com/stretchr/testify/assert"
@@ -206,6 +207,10 @@ func TestServiceUpdateSection(t *testing.T) {
 			WarehouseId:        1,
 			ProductTypeId:      2,
 		}
+
+		mockRep.On("ListarSectionOne", mock.AnythingOfType("int")).
+			Return(sectionList[0], nil).
+			Once()
 		mockRep.On("ListarSectionAll").
 			Return(sectionList, nil).
 			Once()
@@ -233,6 +238,9 @@ func TestServiceUpdateSection(t *testing.T) {
 		}
 		expectUpdateSection := entites.Section{}
 		expectedError := fmt.Errorf("this section_number %v is already registered", updateSection.SectionNumber)
+		mockRep.On("ListarSectionOne", mock.AnythingOfType("int")).
+			Return(sectionList[0], nil).
+			Once()
 		mockRep.On("ListarSectionAll").
 			Return(sectionList, nil)
 		mockRep.On("UpdateSection",
@@ -244,7 +252,7 @@ func TestServiceUpdateSection(t *testing.T) {
 		assert.Equal(t, expectedError, errConflict)
 		assert.ObjectsAreEqual(expectUpdateSection, obUpdateSectionConflict)
 	})
-	t.Run("test servoce no metodo UpdateSection, caso de error, lista de section retorna vazia dentro do metodo update", func(t *testing.T) {
+	t.Run("test servoce no metodo UpdateSection, caso de error, section not found", func(t *testing.T) {
 		var sectionList []entites.Section = []entites.Section{}
 		mockRep := new(mocks.SectionRepository)
 		updateSection := entites.SectionRequestUpdate{
@@ -258,21 +266,72 @@ func TestServiceUpdateSection(t *testing.T) {
 			ProductTypeId:      456,
 		}
 		expectUpdateSection := entites.Section{}
-		expectedError := fmt.Errorf("não há sections registrado")
+		expectedError := fmt.Errorf("sections not found")
+		expectedErrorList := fmt.Errorf("não há sections registrado")
+
+		mockRep.On("ListarSectionOne", mock.Anything).
+			Return(entites.Section{}, expectedError).
+			Once()
 		mockRep.On("ListarSectionAll").
-			Return(sectionList, expectedError)
+			Return(sectionList, expectedErrorList).Once()
 		mockRep.On("UpdateSection",
 			mock.AnythingOfType("int"),
 			mock.AnythingOfType("entites.Section")).
-			Return(expectUpdateSection, expectedError)
+			Return(expectUpdateSection, expectedError).Once()
+
 		service := NewService(mockRep)
-		listNil, errListNil := service.ListarSectionAll()
-		assert.Equal(t, expectedError, errListNil)
-		assert.ObjectsAreEqual(sectionList, listNil)
-		obUpdateSectionConflict, errConflict := service.UpdateSection(1, updateSection)
+
+		obUpdateSectionConflict, errConflict := service.UpdateSection(10, updateSection)
+		assert.Error(t, errConflict)
 		assert.Equal(t, expectedError, errConflict)
 		assert.ObjectsAreEqual(expectUpdateSection, obUpdateSectionConflict)
 	})
+	
+	t.Run("test servoce no metodo UpdateSection, caso de error, lista de section retorna vazia dentro do metodo update", func(t *testing.T) {
+		var sectionList []entites.Section = []entites.Section{}
+		mockRep := new(mocks.SectionRepository)
+		updateSection := entites.SectionRequestUpdate{
+			SectionNumber:      313,
+			CurrentTemperature: 79845,
+			MinimumTemperature: 4,
+			CurrentCapacity:    135,
+			MinimumCapacity:    23,
+			MaximumCapacity:    456,
+			WarehouseId:        78,
+			ProductTypeId:      456,
+		}
+		sectionMock := entites.Section{
+			Id:                 1,
+			SectionNumber:      3,
+			CurrentTemperature: 79845,
+			MinimumTemperature: 4,
+			CurrentCapacity:    135,
+			MinimumCapacity:    23,
+			MaximumCapacity:    456,
+			WarehouseId:        78,
+			ProductTypeId:      456,
+		}
+		expectUpdateSection := entites.Section{}
+		expectedErrorList := fmt.Errorf("não há sections registrado")
+
+		mockRep.On("ListarSectionOne", mock.Anything).
+			Return(sectionMock, nil).
+			Once()
+		mockRep.On("ListarSectionAll").
+			Return(sectionList, expectedErrorList).Once()
+		mockRep.On("UpdateSection",
+			mock.AnythingOfType("int"),
+			mock.AnythingOfType("entites.Section")).
+			Return(expectUpdateSection, expectedErrorList).Once()
+
+		service := NewService(mockRep)
+
+		obUpdateSectionConflict, errConflict := service.UpdateSection(10, updateSection)
+		assert.Error(t, errConflict)
+		assert.Equal(t, expectedErrorList, errConflict)
+		assert.ObjectsAreEqual(expectUpdateSection, obUpdateSectionConflict)
+	})
+	
 	t.Run("test servoce no metodo UpdateSection, caso de error, section não encontrado", func(t *testing.T) {
 		mockRep := new(mocks.SectionRepository)
 		updateSection := entites.SectionRequestUpdate{
@@ -287,6 +346,9 @@ func TestServiceUpdateSection(t *testing.T) {
 		}
 		expectUpdateSection := entites.Section{}
 		expectError := fmt.Errorf("unable to update section")
+		mockRep.On("ListarSectionOne", mock.AnythingOfType("int")).
+			Return(sectionList[0], nil).
+			Once()
 		mockRep.On("ListarSectionAll").
 			Return(sectionList, nil)
 		mockRep.On("UpdateSection",

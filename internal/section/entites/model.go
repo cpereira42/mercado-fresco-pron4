@@ -7,7 +7,7 @@ package entites
  * Request PATCH: SectionRequestUpdate{}
  */
 type Section struct {
-	Id                 int `json:"id" binding:"numeric,omitempty"`
+	Id                 int `json:"id,omitempty" binding:"numeric"`
 	SectionNumber      int `json:"section_number" binding:"numeric,omitempty"`
 	CurrentTemperature int `json:"current_temperature" binding:"numeric,omitempty"`
 	MinimumTemperature int `json:"minimum_temperature" binding:"numeric,omitempty"`
@@ -50,7 +50,7 @@ type Repository interface {
 	CreateSection(section Section) (Section, error)
 	UpdateSection(id int, section Section) (Section, error)
 	DeleteSection(id int) error
-	LastID() (int, error) 
+	LastID() (int, error)
 }
 
 /*
