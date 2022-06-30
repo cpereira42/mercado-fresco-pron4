@@ -5,37 +5,35 @@ package section
  * Entidade: Section{}, [usado para respostas do db no repository]
  * Request POST: SectionRequestCreate{}
  * Request PATCH: SectionRequestUpdate{}
- * Request POST: ProductBatches{}
- * Request GET: ProductBatchesResponse{}
  */
 type Section struct {
-	Id                 int64 `json:"id,omitempty" binding:"numeric,omitempty"`
-	SectionNumber      int   `json:"section_number" binding:"alfa,omitempty"`
-	CurrentTemperature int   `json:"current_temperature" binding:"numeric,omitempty"`
-	MinimumTemperature int   `json:"minimum_temperature" binding:"numeric,omitempty"`
-	CurrentCapacity    int   `json:"current_capacity" binding:"numeric,omitempty"`
-	MinimumCapacity    int   `json:"minimum_capacity" binding:"numeric,omitempty"`
-	MaximumCapacity    int   `json:"maximum_capacity" binding:"numeric,omitempty"`
-	WarehouseId        int64 `json:"warehouse_id" binding:"numeric,omitempty"`
-	ProductTypeId      int64 `json:"product_type_id" binding:"numeric,omitempty"`
+	Id                 int64 `json:"id,omitempty" binding:"numeric"`
+	SectionNumber      int   `json:"section_number,omitempty" binding:"alfa"`
+	CurrentCapacity    int   `json:"current_capacity,omitempty" binding:"numeric"`
+	CurrentTemperature int   `json:"current_temperature,omitempty" binding:"numeric"`
+	MaximumCapacity    int   `json:"maximum_capacity,omitempty" binding:"numeric"`
+	MinimumCapacity    int   `json:"minimum_capacity,omitempty" binding:"numeric"`
+	MinimumTemperature int   `json:"minimum_temperature,omitempty" binding:"numeric"`
+	WarehouseId        int64 `json:"warehouse_id,omitempty" binding:"numeric"`
+	ProductTypeId      int64 `json:"product_type_id,omitempty" binding:"numeric"`
 }
 type SectionRequestCreate struct {
 	SectionNumber      int   `json:"section_number" binding:"required,numeric"`
-	CurrentTemperature int   `json:"current_temperature" binding:"required,numeric"`
-	MinimumTemperature int   `json:"minimum_temperature" binding:"required,numeric"`
 	CurrentCapacity    int   `json:"current_capacity" binding:"required,numeric"`
-	MinimumCapacity    int   `json:"minimum_capacity" binding:"required,numeric"`
+	CurrentTemperature int   `json:"current_temperature" binding:"required,numeric"`
 	MaximumCapacity    int   `json:"maximum_capacity" binding:"required,numeric"`
+	MinimumCapacity    int   `json:"minimum_capacity" binding:"required,numeric"`
+	MinimumTemperature int   `json:"minimum_temperature" binding:"required,numeric"`
 	WarehouseId        int64 `json:"warehouse_id" binding:"required,numeric"`
 	ProductTypeId      int64 `json:"product_type_id" binding:"required,numeric"`
 }
 type SectionRequestUpdate struct {
 	SectionNumber      int   `json:"section_number" binding:"required,numeric,omitempty"`
-	CurrentTemperature int   `json:"current_temperature" binding:"numeric,omitempty"`
-	MinimumTemperature int   `json:"minimum_temperature" binding:"numeric,omitempty"`
 	CurrentCapacity    int   `json:"current_capacity" binding:"numeric,omitempty"`
-	MinimumCapacity    int   `json:"minimum_capacity" binding:"numeric,omitempty"`
+	CurrentTemperature int   `json:"current_temperature" binding:"numeric,omitempty"`
 	MaximumCapacity    int   `json:"maximum_capacity" binding:"numeric,omitempty"`
+	MinimumCapacity    int   `json:"minimum_capacity" binding:"numeric,omitempty"`
+	MinimumTemperature int   `json:"minimum_temperature" binding:"numeric,omitempty"`
 	WarehouseId        int64 `json:"warehouse_id" binding:"numeric,omitempty"`
 	ProductTypeId      int64 `json:"product_type_id" binding:"numeric,omitempty"`
 }
