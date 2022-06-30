@@ -11,10 +11,10 @@ import (
 )
 
 var (
-	warehouse1              = warehouse.Warehouse{ID: 1, Address: "Rua 1", Telephone: "11111-1111", Warehouse_code: "W1", Minimum_capacity: 10, Minimum_temperature: 20, Locality_id: 1}
-	warehouse2              = warehouse.Warehouse{ID: 2, Address: "Rua 2", Telephone: "22222-2222", Warehouse_code: "W2", Minimum_capacity: 20, Minimum_temperature: 30, Locality_id: 1}
-	warehouse3              = warehouse.Warehouse{ID: 3, Address: "Rua 3", Telephone: "33333-3333", Warehouse_code: "W3", Minimum_capacity: 30, Minimum_temperature: 40, Locality_id: 1}
-	warehouse1Updated       = warehouse.Warehouse{ID: 1, Address: "Rua 4", Telephone: "11111-1111", Warehouse_code: "W1", Minimum_capacity: 10, Minimum_temperature: 20, Locality_id: 1}
+	warehouse1              = warehouse.Warehouse{ID: 1, Address: "Rua 1", Telephone: "11111-1111", Warehouse_code: "W1", Minimum_capacity: 10, Minimum_temperature: 20}
+	warehouse2              = warehouse.Warehouse{ID: 2, Address: "Rua 2", Telephone: "22222-2222", Warehouse_code: "W2", Minimum_capacity: 20, Minimum_temperature: 30}
+	warehouse3              = warehouse.Warehouse{ID: 3, Address: "Rua 3", Telephone: "33333-3333", Warehouse_code: "W3", Minimum_capacity: 30, Minimum_temperature: 40}
+	warehouse1Updated       = warehouse.Warehouse{ID: 1, Address: "Rua 4", Telephone: "11111-1111", Warehouse_code: "W1", Minimum_capacity: 10, Minimum_temperature: 20}
 	warehouseUpdateSameCode = "W3"
 )
 
@@ -28,25 +28,23 @@ func TestServiceCreate(t *testing.T) {
 		func(t *testing.T) {
 			repo := &mocks.Repository{}
 			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
-			repo.On("CheckLocality", tmock.Anything).Return(true, nil).Once()
+			repo.On("LastID").Return(2, nil).Once()
 			repo.On("Create",
 				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("int")).
 				Return(warehouse3, nil)
 			service := warehouse.NewService(repo)
-			newWarehouse, err := service.Create(warehouse3.Address, warehouse3.Telephone, warehouse3.Warehouse_code, warehouse3.Minimum_capacity, warehouse3.Minimum_temperature, warehouse3.Locality_id)
+			newWarehouse, err := service.Create(warehouse3.Address, warehouse3.Telephone, warehouse3.Warehouse_code, warehouse3.Minimum_capacity, warehouse3.Minimum_temperature)
 			assert.NoError(t, err)
 			assert.Equal(t, "Rua 3", newWarehouse.Address)
 			assert.Equal(t, "33333-3333", newWarehouse.Telephone)
 			assert.Equal(t, "W3", newWarehouse.Warehouse_code)
 			assert.Equal(t, 30, newWarehouse.Minimum_capacity)
 			assert.Equal(t, 40, newWarehouse.Minimum_temperature)
-			assert.Equal(t, 1, newWarehouse.Locality_id)
 			repo.AssertExpectations(t)
 
 		})
@@ -63,13 +61,12 @@ func TestServiceCreate(t *testing.T) {
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("int")).
 				Return(warehouse.Warehouse{}, errorMsgWarehouseCodeAlreadyExists)
 
 			service := warehouse.NewService(repo)
 
-			newWarehouse, err := service.Create(warehouse1.Address, warehouse1.Telephone, warehouse1.Warehouse_code, warehouse1.Minimum_capacity, warehouse1.Minimum_temperature, warehouse1.Locality_id)
+			newWarehouse, err := service.Create(warehouse1.Address, warehouse1.Telephone, warehouse1.Warehouse_code, warehouse1.Minimum_capacity, warehouse1.Minimum_temperature)
 
 			assert.Error(t, err)
 			assert.EqualError(t, err, errorMsgWarehouseCodeAlreadyExists)
@@ -89,13 +86,12 @@ func TestServiceCreate(t *testing.T) {
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("int")).
 				Return(warehouse.Warehouse{}, nil)
 
 			service := warehouse.NewService(repo)
 
-			newWarehouse, err := service.Create(warehouse3.Address, warehouse3.Telephone, warehouse3.Warehouse_code, warehouse3.Minimum_capacity, warehouse3.Minimum_temperature, warehouse3.Locality_id)
+			newWarehouse, err := service.Create(warehouse3.Address, warehouse3.Telephone, warehouse3.Warehouse_code, warehouse3.Minimum_capacity, warehouse3.Minimum_temperature)
 
 			assert.Error(t, err)
 			assert.EqualError(t, err, errorMsgCannotSaveOnDB.Error())
@@ -103,25 +99,24 @@ func TestServiceCreate(t *testing.T) {
 
 		})
 	t.Run(
-		"If CheckLocality fail sould return an error",
+		"If create cannot save on DB, should return an error - LastIdError",
 		func(t *testing.T) {
-			errorMsgCannotSaveOnDB := fmt.Errorf("locality not found")
+			errorMsgCannotSaveOnDB := fmt.Errorf("Cannot save on DB")
 			repo := &mocks.Repository{}
 			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
-			repo.On("CheckLocality", tmock.Anything).Return(false, errorMsgCannotSaveOnDB).Once()
+			repo.On("LastID").Return(0, errorMsgCannotSaveOnDB).Once()
 			repo.On("Create",
 				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("int")).
 				Return(warehouse.Warehouse{}, nil)
 
 			service := warehouse.NewService(repo)
 
-			newWarehouse, err := service.Create(warehouse3.Address, warehouse3.Telephone, warehouse3.Warehouse_code, warehouse3.Minimum_capacity, warehouse3.Minimum_temperature, warehouse3.Locality_id)
+			newWarehouse, err := service.Create(warehouse3.Address, warehouse3.Telephone, warehouse3.Warehouse_code, warehouse3.Minimum_capacity, warehouse3.Minimum_temperature)
 
 			assert.Error(t, err)
 			assert.EqualError(t, err, errorMsgCannotSaveOnDB.Error())
@@ -134,20 +129,19 @@ func TestServiceCreate(t *testing.T) {
 			errorMsgCannotSaveOnDB := fmt.Errorf("Cannot save on DB")
 			repo := &mocks.Repository{}
 			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
-			repo.On("CheckLocality", tmock.Anything).Return(true, nil).Once()
+			repo.On("LastID").Return(1, nil).Once()
 			repo.On("Create",
 				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("int")).
 				Return(warehouse.Warehouse{}, errorMsgCannotSaveOnDB)
 
 			service := warehouse.NewService(repo)
 
-			newWarehouse, err := service.Create(warehouse3.Address, warehouse3.Telephone, warehouse3.Warehouse_code, warehouse3.Minimum_capacity, warehouse3.Minimum_temperature, warehouse3.Locality_id)
+			newWarehouse, err := service.Create(warehouse3.Address, warehouse3.Telephone, warehouse3.Warehouse_code, warehouse3.Minimum_capacity, warehouse3.Minimum_temperature)
 
 			assert.Error(t, err)
 			assert.EqualError(t, err, errorMsgCannotSaveOnDB.Error())
@@ -256,19 +250,17 @@ func TestServiceUpdate(t *testing.T) {
 		func(t *testing.T) {
 			repo := &mocks.Repository{}
 			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
-			repo.On("CheckLocality", tmock.Anything).Return(true, nil).Once()
 			repo.On("Update",
 				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("int")).
 				Return(warehouse1Updated, nil).Once()
 
 			service := warehouse.NewService(repo)
-			warehouseUpdated, err := service.Update(1, warehouse1Updated.Address, warehouse1.Telephone, warehouse1.Warehouse_code, warehouse1.Minimum_capacity, warehouse1.Minimum_temperature, warehouse1.Locality_id)
+			warehouseUpdated, err := service.Update(1, warehouse1Updated.Address, warehouse1.Telephone, warehouse1.Warehouse_code, warehouse1.Minimum_capacity, warehouse1.Minimum_temperature)
 
 			assert.NoError(t, err)
 			assert.Equal(t, warehouseUpdated, warehouse1Updated)
@@ -282,7 +274,7 @@ func TestServiceUpdate(t *testing.T) {
 			repo := &mocks.Repository{}
 			repo.On("GetAll").Return([]warehouse.Warehouse{}, errorMsgCannotGetAll).Once()
 			service := warehouse.NewService(repo)
-			_, err := service.Update(1, warehouse1Updated.Address, warehouse1.Telephone, warehouse1.Warehouse_code, warehouse1.Minimum_capacity, warehouse1.Minimum_temperature, warehouse1.Locality_id)
+			_, err := service.Update(1, warehouse1Updated.Address, warehouse1.Telephone, warehouse1.Warehouse_code, warehouse1.Minimum_capacity, warehouse1.Minimum_temperature)
 
 			assert.Error(t, err)
 			assert.EqualError(t, err, errorMsgCannotGetAll.Error())
@@ -295,7 +287,7 @@ func TestServiceUpdate(t *testing.T) {
 			errorMsgIdUpdate := fmt.Errorf("invalid id")
 			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
 			service := warehouse.NewService(repo)
-			_, err := service.Update(5, warehouse1Updated.Address, warehouse1.Telephone, warehouse1.Warehouse_code, warehouse1.Minimum_capacity, warehouse1.Minimum_temperature, warehouse1.Locality_id)
+			_, err := service.Update(5, warehouse1Updated.Address, warehouse1.Telephone, warehouse1.Warehouse_code, warehouse1.Minimum_capacity, warehouse1.Minimum_temperature)
 			assert.Error(t, err)
 			assert.EqualError(t, err, errorMsgIdUpdate.Error())
 
@@ -312,13 +304,12 @@ func TestServiceUpdate(t *testing.T) {
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("int")).
 				Return(warehouse.Warehouse{}, errorMsg.Error()).Once()
 
 			service := warehouse.NewService(repo)
 
-			updatedWarehouse, err := service.Update(1, "", "", warehouseUpdateSameCode, 0, 0, 0)
+			updatedWarehouse, err := service.Update(1, "", "", warehouseUpdateSameCode, 0, 0)
 
 			assert.Error(t, err)
 			assert.EqualError(t, err, errorMsg.Error())
@@ -330,19 +321,17 @@ func TestServiceUpdate(t *testing.T) {
 		func(t *testing.T) {
 			repo := &mocks.Repository{}
 			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
-			repo.On("CheckLocality", tmock.Anything).Return(true, nil).Once()
 			repo.On("Update",
 				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("int")).
 				Return(warehouse1Updated, nil).Once()
 
 			service := warehouse.NewService(repo)
-			updatedWarehouse, err := service.Update(1, "", warehouse1.Telephone, warehouse1.Warehouse_code, warehouse1.Minimum_capacity, warehouse1.Minimum_temperature, warehouse1.Locality_id)
+			updatedWarehouse, err := service.Update(1, "", warehouse1.Telephone, warehouse1.Warehouse_code, warehouse1.Minimum_capacity, warehouse1.Minimum_temperature)
 			assert.NoError(t, err)
 			assert.Equal(t, warehouse1Updated.Address, updatedWarehouse.Address)
 		})
@@ -351,19 +340,17 @@ func TestServiceUpdate(t *testing.T) {
 		func(t *testing.T) {
 			repo := &mocks.Repository{}
 			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
-			repo.On("CheckLocality", tmock.Anything).Return(true, nil).Once()
 			repo.On("Update",
 				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("int")).
 				Return(warehouse1Updated, nil).Once()
 
 			service := warehouse.NewService(repo)
-			updatedWarehouse, err := service.Update(1, warehouse1.Address, "", warehouse1.Warehouse_code, warehouse1.Minimum_capacity, warehouse1.Minimum_temperature, warehouse1.Locality_id)
+			updatedWarehouse, err := service.Update(1, warehouse1.Address, "", warehouse1.Warehouse_code, warehouse1.Minimum_capacity, warehouse1.Minimum_temperature)
 			assert.NoError(t, err)
 			assert.Equal(t, warehouse1Updated.Telephone, updatedWarehouse.Telephone)
 		})
@@ -372,19 +359,17 @@ func TestServiceUpdate(t *testing.T) {
 		func(t *testing.T) {
 			repo := &mocks.Repository{}
 			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
-			repo.On("CheckLocality", tmock.Anything).Return(true, nil).Once()
 			repo.On("Update",
 				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("int")).
 				Return(warehouse1Updated, nil).Once()
 
 			service := warehouse.NewService(repo)
-			updatedWarehouse, err := service.Update(1, warehouse1.Address, warehouse1.Telephone, "", warehouse1.Minimum_capacity, warehouse1.Minimum_temperature, warehouse1.Locality_id)
+			updatedWarehouse, err := service.Update(1, warehouse1.Address, warehouse1.Telephone, "", warehouse1.Minimum_capacity, warehouse1.Minimum_temperature)
 			assert.NoError(t, err)
 			assert.Equal(t, warehouse1Updated.Warehouse_code, updatedWarehouse.Warehouse_code)
 		})
@@ -393,19 +378,17 @@ func TestServiceUpdate(t *testing.T) {
 		func(t *testing.T) {
 			repo := &mocks.Repository{}
 			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
-			repo.On("CheckLocality", tmock.Anything).Return(true, nil).Once()
 			repo.On("Update",
 				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("int")).
 				Return(warehouse1Updated, nil).Once()
 
 			service := warehouse.NewService(repo)
-			updatedWarehouse, err := service.Update(1, warehouse1.Address, warehouse1.Telephone, warehouse1.Warehouse_code, 0, warehouse1.Minimum_temperature, warehouse1.Locality_id)
+			updatedWarehouse, err := service.Update(1, warehouse1.Address, warehouse1.Telephone, warehouse1.Warehouse_code, 0, warehouse1.Minimum_temperature)
 			assert.NoError(t, err)
 			assert.Equal(t, warehouse1Updated.Minimum_capacity, updatedWarehouse.Minimum_capacity)
 		})
@@ -414,69 +397,19 @@ func TestServiceUpdate(t *testing.T) {
 		func(t *testing.T) {
 			repo := &mocks.Repository{}
 			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
-			repo.On("CheckLocality", tmock.Anything).Return(true, nil).Once()
 			repo.On("Update",
 				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("int")).
 				Return(warehouse1Updated, nil).Once()
 
 			service := warehouse.NewService(repo)
-			updatedWarehouse, err := service.Update(1, warehouse1.Address, warehouse1.Telephone, warehouse1.Warehouse_code, warehouse1.Minimum_capacity, 0, warehouse1.Locality_id)
+			updatedWarehouse, err := service.Update(1, warehouse1.Address, warehouse1.Telephone, warehouse1.Warehouse_code, warehouse1.Minimum_capacity, 0)
 			assert.NoError(t, err)
 			assert.Equal(t, warehouse1Updated.Minimum_temperature, updatedWarehouse.Minimum_temperature)
-		})
-	t.Run(
-		"If Locality_id is empty, should return the same Locality_id of the Warehouse",
-		func(t *testing.T) {
-			repo := &mocks.Repository{}
-			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
-			repo.On("CheckLocality", tmock.Anything).Return(true, nil).Once()
-			repo.On("Update",
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int")).
-				Return(warehouse1Updated, nil).Once()
-
-			service := warehouse.NewService(repo)
-			updatedWarehouse, err := service.Update(1, warehouse1.Address, warehouse1.Telephone, warehouse1.Warehouse_code, warehouse1.Minimum_capacity, warehouse1.Minimum_temperature, 0)
-			assert.NoError(t, err)
-			assert.Equal(t, warehouse1Updated.Locality_id, updatedWarehouse.Locality_id)
-		})
-
-	t.Run(
-		"If CheckLocality fail sould return an error",
-		func(t *testing.T) {
-			errorMsgCannotSaveOnDB := fmt.Errorf("locality not found")
-			repo := &mocks.Repository{}
-			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
-			repo.On("CheckLocality", tmock.Anything).Return(false, errorMsgCannotSaveOnDB).Once()
-			repo.On("Update",
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int")).
-				Return(warehouse.Warehouse{}, nil)
-
-			service := warehouse.NewService(repo)
-
-			newWarehouse, err := service.Update(3, warehouse3.Address, warehouse3.Telephone, warehouse3.Warehouse_code, warehouse3.Minimum_capacity, warehouse3.Minimum_temperature, warehouse3.Locality_id)
-
-			assert.Error(t, err)
-			assert.EqualError(t, err, errorMsgCannotSaveOnDB.Error())
-			assert.ObjectsAreEqual([]warehouse.Warehouse{}, newWarehouse)
-
 		})
 
 	t.Run(
@@ -485,20 +418,18 @@ func TestServiceUpdate(t *testing.T) {
 			errorMsgCannotSaveOnDB := fmt.Errorf("Cannot save on DB")
 			repo := &mocks.Repository{}
 			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
-			repo.On("CheckLocality", tmock.Anything).Return(true, nil).Once()
 			repo.On("Update",
 				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("int")).
 				Return(warehouse.Warehouse{}, errorMsgCannotSaveOnDB)
 
 			service := warehouse.NewService(repo)
 
-			newWarehouse, err := service.Update(1, warehouse1.Address, warehouse1.Telephone, warehouse1.Warehouse_code, warehouse1.Minimum_capacity, warehouse1.Minimum_temperature, warehouse1.Locality_id)
+			newWarehouse, err := service.Update(1, warehouse1.Address, warehouse1.Telephone, warehouse1.Warehouse_code, warehouse1.Minimum_capacity, warehouse1.Minimum_temperature)
 
 			assert.Error(t, err)
 			assert.EqualError(t, err, errorMsgCannotSaveOnDB.Error())
