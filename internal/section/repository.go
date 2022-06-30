@@ -3,6 +3,7 @@ package section
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 
 	"github.com/cpereira42/mercado-fresco-pron4/internal/warehouse"
 )
@@ -19,7 +20,7 @@ func (repoSection *repository) ListarSectionAll() ([]Section, error) {
 	var sectionList []Section = []Section{}
 	rows, err := repoSection.db.Query(sqlSelect)
 	if err != nil {
-		return sectionList, err
+		return sectionList, fmt.Errorf("sections not this registered")
 	}
 	defer rows.Close()
 
@@ -51,7 +52,7 @@ func (repoSection *repository) ListarSectionOne(id int64) (Section, error) {
 	if err := rows.Scan(&sectionObj.Id, &sectionObj.SectionNumber, &sectionObj.CurrentCapacity, &sectionObj.CurrentTemperature,
 		&sectionObj.MaximumCapacity, &sectionObj.MinimumCapacity, &sectionObj.MinimumTemperature,
 		&sectionObj.ProductTypeId, &sectionObj.WarehouseId); err != nil {
-		return Section{}, err
+		return Section{}, fmt.Errorf("section %v not found", id)
 	}
 
 	return sectionObj, nil
@@ -112,6 +113,7 @@ func (repoSection *repository) UpdateSection(sectionUp Section) (Section, error)
 	if err != nil {
 		return Section{}, err
 	}
+	sectionUp.Id = 0
 	return sectionUp, nil
 }
 

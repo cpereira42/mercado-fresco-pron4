@@ -182,12 +182,12 @@ DEFAULT CHARACTER SET = utf8;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mercadofresco`.`sections` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `section_number` VARCHAR(255) NOT NULL,
+  `section_number` INT(11) NOT NULL,
   `current_capacity` INT(11) NOT NULL,
-  `current_temperature` DECIMAL(19,2) NOT NULL,
+  `current_temperature` INT(11) NOT NULL,
   `maximum_capacity` INT(11) NOT NULL,
   `minimum_capacity` INT(11) NOT NULL,
-  `minimum_temperature` DECIMAL(19,2) NOT NULL,
+  `minimum_temperature` INT(11) NOT NULL,
   `product_type_id` INT(11) NOT NULL,
   `warehouse_id` INT(10) UNSIGNED NOT NULL,
   PRIMARY KEY (`id`),
@@ -447,7 +447,7 @@ INSERT INTO `warehouse` VALUES
 (1,'rua 1','11','1',1,1,2.00);
 
 INSERT INTO `sections` VALUES
-(1,'sec1',1,1.00,1,1,1.00,1,1);
+(1,1,1,1,1,1,1,1,1);
 
 INSERT INTO `products_batches` VALUES
 (1,'1',1,1.00,'2008-11-11 13:23:44',1,'2008-11-11 13:23:44','2008-11-11 13:23:44',1.00,1,1);

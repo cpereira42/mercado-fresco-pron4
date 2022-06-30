@@ -8,6 +8,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 
+	"github.com/cpereira42/mercado-fresco-pron4/internal/productbatch"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/section"
 
 	"github.com/cpereira42/mercado-fresco-pron4/cmd/server/handler"
@@ -48,9 +49,11 @@ func main() {
 	svcWarehouse := warehouse.NewService(repoWarehouse)
 	w := handler.NewWarehouse(svcWarehouse)
 
+	repoPB := productbatch.NewRepositoryProductBatches(conn)
+	servicePB := productbatch.NewServiceProductBatches(repoPB)
 	repSection := section.NewRepository(conn)
 	serviceSection := section.NewService(repSection, repoWarehouse)
-	sectionController := handler.NewSectionController(serviceSection)
+	sectionController := handler.NewSectionController(serviceSection, servicePB)
 
 	dbSeller := store.New(store.FileType, "../mercado-fresco-pron4/internal/repositories/sellers.json")
 	repoSeller := seller.NewRepositorySeller(dbSeller)
@@ -93,6 +96,8 @@ func main() {
 	section.POST("/", sectionController.CreateSection())
 	section.PATCH("/:id", sectionController.UpdateSection())
 	section.DELETE("/:id", sectionController.DeleteSection())
+	section.GET("/reportProducts", sectionController.ReadPB())     // new
+	r.POST("/api/v1/productBatches", sectionController.CreatePB()) // new
 
 	wr := r.Group("api/v1/warehouse")
 	wr.GET("/", w.GetAll)
