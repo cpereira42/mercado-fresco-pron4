@@ -29,37 +29,19 @@ func (s service) GetAll() ([]Employee, error) {
 }
 
 func (s service) GetByID(id int) (Employee, error) {
-	employees, err := s.repository.GetAll()
-	if err != nil {
-		return Employee{}, err
-	}
-	exists := false
-	for i := range employees {
-		if employees[i].ID == id {
-			exists = true
-		}
-	}
-	if !exists {
-		return Employee{}, fmt.Errorf("employee with id %d not found", id)
-	}
 	employee, err := s.repository.GetByID(id)
 	if err != nil {
-		return Employee{}, err
+		return Employee{}, fmt.Errorf("employee with id %d not found", id)
 	}
 	return employee, nil
 }
 
 func (s service) Create(cardNumberID, firstName, lastName string, warehouseID int) (Employee, error) {
-	lastID, err := s.repository.LastID()
-	if err != nil {
-		return Employee{}, err
-	}
-	lastID++
 	employees, err := s.repository.GetAll()
 	if err != nil {
 		return Employee{}, err
 	}
-	employee := Employee{lastID, cardNumberID, firstName, lastName, warehouseID}
+
 	exists := false
 	for i := range employees {
 		if employees[i].CardNumberID == cardNumberID {
@@ -70,7 +52,11 @@ func (s service) Create(cardNumberID, firstName, lastName string, warehouseID in
 		return Employee{}, fmt.Errorf("employee with this card number id %s exists", cardNumberID)
 	}
 
-	employee, err = s.repository.Create(lastID, cardNumberID, firstName, lastName, warehouseID)
+	if _, err := s.repository.GetByIDWarehouse(warehouseID); err != nil {
+		return Employee{}, fmt.Errorf("warehouse id does not exists")
+	}
+
+	employee, err := s.repository.Create(cardNumberID, firstName, lastName, warehouseID)
 
 	if err != nil {
 		return Employee{}, err
@@ -80,20 +66,17 @@ func (s service) Create(cardNumberID, firstName, lastName string, warehouseID in
 }
 
 func (s service) Update(id int, cardNumberID, firstName, lastName string, warehouseID int) (Employee, error) {
+	employee, err := s.GetByID(id)
+
+	if err != nil {
+		return Employee{}, err
+	}
+
 	employees, err := s.repository.GetAll()
 	if err != nil {
 		return Employee{}, err
 	}
-	idExists := false
 	exists := false
-	for i := range employees {
-		if employees[i].ID == id {
-			idExists = true
-		}
-	}
-	if !idExists {
-		return Employee{}, fmt.Errorf("employee with id %d not found", id)
-	}
 
 	for i := range employees {
 		if employees[i].CardNumberID == cardNumberID && id != employees[i].ID {
@@ -104,7 +87,7 @@ func (s service) Update(id int, cardNumberID, firstName, lastName string, wareho
 		return Employee{}, fmt.Errorf("employee with this card number id %s exists", cardNumberID)
 	}
 
-	employee := Employee{CardNumberID: cardNumberID, FirstName: firstName, LastName: lastName, WarehouseID: warehouseID}
+	employee = Employee{CardNumberID: cardNumberID, FirstName: firstName, LastName: lastName, WarehouseID: warehouseID}
 	for i := range employees {
 		if employees[i].ID == id {
 			employee.ID = id
@@ -123,6 +106,9 @@ func (s service) Update(id int, cardNumberID, firstName, lastName string, wareho
 			employees[i] = employee
 		}
 	}
+	if _, err := s.repository.GetByIDWarehouse(employee.WarehouseID); err != nil {
+		return Employee{}, fmt.Errorf("warehouse id does not exists")
+	}
 
 	employee, err = s.repository.Update(employee.ID, employee.CardNumberID, employee.FirstName, employee.LastName, employee.WarehouseID)
 	if err != nil {
@@ -133,22 +119,12 @@ func (s service) Update(id int, cardNumberID, firstName, lastName string, wareho
 }
 
 func (s service) Delete(id int) error {
-	employees, err := s.repository.GetAll()
-	if err != nil {
+	if _, err := s.GetByID(id); err != nil {
 		return err
 	}
-	deleted := false
-	var index int
-	for i := range employees {
-		if employees[i].ID == id {
-			index = i
-			deleted = true
-		}
-	}
-	if !deleted {
-		return fmt.Errorf("employee with id %d not found", id)
-	}
-	err = s.repository.Delete(index)
+
+	err := s.repository.Delete(id)
+
 	if err != nil {
 		return err
 	}

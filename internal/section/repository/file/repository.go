@@ -1,7 +1,6 @@
 package sectionRepository
 
 import (
-	 
 	"errors"
 	"fmt"
 
@@ -9,7 +8,6 @@ import (
 	"github.com/cpereira42/mercado-fresco-pron4/pkg/store"
 	"github.com/fatih/structs"
 )
-
 
 type repository struct {
 	db store.Store
@@ -19,12 +17,12 @@ func (r *repository) CreateSection(newSection entites.Section) (entites.Section,
 	var sectionsList []entites.Section
 	if err := r.db.Read(&sectionsList); err != nil {
 		return entites.Section{}, err
-	} 
+	}
 	lastID, _ := r.LastID()
-	lastID ++
+	lastID++
 
 	newSection.Id = lastID
-	sectionsList = append(sectionsList, newSection)		
+	sectionsList = append(sectionsList, newSection)
 	if err := r.db.Write(sectionsList); err != nil {
 		return entites.Section{}, err
 	}
@@ -59,18 +57,18 @@ func (r *repository) ListarSectionOne(id int) (entites.Section, error) {
 func (r *repository) UpdateSection(id int, sectionUp entites.Section) (entites.Section, error) {
 	var (
 		sectionList []entites.Section
-		section entites.Section = sectionUp
+		section     entites.Section = sectionUp
 	)
 	if err := r.db.Read(&sectionList); err != nil {
 		return entites.Section{}, err
-	} 
+	}
 	var updated, sectionEncontrado = false, false
 	strSection := structs.Map(sectionUp)
 
 	field := []string{"SectionNumber", "CurrentTemperature", "MinimumTemperature", "CurrentCapacity",
 		"MinimumCapacity", "MaximumCapacity", "WarehouseId", "ProductTypeId"}
 
-		for index := range sectionList {
+	for index := range sectionList {
 		strSection2 := structs.Map(sectionList[index])
 		for _, value := range field {
 			if strSection2["Id"] == id {
@@ -99,7 +97,7 @@ func (r *repository) UpdateSection(id int, sectionUp entites.Section) (entites.S
 			return omitFieldId(sectionUp), nil
 		}
 	}
-	
+
 	if sectionEncontrado {
 		return omitFieldId(section), nil
 	}
@@ -141,7 +139,6 @@ func (r *repository) LastID() (int, error) {
 func NewRepository(db store.Store) entites.Repository {
 	return &repository{db: db}
 }
-
 
 //
 // HELPERS

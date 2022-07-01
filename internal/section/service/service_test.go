@@ -3,6 +3,7 @@ package sectionService
 import (
 	"fmt"
 	"testing"
+
 	"github.com/cpereira42/mercado-fresco-pron4/internal/section/entites"
 	mocks "github.com/cpereira42/mercado-fresco-pron4/internal/section/mock"
 	"github.com/stretchr/testify/assert"

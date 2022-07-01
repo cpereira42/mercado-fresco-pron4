@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/fatih/structs v1.1.0
 	github.com/gin-gonic/gin v1.8.1
+	github.com/go-sql-driver/mysql v1.6.0
 	github.com/stretchr/testify v1.7.2
 )
 
@@ -14,10 +15,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-require (
-	github.com/go-sql-driver/mysql v1.6.0 // indirect
-	github.com/stretchr/objx v0.1.0 // indirect
-)
+require github.com/stretchr/objx v0.1.0 // indirect
 
 require (
 	github.com/gin-contrib/sse v0.1.0 // indirect

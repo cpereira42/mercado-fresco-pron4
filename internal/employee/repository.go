@@ -3,6 +3,8 @@ package employee
 import (
 	"database/sql"
 	"fmt"
+
+	"github.com/cpereira42/mercado-fresco-pron4/internal/warehouse"
 )
 
 type Repository interface {
@@ -10,6 +12,7 @@ type Repository interface {
 	GetByID(id int) (Employee, error)
 	Create(cardNumberID, firstName, lastName string, warehouseID int) (Employee, error)
 	Update(id int, cardNumberID, firstName, lastName string, warehouseID int) (Employee, error)
+	GetByIDWarehouse(id int) (warehouse.Warehouse, error)
 	Delete(id int) error
 }
 
@@ -68,31 +71,50 @@ func (r *repository) GetByID(id int) (Employee, error) {
 
 	return employee, nil
 }
+func (r *repository) GetByIDWarehouse(id int) (warehouse.Warehouse, error) {
+	stmt, err := r.db.Prepare("SELECT * FROM warehouse WHERE id = ?")
+	if err != nil {
+		return warehouse.Warehouse{}, err
+	}
+	defer stmt.Close()
+
+	var warehouse warehouse.Warehouse
+
+	err = stmt.QueryRow(id).Scan(
+		&warehouse.ID,
+		&warehouse.Address,
+		&warehouse.Telephone,
+		&warehouse.Warehouse_code,
+	)
+
+	if err != nil {
+		return warehouse, err
+	}
+
+	return warehouse, nil
+}
 
 func (r *repository) Create(cardNumberID, firstName, lastName string, warehouseID int) (Employee, error) {
-	employee := Employee{0, cardNumberID, firstName, lastName, warehouseID}
+	employee := Employee{CardNumberID: cardNumberID, FirstName: firstName, LastName: lastName, WarehouseID: warehouseID}
 
-	stmt, err := r.db.Prepare(`INSERT INTO employee
+	stmt, err := r.db.Exec(`INSERT INTO employee
 	(card_number_id,
-	first_name,
-	last_name,
-	warehouse_id) VALUES(?,?,?,?)`)
+		first_name,
+		last_name,
+		warehouse_id) VALUES(?,?,?,?)`, cardNumberID,
+		firstName,
+		lastName,
+		warehouseID)
 	if err != nil {
 		return Employee{}, err
 	}
-	defer stmt.Close()
-	rows, err := stmt.Exec(
-		cardNumberID,
-		firstName,
-		lastName,
-		warehouseID,
-	)
-	RowsAffected, _ := rows.RowsAffected()
+
+	RowsAffected, _ := stmt.RowsAffected()
 	if RowsAffected == 0 {
 		return Employee{}, fmt.Errorf("fail to save")
 	}
 
-	lastID, err := rows.LastInsertId()
+	lastID, err := stmt.LastInsertId()
 	if err != nil {
 		return Employee{}, err
 	}
@@ -102,32 +124,28 @@ func (r *repository) Create(cardNumberID, firstName, lastName string, warehouseI
 	if err != nil {
 		return Employee{}, err
 	}
+
 	return employee, nil
 }
 func (r *repository) Update(id int, cardNumberID, firstName, lastName string, warehouseID int) (Employee, error) {
 	employee := Employee{id, cardNumberID, firstName, lastName, warehouseID}
-	stmt, err := r.db.Prepare(`UPDATE employee SET
+
+	stmt, err := r.db.Exec(`UPDATE employee SET
 	card_number_id=?,
 	first_name=?,
 	last_name=?,
-	warehouse_id=? WHERE id=?`)
-
-	if err != nil {
-		return Employee{}, err
-	}
-
-	defer stmt.Close()
-
-	rows, err := stmt.Exec(
+	warehouse_id=? WHERE id=?`,
 		cardNumberID,
 		firstName,
 		lastName,
 		warehouseID,
-	)
+		id)
+
 	if err != nil {
 		return Employee{}, err
 	}
-	RowsAffected, _ := rows.RowsAffected()
+
+	RowsAffected, _ := stmt.RowsAffected()
 	if RowsAffected == 0 {
 		return Employee{}, fmt.Errorf("fail to update")
 	}
@@ -136,16 +154,11 @@ func (r *repository) Update(id int, cardNumberID, firstName, lastName string, wa
 }
 
 func (r *repository) Delete(id int) error {
-	stmt, err := r.db.Prepare("DELETE FROM employee WHERE id=?")
+	stmt, err := r.db.Exec("DELETE FROM employee WHERE id=?", id)
 	if err != nil {
 		return err
 	}
-	defer stmt.Close()
-	rows, err := stmt.Exec(id)
-	if err != nil {
-		return err
-	}
-	RowsAffected, _ := rows.RowsAffected()
+	RowsAffected, _ := stmt.RowsAffected()
 	if RowsAffected == 0 {
 		return fmt.Errorf("fail to delete")
 	}
