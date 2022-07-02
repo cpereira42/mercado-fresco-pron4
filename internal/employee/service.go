@@ -37,25 +37,6 @@ func (s service) GetByID(id int) (Employee, error) {
 }
 
 func (s service) Create(cardNumberID, firstName, lastName string, warehouseID int) (Employee, error) {
-	employees, err := s.repository.GetAll()
-	if err != nil {
-		return Employee{}, err
-	}
-
-	exists := false
-	for i := range employees {
-		if employees[i].CardNumberID == cardNumberID {
-			exists = true
-		}
-	}
-	if exists {
-		return Employee{}, fmt.Errorf("employee with this card number id %s exists", cardNumberID)
-	}
-
-	if _, err := s.repository.GetByIDWarehouse(warehouseID); err != nil {
-		return Employee{}, fmt.Errorf("warehouse id does not exists")
-	}
-
 	employee, err := s.repository.Create(cardNumberID, firstName, lastName, warehouseID)
 
 	if err != nil {
@@ -67,47 +48,21 @@ func (s service) Create(cardNumberID, firstName, lastName string, warehouseID in
 
 func (s service) Update(id int, cardNumberID, firstName, lastName string, warehouseID int) (Employee, error) {
 	employee, err := s.GetByID(id)
-
 	if err != nil {
 		return Employee{}, err
 	}
 
-	employees, err := s.repository.GetAll()
-	if err != nil {
-		return Employee{}, err
+	if cardNumberID != "" {
+		employee.CardNumberID = cardNumberID
 	}
-	exists := false
-
-	for i := range employees {
-		if employees[i].CardNumberID == cardNumberID && id != employees[i].ID {
-			exists = true
-		}
+	if firstName != "" {
+		employee.FirstName = firstName
 	}
-	if exists {
-		return Employee{}, fmt.Errorf("employee with this card number id %s exists", cardNumberID)
+	if lastName != "" {
+		employee.LastName = lastName
 	}
-
-	employee = Employee{CardNumberID: cardNumberID, FirstName: firstName, LastName: lastName, WarehouseID: warehouseID}
-	for i := range employees {
-		if employees[i].ID == id {
-			employee.ID = id
-			if cardNumberID == "" {
-				employee.CardNumberID = employees[i].CardNumberID
-			}
-			if firstName == "" {
-				employee.FirstName = employees[i].FirstName
-			}
-			if lastName == "" {
-				employee.LastName = employees[i].LastName
-			}
-			if warehouseID == 0 {
-				employee.WarehouseID = employees[i].WarehouseID
-			}
-			employees[i] = employee
-		}
-	}
-	if _, err := s.repository.GetByIDWarehouse(employee.WarehouseID); err != nil {
-		return Employee{}, fmt.Errorf("warehouse id does not exists")
+	if warehouseID > 0 {
+		employee.WarehouseID = warehouseID
 	}
 
 	employee, err = s.repository.Update(employee.ID, employee.CardNumberID, employee.FirstName, employee.LastName, employee.WarehouseID)
@@ -119,9 +74,6 @@ func (s service) Update(id int, cardNumberID, firstName, lastName string, wareho
 }
 
 func (s service) Delete(id int) error {
-	if _, err := s.GetByID(id); err != nil {
-		return err
-	}
 
 	err := s.repository.Delete(id)
 
