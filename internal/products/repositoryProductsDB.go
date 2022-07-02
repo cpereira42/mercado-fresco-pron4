@@ -3,7 +3,6 @@ package products
 import (
 	"database/sql"
 	"fmt"
-	"log"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -68,7 +67,7 @@ func (r *repository) GetId(id int) (Product, error) {
 
 	stmt, err := r.db.Prepare("SELECT * FROM products Where id = ?")
 	if err != nil {
-		return product, err
+		return product, fmt.Errorf("Fail to prepar query")
 	}
 	err = stmt.QueryRow(id).Scan(&product.Id,
 		&product.ProductCode,
@@ -92,13 +91,13 @@ func (r *repository) GetId(id int) (Product, error) {
 
 func (r *repository) CheckCode(id int, code string) error {
 
-	stmt, err := r.db.Prepare("SELECT product_code FROM products Where product_code = ? and id != ?")
+	stmt, err := r.db.Prepare("SELECT product_code FROM products Where id != ? and product_code = ?")
 
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
-	err = stmt.QueryRow(code, id).Scan(&code)
+	err = stmt.QueryRow(id, code).Scan(&code)
 
 	if err == nil {
 		return fmt.Errorf("Product already registred")
@@ -108,7 +107,7 @@ func (r *repository) CheckCode(id int, code string) error {
 
 func (r *repository) Delete(id int) error {
 
-	stmt, err := r.db.Prepare("DELETE FROM products WHERE id=? ")
+	stmt, err := r.db.Prepare("DELETE FROM products WHERE id = ?")
 	if err != nil {
 		return err
 	}
@@ -129,7 +128,6 @@ func (r *repository) Delete(id int) error {
 
 func (r *repository) Create(p Product) (Product, error) {
 
-	log.Println("err", p.SellerId)
 	stmt, err := r.db.Prepare(`INSERT INTO products (
 		product_code, 
 		description, 
@@ -177,16 +175,17 @@ func (r *repository) GetProductsTypes(id int) (string, error) {
 	var description string
 
 	stmt, err := r.db.Prepare("SELECT description FROM products_types Where id = ?")
+
 	if err != nil {
 		return "", fmt.Errorf("Products Types not Found")
 	}
-	defer stmt.Close()
 
 	err = stmt.QueryRow(id).Scan(&description)
 
 	if err != nil {
 		return "", fmt.Errorf("Products Types not Found")
 	}
+	defer stmt.Close()
 	return description, nil
 }
 

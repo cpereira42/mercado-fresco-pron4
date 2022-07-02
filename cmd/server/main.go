@@ -85,7 +85,7 @@ func main() {
 	pr.GET("/reportRecords/", pRecord.GetId())
 
 	prec := r.Group("/api/v1/productsRecords")
-	prec.GET("", pRecord.GetAll())
+	//prec.GET("", pRecord.GetAll())
 	prec.POST("/", pRecord.Create())
 
 	sellers := r.Group("/api/v1/sellers")

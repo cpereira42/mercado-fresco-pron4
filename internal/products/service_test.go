@@ -190,15 +190,14 @@ func Test_RepositoryDelete(t *testing.T) {
 	})
 }
 
-/*func Test_RepositoryUpdate(t *testing.T) {
+func Test_RepositoryUpdate(t *testing.T) {
 	produtos := []products.Product{prod1, prod2, prod3}
 	t.Run("Update Ok", func(t *testing.T) {
 		repo := &mocks.Repository{}
-		repo.On("GetAll").Return(produtos, nil)
 		repo.On("GetId", 3).Return(produtos[2], nil)
 		prod3.NetWeight = 9.9
 		repo.On("Update", 3, prod3).Return(prod3, nil)
-
+		repo.On("CheckCode", 3, prod3.ProductCode).Return(nil)
 		service := products.NewService(repo, repoSeller)
 		ps, err := service.Update(3, prodUp)
 
@@ -209,7 +208,6 @@ func Test_RepositoryDelete(t *testing.T) {
 
 	t.Run("Update Fail", func(t *testing.T) {
 		repo := &mocks.Repository{}
-		repo.On("GetAll").Return(produtos, nil)
 		repo.On("GetId", 5).Return(products.Product{}, fmt.Errorf("Product not found"))
 		repo.On("Update", 5, prod3).Return(products.Product{}, fmt.Errorf("Product not found"))
 		service := products.NewService(repo, repoSeller)
@@ -221,21 +219,21 @@ func Test_RepositoryDelete(t *testing.T) {
 
 	t.Run("Update Code already Registred Fail", func(t *testing.T) {
 		repo := &mocks.Repository{}
-		repo.On("GetAll").Return(produtos, nil)
 		repo.On("GetId", 3).Return(produtos[2], nil)
+
 		prod3.NetWeight = 9.9
 		prodUp.ProductCode = "prod2"
-		repo.On("Update", 3, prod3).Return(products.Product{}, fmt.Errorf("code Product prod2 already registredtt"))
+		repo.On("CheckCode", 3, prodUp.ProductCode).Return(fmt.Errorf("code Product prod2 already registred"))
 		service := products.NewService(repo, repoSeller)
 		_, err := service.Update(3, prodUp)
 
 		assert.Equal(t, fmt.Errorf("code Product prod2 already registred"), err)
 
 	})
-}*/
+}
 
 func Test_RepositoryCreate(t *testing.T) {
-	produtos := []products.Product{prod1, prod2, prod3}
+
 	t.Run("Create Ok", func(t *testing.T) {
 		repo := &mocks.Repository{}
 		repoSeller.On("GetId", prodNew.SellerId).Return(seller.Seller{}, nil)
@@ -265,7 +263,6 @@ func Test_RepositoryCreate(t *testing.T) {
 
 	})
 
-	produtos = append(produtos, prod4)
 	t.Run("Create Code already Registred Fail ", func(t *testing.T) {
 		repo := &mocks.Repository{}
 		repoSeller.On("GetId", prodNew.SellerId).Return(seller.Seller{}, nil)
@@ -277,6 +274,30 @@ func Test_RepositoryCreate(t *testing.T) {
 
 		assert.NotNil(t, err)
 		assert.Equal(t, err, fmt.Errorf("code Product prod4 already registred"))
+
+	})
+
+	t.Run("Create invalid product types ", func(t *testing.T) {
+		repo := &mocks.Repository{}
+		repoSeller.On("GetId", prodNew.SellerId).Return(seller.Seller{}, nil)
+		repo.On("GetProductsTypes", prodNew.ProductTypeId).Return("", fmt.Errorf("Product type not found"))
+		service := products.NewService(repo, repoSeller)
+		_, err := service.Create(prodCreate)
+
+		assert.NotNil(t, err)
+		assert.Equal(t, err, fmt.Errorf("Product type not found"))
+
+	})
+
+	t.Run("Create invalid seller ", func(t *testing.T) {
+		repo := &mocks.Repository{}
+		repoSeller := &mockSeller.RepositorySeller{}
+		repoSeller.On("GetId", prodNew.SellerId).Return(seller.Seller{}, fmt.Errorf("Seller not found"))
+		service := products.NewService(repo, repoSeller)
+		_, err := service.Create(prodCreate)
+
+		assert.NotNil(t, err)
+		assert.Equal(t, err, fmt.Errorf("Seller not found"))
 
 	})
 
