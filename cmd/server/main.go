@@ -2,16 +2,14 @@ package main
 
 import (
 	"database/sql"
-
-	_ "github.com/go-sql-driver/mysql"
-
 	"fmt"
 	"log"
 	"os"
 
-	//sectionRepository "github.com/cpereira42/mercado-fresco-pron4/internal/section/repository/file"
-	sectionRepository "github.com/cpereira42/mercado-fresco-pron4/internal/section/repository/mariadb"
-	sectionService "github.com/cpereira42/mercado-fresco-pron4/internal/section/service"
+	_ "github.com/go-sql-driver/mysql"
+
+	"github.com/cpereira42/mercado-fresco-pron4/internal/productbatch"
+	"github.com/cpereira42/mercado-fresco-pron4/internal/section"
 
 	"github.com/cpereira42/mercado-fresco-pron4/cmd/server/handler"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/buyer"
@@ -25,15 +23,12 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var Conn *sql.DB
-
 func main() {
-
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal(".Env cant be load")
 	}
-	Conn, err = connection()
+	conn, err := connection()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -47,23 +42,24 @@ func main() {
 	repoProd := products.NewRepositoryProducts(dbProd)
 	serviceProd := products.NewService(repoProd)
 
-	dbWarehouse := store.New(store.FileType, "./internal/repositories/warehouse.json")
-	repoWarehouse := warehouse.NewRepository(dbWarehouse)
+	// dbWarehouse := store.New(store.FileType, "./internal/repositories/warehouse.json")
+	// repoWarehouse := warehouse.NewRepository(dbWarehouse)
+
+	repoWarehouse := warehouse.NewRepository(conn)
 	svcWarehouse := warehouse.NewService(repoWarehouse)
 	w := handler.NewWarehouse(svcWarehouse)
 
-	//dbSection := store.New(store.FileType, "./internal/repositories/sections.json")
-	//repSection := sectionRepository.NewRepository(dbSection)
-
-	repSection := sectionRepository.NewRepository(Conn)
-	serviceSection := sectionService.NewService(repSection)
-	sectionController := handler.NewSectionController(serviceSection)
+	repoPB := productbatch.NewRepositoryProductBatches(conn)
+	servicePB := productbatch.NewServiceProductBatches(repoPB)
+	repSection := section.NewRepository(conn)
+	serviceSection := section.NewService(repSection, repoWarehouse)
+	sectionController := handler.NewSectionController(serviceSection, servicePB)
 
 	dbSeller := store.New(store.FileType, "../mercado-fresco-pron4/internal/repositories/sellers.json")
 	repoSeller := seller.NewRepositorySeller(dbSeller)
 	serviceSeller := seller.NewService(repoSeller)
 
-	repositoryEmployees := employee.NewRepository(Conn)
+	repositoryEmployees := employee.NewRepository(conn)
 	serviceEmployees := employee.NewService(repositoryEmployees)
 	handlerEmployees := handler.NewEmployee(serviceEmployees)
 
@@ -94,11 +90,13 @@ func main() {
 	routesEmployees.DELETE("/:id", handlerEmployees.Delete())
 
 	section := r.Group("/api/v1/sections")
-	section.GET("/", sectionController.ListarSectionAll())    // lista todos recursos
-	section.GET("/:id", sectionController.ListarSectionOne()) // buscar recurso por id
-	section.POST("/", sectionController.CreateSection())      // cria um novo recurso
-	section.PATCH("/:id", sectionController.UpdateSection())  // modifica recursos
-	section.DELETE("/:id", sectionController.DeleteSection()) // remove recursos
+	section.GET("/", sectionController.ListarSectionAll())
+	section.GET("/:id", sectionController.ListarSectionOne())
+	section.POST("/", sectionController.CreateSection())
+	section.PATCH("/:id", sectionController.UpdateSection())
+	section.DELETE("/:id", sectionController.DeleteSection())
+	section.GET("/reportProducts", sectionController.ReadPB())     // new
+	r.POST("/api/v1/productBatches", sectionController.CreatePB()) // new
 
 	wr := r.Group("api/v1/warehouse")
 	wr.GET("/", w.GetAll)
@@ -124,6 +122,10 @@ func connection() (*sql.DB, error) {
 	host := os.Getenv("HOST_DB")
 	database := os.Getenv("DATABASE")
 	dataSource := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", user, pass, host, port, database)
-	log.Println(dataSource)
-	return sql.Open("mysql", dataSource)
+	log.Println("conection Success")
+	conn, err := sql.Open("mysql", dataSource)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return conn, nil
 }
