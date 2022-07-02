@@ -88,13 +88,10 @@ func TestServiceGetByID(t *testing.T) {
 }
 
 func TestServiceCreate(t *testing.T) {
-	employees := []employee.Employee{employee1, employee2, employee3}
 
 	t.Run("If Create is success, it should return a employee",
 		func(t *testing.T) {
 			repo := &mocks.Repository{}
-			repo.On("GetAll").Return(employees, nil).Once()
-			repo.On("GetByIDWarehouse", 1).Return(warehouse1, nil).Once()
 			repo.On("Create",
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
@@ -113,8 +110,6 @@ func TestServiceCreate(t *testing.T) {
 		func(t *testing.T) {
 			errorMsg := fmt.Errorf("employee with this card number id 123 exists")
 			repo := &mocks.Repository{}
-			repo.On("GetAll").Return(employees, nil).Once()
-			repo.On("GetByIDWarehouse", 1).Return(warehouse1, nil).Once()
 			repo.On("Create",
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
@@ -134,8 +129,6 @@ func TestServiceCreate(t *testing.T) {
 		func(t *testing.T) {
 			errorMsg := fmt.Errorf("error to Create")
 			repo := &mocks.Repository{}
-			repo.On("GetAll").Return(employees, nil).Once()
-			repo.On("GetByIDWarehouse", 1).Return(warehouse1, nil).Once()
 			repo.On("Create",
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
@@ -153,13 +146,10 @@ func TestServiceCreate(t *testing.T) {
 
 func TestServiceUpdate(t *testing.T) {
 
-	employees := []employee.Employee{employee1, employee2, employee3}
 	t.Run("If Update is success, it should return an updated employee",
 		func(t *testing.T) {
 			repo := &mocks.Repository{}
 			repo.On("GetByID", 1).Return(employee1, nil).Once()
-			repo.On("GetAll").Return(employees, nil).Once()
-			repo.On("GetByIDWarehouse", 1).Return(warehouse1, nil).Once()
 			repo.On("Update",
 				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("string"),
@@ -181,8 +171,6 @@ func TestServiceUpdate(t *testing.T) {
 			errorMsg := fmt.Errorf("employee with id 10 not found")
 			repo := &mocks.Repository{}
 			repo.On("GetByID", 10).Return(employee.Employee{}, errorMsg).Once()
-			repo.On("GetAll").Return(employees, nil).Once()
-			repo.On("GetByIDWarehouse", 1).Return(warehouse1, nil).Once()
 			repo.On("Update",
 				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("string"),
@@ -200,11 +188,9 @@ func TestServiceUpdate(t *testing.T) {
 		})
 	t.Run("If the CardNumberID  in the Update exists, it should return an error",
 		func(t *testing.T) {
-			errorMsg := fmt.Errorf("employee with this card number id 123 exists")
+			errorMsg := fmt.Errorf("employee with this card number id exists")
 			repo := &mocks.Repository{}
-			repo.On("GetByID", 1).Return(employee1, nil).Once()
-			repo.On("GetAll").Return(employees, nil).Once()
-			repo.On("GetByIDWarehouse", 1).Return(warehouse1, nil).Once()
+			repo.On("GetByID", 2).Return(employee2, nil).Once()
 			repo.On("Update",
 				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("string"),
@@ -225,8 +211,6 @@ func TestServiceUpdate(t *testing.T) {
 		func(t *testing.T) {
 			repo := &mocks.Repository{}
 			repo.On("GetByID", 1).Return(employee1, nil).Once()
-			repo.On("GetAll").Return(employees, nil).Once()
-			repo.On("GetByIDWarehouse", 1).Return(warehouse1, nil).Once()
 			repo.On("Update",
 				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("string"),
@@ -246,8 +230,6 @@ func TestServiceUpdate(t *testing.T) {
 		func(t *testing.T) {
 			repo := &mocks.Repository{}
 			repo.On("GetByID", 1).Return(employee1, nil).Once()
-			repo.On("GetAll").Return(employees, nil).Once()
-			repo.On("GetByIDWarehouse", 1).Return(warehouse1, nil).Once()
 			repo.On("Update",
 				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("string"),
@@ -267,8 +249,6 @@ func TestServiceUpdate(t *testing.T) {
 		func(t *testing.T) {
 			repo := &mocks.Repository{}
 			repo.On("GetByID", 1).Return(employee1, nil).Once()
-			repo.On("GetAll").Return(employees, nil).Once()
-			repo.On("GetByIDWarehouse", 1).Return(warehouse1, nil).Once()
 			repo.On("Update",
 				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("string"),
@@ -288,8 +268,6 @@ func TestServiceUpdate(t *testing.T) {
 		func(t *testing.T) {
 			repo := &mocks.Repository{}
 			repo.On("GetByID", 1).Return(employee1, nil).Once()
-			repo.On("GetAll").Return(employees, nil).Once()
-			repo.On("GetByIDWarehouse", 1).Return(warehouse1, nil).Once()
 			repo.On("Update",
 				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("string"),
@@ -310,8 +288,6 @@ func TestServiceUpdate(t *testing.T) {
 			errorMsg := fmt.Errorf("error to Update")
 			repo := &mocks.Repository{}
 			repo.On("GetByID", 1).Return(employee1, nil).Once()
-			repo.On("GetAll").Return(employees, nil).Once()
-			repo.On("GetByIDWarehouse", 1).Return(warehouse1, nil).Once()
 			repo.On("Update",
 				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("string"),
@@ -332,7 +308,6 @@ func TestServiceDelete(t *testing.T) {
 	t.Run("If GetByID is success, it should return a employee",
 		func(t *testing.T) {
 			repo := &mocks.Repository{}
-			repo.On("GetByID", 1).Return(employee1, nil).Once()
 			repo.On("Delete", tmock.AnythingOfType("int")).Return(nil).Once()
 
 			service := employee.NewService(repo)
@@ -347,7 +322,7 @@ func TestServiceDelete(t *testing.T) {
 		func(t *testing.T) {
 			errorMsg := fmt.Errorf("employee with id 10 not found")
 			repo := &mocks.Repository{}
-			repo.On("GetByID", 10).Return(employee.Employee{}, errorMsg).Once()
+			repo.On("Delete", tmock.AnythingOfType("int")).Return(errorMsg).Once()
 
 			service := employee.NewService(repo)
 			err := service.Delete(10)
@@ -361,7 +336,6 @@ func TestServiceDelete(t *testing.T) {
 		func(t *testing.T) {
 			errorMsg := fmt.Errorf("error to Delete")
 			repo := &mocks.Repository{}
-			repo.On("GetByID", 1).Return(employee1, nil).Once()
 			repo.On("Delete", tmock.AnythingOfType("int")).Return(errorMsg).Once()
 
 			service := employee.NewService(repo)
