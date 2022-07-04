@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`localities` (
   `province_name` VARCHAR(255) NOT NULL,
   `country_name` VARCHAR(255) NOT NULL,
   PRIMARY KEY (`id`),
-  INDEX `fk_localities_provinces1_idx` (`province_id` ASC) VISIBLE)
+  CONSTRAINT `locality_name_unique` UNIQUE (`locality_name`))
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 
@@ -182,12 +182,12 @@ DEFAULT CHARACTER SET = utf8;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mercadofresco`.`sections` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `section_number` VARCHAR(255) NOT NULL,
+  `section_number` INT(11) NOT NULL,
   `current_capacity` INT(11) NOT NULL,
-  `current_temperature` DECIMAL(19,2) NOT NULL,
+  `current_temperature` INT(11) NOT NULL,
   `maximum_capacity` INT(11) NOT NULL,
   `minimum_capacity` INT(11) NOT NULL,
-  `minimum_temperature` DECIMAL(19,2) NOT NULL,
+  `minimum_temperature` INT(11) NOT NULL,
   `product_type_id` INT(11) NOT NULL,
   `warehouse_id` INT(10) UNSIGNED NOT NULL,
   PRIMARY KEY (`id`),
@@ -197,13 +197,13 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`sections` (
   CONSTRAINT `fk_section_products_types1`
     FOREIGN KEY (`product_type_id`)
     REFERENCES `mercadofresco`.`products_types` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
   CONSTRAINT `fk_section_warehouse1`
     FOREIGN KEY (`warehouse_id`)
     REFERENCES `mercadofresco`.`warehouse` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 
@@ -229,13 +229,13 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`products_batches` (
   CONSTRAINT `fk_products_batches_product1`
     FOREIGN KEY (`product_id`)
     REFERENCES `mercadofresco`.`products` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
   CONSTRAINT `fk_products_batches_section1`
     FOREIGN KEY (`section_id`)
     REFERENCES `mercadofresco`.`sections` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 
@@ -424,8 +424,10 @@ SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 
 
-INSERT INTO `localities` VALUES
-(1,'São Paulo','SP','Brazil');
+INSERT INTO `localities` (id, locality_name, province_name, country_name) VALUES
+(1,'São Paulo','SP','Brazil'),
+(2,'Rio de Janeiro','RJ','Brazil'),
+(3,'Nova York','NY','EUA');
 
 INSERT INTO `sellers` VALUES
 (1,'cid1','Mercado','rua 1','111',1);
@@ -445,7 +447,7 @@ INSERT INTO `warehouse` VALUES
 (1,'rua 1','11','1',1,1,2.00);
 
 INSERT INTO `sections` VALUES
-(1,'sec1',1,1.00,1,1,1.00,1,1);
+(1,1,1,1,1,1,1,1,1);
 
 INSERT INTO `products_batches` VALUES
 (1,'1',1,1.00,'2008-11-11 13:23:44',1,'2008-11-11 13:23:44','2008-11-11 13:23:44',1.00,1,1);
@@ -475,22 +477,5 @@ INSERT INTO `purchase_orders` VALUES
 
 INSERT INTO `order_details` VALUES
 (1,'teste',15,15.00,1,1);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

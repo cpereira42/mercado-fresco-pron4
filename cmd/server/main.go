@@ -2,24 +2,17 @@ package main
 
 import (
 	"database/sql"
-<<<<<<< HEAD
-=======
+
 	_ "github.com/go-sql-driver/mysql"
 
->>>>>>> sprint_3
 	"fmt"
 	"log"
 	"os"
 
-<<<<<<< HEAD
-	sectionRepository "github.com/cpereira42/mercado-fresco-pron4/internal/section/repository/file"
-	sectionService "github.com/cpereira42/mercado-fresco-pron4/internal/section/service"
-	"github.com/joho/godotenv"
-=======
 	//sectionRepository "github.com/cpereira42/mercado-fresco-pron4/internal/section/repository/file"
+	"github.com/cpereira42/mercado-fresco-pron4/internal/carries"
 	sectionRepository "github.com/cpereira42/mercado-fresco-pron4/internal/section/repository/mariadb"
 	sectionService "github.com/cpereira42/mercado-fresco-pron4/internal/section/service"
->>>>>>> sprint_3
 
 	"github.com/cpereira42/mercado-fresco-pron4/cmd/server/handler"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/buyer"
@@ -31,14 +24,12 @@ import (
 	"github.com/cpereira42/mercado-fresco-pron4/pkg/store"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-
-
 )
 
 var Conn *sql.DB
 
 func main() {
-	
+
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal(".Env cant be load")
@@ -47,7 +38,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
- 
 
 	dbBuyers := store.New(store.FileType, "./internal/repositories/buyer.json")
 	repositoryBuyers := buyer.NewRepository(dbBuyers)
@@ -65,10 +55,14 @@ func main() {
 	svcWarehouse := warehouse.NewService(repoWarehouse)
 	w := handler.NewWarehouse(svcWarehouse)
 
+	repoCarries := carries.NewRepository(Conn)
+	svcCarries := carries.NewService(repoCarries)
+	carriesController := handler.NewCarry(svcCarries)
+
 	//dbSection := store.New(store.FileType, "./internal/repositories/sections.json")
 	//repSection := sectionRepository.NewRepository(dbSection)
-	
-	repSection := sectionRepository.NewRepository(Conn)	
+
+	repSection := sectionRepository.NewRepository(Conn)
 	serviceSection := sectionService.NewService(repSection)
 	sectionController := handler.NewSectionController(serviceSection)
 
@@ -128,6 +122,11 @@ func main() {
 	buyers.PATCH("/:id", hdBuyers.Update())
 	buyers.DELETE("/:id", hdBuyers.Delete())
 
+	carry := r.Group("/api/v1/carries")
+	localities := r.Group("/api/v1/localities")
+	localities.GET("/:id", carriesController.GetByIDReport)
+	carry.POST("/", carriesController.Create)
+
 	r.Run()
 }
 
@@ -137,7 +136,7 @@ func connection() (*sql.DB, error) {
 	port := os.Getenv("PORT_DB")
 	host := os.Getenv("HOST_DB")
 	database := os.Getenv("DATABASE")
-	dataSource := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", user, pass,host,port,database)
+	dataSource := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", user, pass, host, port, database)
 	log.Println(dataSource)
 	return sql.Open("mysql", dataSource)
 }

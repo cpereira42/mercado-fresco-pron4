@@ -5,8 +5,6 @@ import (
 	"fmt"
 
 	"github.com/cpereira42/mercado-fresco-pron4/internal/section/entites"
-	"github.com/cpereira42/mercado-fresco-pron4/internal/warehouse"
-	"github.com/cpereira42/mercado-fresco-pron4/pkg/store"
 	// "github.com/cpereira42/mercado-fresco-pron4/internal/warehouse"
 	// main "github.com/cpereira42/mercado-fresco-pron4/cmd/server"
 )
@@ -32,18 +30,18 @@ func (s service) ListarSectionOne(id int) (entites.Section, error) {
 }
 
 func (s service) CreateSection(newSection entites.SectionRequestCreate) (entites.Section, error) {
-	dbWarehouse := store.New("file", "./internal/repositories/warehouse.json")
-	repoWarehouse := warehouse.NewRepository(dbWarehouse)
-	serviceWarehouse := warehouse.NewService(repoWarehouse)
+	//dbWarehouse := store.New("file", "./internal/repositories/warehouse.json")
+	//repoWarehouse := warehouse.NewRepository(dbWarehouse)
+	//serviceWarehouse := warehouse.NewService(repoWarehouse)
 
-	_, err := serviceWarehouse.GetByID(newSection.WarehouseId)
-	if err != nil {
-		return entites.Section{}, err
-	}
+	//_, err := serviceWarehouse.GetByID(newSection.WarehouseId)
+	//if err != nil {
+	//	return entites.Section{}, err
+	//}
 
 	var sectionList []entites.Section
 
-	sectionList, err = s.repository.ListarSectionAll()
+	sectionList, err := s.repository.ListarSectionAll()
 	if err != nil {
 		return entites.Section{}, err
 	}
