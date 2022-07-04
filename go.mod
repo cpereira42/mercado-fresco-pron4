@@ -15,6 +15,7 @@ require (
 )
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.0 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/stretchr/objx v0.1.0 // indirect
 )
