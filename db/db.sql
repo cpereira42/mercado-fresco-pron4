@@ -195,6 +195,7 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`products` (
   `product_type_id` INT(11) NOT NULL,
   `seller_id` INT(11) NOT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE INDEX `product_code` (`product_code` ASC) VISIBLE,
   INDEX `fk_product_sellers1_idx` (`seller_id` ASC) VISIBLE,
   INDEX `fk_product_products_types1_idx` (`product_type_id` ASC) VISIBLE,
   CONSTRAINT `fk_product_products_types1`

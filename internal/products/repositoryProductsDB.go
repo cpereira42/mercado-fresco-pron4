@@ -7,15 +7,43 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+const (
+	QUERY_GETALL    = "SELECT * FROM products"
+	QUERY_GETID     = "SELECT * FROM products Where id = ?"
+	QUERY_CHECKCODE = "SELECT product_code FROM products Where id != ? and product_code = ?"
+	QUERY_DELETE    = "DELETE FROM products WHERE id = ?"
+	QUERY_INSERT    = `INSERT INTO products (
+		product_code, 
+		description, 
+		width, 
+		length,	
+		height,	
+		net_weight,	
+		expiration_rate, 
+		recommended_freezing_temperature, 
+		freezing_rate, 
+		product_type_id,
+		seller_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+	QUERY_UPDATE = `UPDATE products SET 
+		product_code=?,
+		description=?, 
+		width=? ,
+		length=?,	
+		height=?,	
+		net_weight=?,	
+		expiration_rate=?, 
+		recommended_freezing_temperature=? ,
+		freezing_rate=? ,
+		product_type_id=?,
+		seller_id=? WHERE id=?`
+)
+
 type Repository interface {
 	GetAll() ([]Product, error)
 	GetId(id int) (Product, error)
 	Delete(id int) error
-	LastID() (int, error)
 	Create(p Product) (Product, error)
 	Update(id int, prod Product) (Product, error)
-	CheckCode(id int, code string) error
-	GetProductsTypes(id int) (string, error)
 }
 
 type repository struct {
@@ -31,7 +59,7 @@ func NewRepositoryProductsDB(db *sql.DB) Repository {
 func (r *repository) GetAll() ([]Product, error) {
 	var products []Product
 
-	rows, err := r.db.Query("SELECT * FROM products")
+	rows, err := r.db.Query(QUERY_GETALL)
 	if err != nil {
 		return products, err
 	}
@@ -65,9 +93,9 @@ func (r *repository) GetAll() ([]Product, error) {
 func (r *repository) GetId(id int) (Product, error) {
 	var product Product
 
-	stmt, err := r.db.Prepare("SELECT * FROM products Where id = ?")
+	stmt, err := r.db.Prepare(QUERY_GETID)
 	if err != nil {
-		return product, fmt.Errorf("Fail to prepar query")
+		return product, err
 	}
 	err = stmt.QueryRow(id).Scan(&product.Id,
 		&product.ProductCode,
@@ -84,35 +112,19 @@ func (r *repository) GetId(id int) (Product, error) {
 	defer stmt.Close()
 
 	if err != nil {
-		return Product{}, fmt.Errorf("Product not found")
+		return Product{}, err
 	}
 	return product, nil
 }
 
-func (r *repository) CheckCode(id int, code string) error {
-
-	stmt, err := r.db.Prepare("SELECT product_code FROM products Where id != ? and product_code = ?")
-
-	if err != nil {
-		return err
-	}
-	defer stmt.Close()
-	err = stmt.QueryRow(id, code).Scan(&code)
-
-	if err == nil {
-		return fmt.Errorf("Product already registred")
-	}
-	return nil
-}
-
 func (r *repository) Delete(id int) error {
 
-	stmt, err := r.db.Prepare("DELETE FROM products WHERE id = ?")
+	stmt, err := r.db.Prepare(QUERY_DELETE)
 	if err != nil {
 		return err
 	}
 
-	defer stmt.Close() // Impedir vazamento de memória
+	defer stmt.Close()
 
 	res, err := stmt.Exec(id)
 	if err != nil {
@@ -128,18 +140,7 @@ func (r *repository) Delete(id int) error {
 
 func (r *repository) Create(p Product) (Product, error) {
 
-	stmt, err := r.db.Prepare(`INSERT INTO products (
-		product_code, 
-		description, 
-		width, 
-		length,	
-		height,	
-		net_weight,	
-		expiration_rate, 
-		recommended_freezing_temperature, 
-		freezing_rate, 
-		product_type_id,
-		seller_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+	stmt, err := r.db.Prepare(QUERY_INSERT)
 
 	if err != nil {
 		return Product{}, err
@@ -171,48 +172,8 @@ func (r *repository) Create(p Product) (Product, error) {
 	return p, nil
 }
 
-func (r *repository) GetProductsTypes(id int) (string, error) {
-	var description string
-
-	stmt, err := r.db.Prepare("SELECT description FROM products_types Where id = ?")
-
-	if err != nil {
-		return "", fmt.Errorf("Products Types not Found")
-	}
-
-	err = stmt.QueryRow(id).Scan(&description)
-
-	if err != nil {
-		return "", fmt.Errorf("Products Types not Found")
-	}
-	defer stmt.Close()
-	return description, nil
-}
-
-func (r *repository) LastID() (int, error) {
-	/*var ps []Product
-	if err := r.db.Read(&ps); err != nil {
-		return 0, err
-	}
-	if len(ps) == 0 {
-		return 0, nil
-	}*/
-	return 0, nil
-}
-
 func (r *repository) Update(id int, p Product) (Product, error) {
-	stmt, err := r.db.Prepare(`UPDATE products SET 
-		product_code=?,
-		description=?, 
-		width=? ,
-		length=?,	
-		height=?,	
-		net_weight=?,	
-		expiration_rate=?, 
-		recommended_freezing_temperature=? ,
-		freezing_rate=? ,
-		product_type_id=?,
-		seller_id=? WHERE id=?`)
+	stmt, err := r.db.Prepare(QUERY_UPDATE)
 
 	if err != nil {
 		return Product{}, err

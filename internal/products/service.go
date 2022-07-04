@@ -2,6 +2,7 @@ package products
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/cpereira42/mercado-fresco-pron4/internal/seller"
 	"github.com/fatih/structs"
@@ -13,8 +14,6 @@ type Service interface {
 	Delete(id int) error
 	Create(p RequestProductsCreate) (Product, error)
 	Update(id int, p RequestProductsUpdate) (Product, error)
-	CheckCode(id int, code string) bool
-	GetProductsTypes(id int) (string, error)
 }
 
 type service struct {
@@ -40,8 +39,9 @@ func (s *service) GetAll() ([]Product, error) {
 func (s *service) GetId(id int) (Product, error) {
 
 	ps, err := s.rep.GetId(id)
+
 	if err != nil {
-		return Product{}, fmt.Errorf("Product not Found")
+		return Product{}, checkError(err)
 	}
 	return ps, nil
 }
@@ -50,35 +50,8 @@ func (s *service) Delete(id int) error {
 	return s.rep.Delete(id)
 }
 
-func (s *service) CheckCode(id int, code string) bool {
-
-	err := s.rep.CheckCode(id, code)
-	if err != nil {
-		return true
-	}
-	return false
-}
-
-func (s *service) GetProductsTypes(id int) (string, error) {
-	return s.rep.GetProductsTypes(id)
-}
-
 func (s *service) Create(p RequestProductsCreate) (Product, error) {
 	var prod Product
-
-	_, err := s.res.GetId(p.SellerId)
-	if err != nil {
-		return Product{}, err
-	}
-
-	_, err = s.rep.GetProductsTypes(p.ProductTypeId)
-	if err != nil {
-		return Product{}, err
-	}
-
-	if s.CheckCode(0, p.ProductCode) {
-		return Product{}, fmt.Errorf("code Product %s already registred", p.ProductCode)
-	}
 	prod.ProductCode = p.ProductCode
 	prod.Description = p.Description
 	prod.Width = p.Width
@@ -92,7 +65,7 @@ func (s *service) Create(p RequestProductsCreate) (Product, error) {
 	prod.SellerId = p.SellerId
 	product, err := s.rep.Create(prod)
 	if err != nil {
-		return Product{}, err
+		return Product{}, checkError(err)
 	}
 
 	return product, nil
@@ -103,11 +76,7 @@ func (s *service) Update(id int, p RequestProductsUpdate) (Product, error) {
 	list := []string{"ProductCode", "Description", "Width", "Length", "Height", "NetWeight", "ExpirationRate", "RecommendedFreezingTemperature", "FreezingRate", "ProductTypeId", "SellerId"}
 	prodUp, err := s.rep.GetId(id)
 	if err != nil {
-		return Product{}, fmt.Errorf("Product not found")
-	}
-
-	if s.CheckCode(id, p.ProductCode) {
-		return Product{}, fmt.Errorf("code Product %s already registred", p.ProductCode)
+		return Product{}, err
 	}
 
 	m1 := structs.Map(p)
@@ -133,4 +102,20 @@ func (s *service) Update(id int, p RequestProductsUpdate) (Product, error) {
 	prodUp.SellerId = m2["SellerId"].(int)
 	s.rep.Update(id, prodUp)
 	return prodUp, nil
+}
+
+func checkError(sqlError error) error {
+	switch {
+	case strings.Contains(sqlError.Error(), "no rows in result set"):
+		return fmt.Errorf("data not found")
+	case strings.Contains(sqlError.Error(), "Duplicate entry"):
+		err := strings.Split(sqlError.Error(), "'")
+		msg := fmt.Sprint(err[3], " is unique, and ", err[1], " already registered")
+		return fmt.Errorf(msg)
+	case strings.Contains(sqlError.Error(), "Cannot add"):
+		err := strings.Split(sqlError.Error(), "`")
+		msg := fmt.Sprint(err[7], " is not registered on ", err[9])
+		return fmt.Errorf(msg)
+	}
+	return sqlError
 }
