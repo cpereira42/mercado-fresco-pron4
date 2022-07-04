@@ -50,10 +50,6 @@ func (l *Locality) GenerateReportAll() gin.HandlerFunc {
 			ctx.JSON(http.StatusBadRequest, web.NewResponse(http.StatusBadRequest, nil, err.Error()))
 			return
 		}
-		if len(report) == 0 {
-			ctx.JSON(http.StatusBadRequest, web.NewResponse(http.StatusBadRequest, report, "Nothing to report"))
-			return
-		}
 		ctx.JSON(http.StatusOK, web.NewResponse(http.StatusOK, report, ""))
 	}
 }
