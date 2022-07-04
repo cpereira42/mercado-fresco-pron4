@@ -4,8 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-
-	"github.com/cpereira42/mercado-fresco-pron4/internal/warehouse"
 )
 
 type repository struct {
@@ -18,7 +16,7 @@ func NewRepository(db *sql.DB) Repository {
 
 func (repoSection *repository) ListarSectionAll() ([]Section, error) {
 	var sectionList []Section = []Section{}
-	rows, err := repoSection.db.Query(sqlSelect)
+	rows, err := repoSection.db.Query(SqlSelect)
 	if err != nil {
 		return sectionList, fmt.Errorf("sections not this registered")
 	}
@@ -38,7 +36,7 @@ func (repoSection *repository) ListarSectionAll() ([]Section, error) {
 			&sectionObj.WarehouseId,
 		)
 		if err != nil {
-			return []Section{}, err
+			return []Section{}, fmt.Errorf("section field invalid")
 		}
 		sectionList = append(sectionList, sectionObj)
 	}
@@ -46,7 +44,7 @@ func (repoSection *repository) ListarSectionAll() ([]Section, error) {
 }
 
 func (repoSection *repository) ListarSectionOne(id int64) (Section, error) {
-	rows := repoSection.db.QueryRow(sqlSelectByID, id)
+	rows := repoSection.db.QueryRow(SqlSelectByID, id)
 
 	sectionObj := Section{}
 	if err := rows.Scan(&sectionObj.Id, &sectionObj.SectionNumber, &sectionObj.CurrentCapacity, &sectionObj.CurrentTemperature,
@@ -59,31 +57,25 @@ func (repoSection *repository) ListarSectionOne(id int64) (Section, error) {
 }
 
 func (repoSection *repository) CreateSection(newSection Section) (Section, error) {
-	if _, err := repoSection.getWarhouseById(repoSection.db, newSection.WarehouseId); err != nil {
-		return Section{}, err
-	}
+	sectionErro := Section{}
 
-	if _, err := repoSection.getProductBatchtes(repoSection.db, newSection.ProductTypeId); err != nil {
-		return Section{}, err
-	}
-
-	stmt, err := repoSection.db.Prepare(sqlCreateSection)
+	result, err := repoSection.db.Exec(SqlCreateSection,
+		&newSection.SectionNumber,
+		&newSection.CurrentCapacity,
+		&newSection.CurrentTemperature,
+		&newSection.MaximumCapacity,
+		&newSection.MinimumCapacity,
+		&newSection.MinimumTemperature,
+		&newSection.ProductTypeId,
+		&newSection.WarehouseId,
+	)
 	if err != nil {
-		return Section{}, err
+		return sectionErro, errors.New("inserção de section falho, campos invalidos")
 	}
 
-	defer stmt.Close()
-
-	res, err := stmt.Exec(
-		newSection.SectionNumber, newSection.CurrentCapacity, newSection.CurrentTemperature, newSection.MaximumCapacity,
-		newSection.MinimumCapacity, newSection.MinimumTemperature, newSection.ProductTypeId, newSection.WarehouseId)
+	lastID, err := result.LastInsertId()
 	if err != nil {
-		return Section{}, err
-	}
-
-	lastID, err := res.LastInsertId()
-	if err != nil {
-		return Section{}, err
+		return sectionErro, err
 	}
 
 	newSection.Id = lastID
@@ -92,14 +84,14 @@ func (repoSection *repository) CreateSection(newSection Section) (Section, error
 }
 
 func (repoSection *repository) UpdateSection(sectionUp Section) (Section, error) {
-	if _, err := repoSection.getWarhouseById(repoSection.db, sectionUp.WarehouseId); err != nil {
-		return Section{}, err
+	stmt, err := repoSection.db.Prepare(SqlUpdateSection)
+	if err != nil {
+		return sectionUp, errors.New("falha ao executar query sql")
 	}
 
-	if _, err := repoSection.getProductBatchtes(repoSection.db, sectionUp.ProductTypeId); err != nil {
-		return Section{}, err
-	}
-	_, err := repoSection.db.Exec(sqlUpdateSection,
+	defer stmt.Close()
+
+	result, err := stmt.Exec(
 		&sectionUp.SectionNumber,
 		&sectionUp.CurrentCapacity,
 		&sectionUp.CurrentTemperature,
@@ -111,27 +103,33 @@ func (repoSection *repository) UpdateSection(sectionUp Section) (Section, error)
 		&sectionUp.Id,
 	)
 	if err != nil {
-		return Section{}, err
+		return Section{}, errors.New("falha ao atualizar o section")
 	}
+
+	rowsAffexcted, _ := result.RowsAffected()
+	if rowsAffexcted == 0 {
+		return Section{}, errors.New("section não atualizada")
+	}
+
 	sectionUp.Id = 0
 	return sectionUp, nil
 }
 
 func (repoSection *repository) DeleteSection(id int64) error {
-	result, err := repoSection.db.Query(sqlDeleteSection, id)
+	result, err := repoSection.db.Query(SqlDeleteSection, id)
 	if err != nil {
-		return errors.New("falha ao remove o sections")
+		return err
 	}
 	defer result.Close()
 
 	if result.Err() != nil {
-		return result.Err()
+		return err
 	}
 	return nil
 }
 
-func (repo *repository) getProductBatchtes(db *sql.DB, id int64) (ProductTypes, error) {
-	result := db.QueryRow("select id from products_types where id=?", id)
+func (repo *repository) getProductTypes(id int64) (ProductTypes, error) {
+	result := repo.db.QueryRow("select id from products_types where id=?", id)
 	productTypes := ProductTypes{}
 	err := result.Scan(
 		&productTypes.ID,
@@ -142,14 +140,19 @@ func (repo *repository) getProductBatchtes(db *sql.DB, id int64) (ProductTypes, 
 	return productTypes, nil
 }
 
-func (repo *repository) getWarhouseById(db *sql.DB, id int64) (warehouse.Warehouse, error) {
-	result := db.QueryRow("select id from warehouse where id=?", id)
-	warehouse := warehouse.Warehouse{}
+func (repo *repository) getWarehouse(id int64) (int, error) {
+	result := repo.db.QueryRow("select count(*) total from products_types where id=?", id)
+
+	var total int
+
 	err := result.Scan(
-		&warehouse.ID,
+		&total,
 	)
 	if err != nil {
-		return warehouse, errors.New("warehouse_id id not found")
+		return total, errors.New("warehouse_id not found")
 	}
-	return warehouse, nil
+	if total == 0 {
+		return total, errors.New("warehouse_id not found")
+	}
+	return total, nil
 }

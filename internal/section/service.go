@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/cpereira42/mercado-fresco-pron4/internal/warehouse"
-	"github.com/fatih/structs"
 )
 
 type service struct {
@@ -33,36 +32,47 @@ func (s service) ListarSectionOne(id int64) (Section, error) {
 	return sect, nil
 }
 
-func (s service) CreateSection(newSection SectionRequestCreate) (Section, error) {
-	_, err := s.repositoryWarehouse.GetByID(int(newSection.WarehouseId))
-	if err != nil {
-		return Section{}, err
+func (s service) CreateSection(newSection SectionRequestCreate) (SectionRequestCreate, error) {
+	if _, err := s.repository.getProductTypes(newSection.ProductTypeId); err != nil {
+		return newSection, err
+	}
+
+	if _, err := s.repositoryWarehouse.GetByID(int(newSection.WarehouseId)); err != nil {
+		return newSection, err
 	}
 
 	var sectionList []Section
 
-	sectionList, err = s.repository.ListarSectionAll()
+	sectionList, err := s.repository.ListarSectionAll()
 	if err != nil {
-		return Section{}, err
+		return newSection, err
 	}
+
 	for index := range sectionList {
 		if sectionList[index].SectionNumber == newSection.SectionNumber {
-			return Section{}, fmt.Errorf("section invalid, section_number field must be unique")
+			return newSection, fmt.Errorf("section invalid, section_number field must be unique")
 		}
 	}
 	var sec Section = factorySection(newSection)
 
-	return s.repository.CreateSection(sec)
+	if _, err = s.repository.CreateSection(sec); err != nil {
+		return newSection, err
+	}
+
+	return newSection, nil
 }
 
 func (s service) UpdateSection(id int64, sectionUp SectionRequestUpdate) (Section, error) {
-	_, err := s.ListarSectionOne(id)
-	if err != nil {
+	if _, err := s.repository.getWarehouse(int64(sectionUp.WarehouseId)); err != nil && sectionUp.WarehouseId != 0 {
 		return Section{}, err
 	}
 
+	if _, err := s.repository.getProductTypes(int64(sectionUp.ProductTypeId)); err != nil && sectionUp.ProductTypeId != 0 {
+		return Section{}, errors.New("product_type_id invalid")
+	}
+
 	var sectionList []Section
-	sectionList, err = s.repository.ListarSectionAll()
+	sectionList, err := s.ListarSectionAll()
 	if err != nil {
 		return Section{}, err
 	}
@@ -72,9 +82,15 @@ func (s service) UpdateSection(id int64, sectionUp SectionRequestUpdate) (Sectio
 			return Section{}, fmt.Errorf("this section_number %v is already registered", sectionUp.SectionNumber)
 		}
 	}
-	newSectionRequest := factorySectionUpdate(&s, id, sectionUp)
+	sec, _ := s.ListarSectionOne(id)
+	
+	object := factorySectionUpdate(&s, &sectionUp, &sec)
 
-	return s.repository.UpdateSection(newSectionRequest)
+	if _, err := s.repository.UpdateSection(object); err != nil {
+		return Section{}, err
+	}
+
+	return object, nil
 }
 
 func (s service) DeleteSection(id int64) error {
@@ -102,45 +118,30 @@ func factorySection(sectionRequest SectionRequestCreate) Section {
 	}
 }
 
-func factorySectionUpdate(s *service, id int64, sectionRequest SectionRequestUpdate) Section {
-	fieldSection := []string{
-		"SectionNumber",
-		"CurrentCapacity",
-		"CurrentTemperature",
-		"MaximumCapacity",
-		"MinimumCapacity",
-		"MinimumTemperature",
-		"WarehouseId",
-		"ProductTypeId",
+func factorySectionUpdate(s *service, sectionUp *SectionRequestUpdate, sec *Section) Section {
+	if sec.SectionNumber != sectionUp.SectionNumber && sectionUp.SectionNumber != 0 {
+		sec.SectionNumber = sectionUp.SectionNumber
 	}
-	sec, _ := s.ListarSectionOne(id)
-	sectionMapCurrent := structs.Map(sec)
-	sectionMapModify := structs.Map(sectionRequest)
-
-	for _, value := range fieldSection {
-		if sectionMapModify[value] != 0 && sectionMapModify[value] != sectionMapCurrent[value] {
-			switch value {
-			case "WarehouseId":
-				fmt.Println(value)
-				sectionMapCurrent[value] = sectionMapModify[value]
-			case "ProductTypeId":
-				fmt.Println(value)
-				sectionMapCurrent[value] = sectionMapModify[value]
-			default:
-				sectionMapCurrent[value] = sectionMapModify[value]
-			}
-		}
+	if sec.CurrentCapacity != sectionUp.CurrentCapacity && sectionUp.CurrentCapacity != 0 {
+		sec.CurrentCapacity = sectionUp.CurrentCapacity
 	}
-	objetoSec := Section{
-		Id:                 id,
-		SectionNumber:      sectionMapCurrent["SectionNumber"].(int),
-		CurrentCapacity:    sectionMapCurrent["CurrentCapacity"].(int),
-		CurrentTemperature: sectionMapCurrent["CurrentTemperature"].(int),
-		MaximumCapacity:    sectionMapCurrent["MaximumCapacity"].(int),
-		MinimumCapacity:    sectionMapCurrent["MinimumCapacity"].(int),
-		MinimumTemperature: sectionMapCurrent["MinimumTemperature"].(int),
-		WarehouseId:        sectionMapCurrent["WarehouseId"].(int64),
-		ProductTypeId:      sectionMapCurrent["ProductTypeId"].(int64),
+	if sec.CurrentTemperature != sectionUp.CurrentTemperature && sectionUp.CurrentTemperature != 0 {
+		sec.CurrentTemperature = sectionUp.CurrentTemperature
 	}
-	return objetoSec
+	if sec.MaximumCapacity != sectionUp.MaximumCapacity && sectionUp.MaximumCapacity != 0 {
+		sec.MaximumCapacity = sectionUp.MaximumCapacity
+	}
+	if sec.MinimumCapacity != sectionUp.MinimumCapacity && sectionUp.MinimumCapacity != 0 {
+		sec.MinimumCapacity = sectionUp.MinimumCapacity
+	}
+	if sec.MinimumTemperature != sectionUp.MinimumTemperature && sectionUp.MinimumTemperature != 0 {
+		sec.MinimumTemperature = sectionUp.MinimumTemperature
+	}
+	if sec.WarehouseId != sectionUp.WarehouseId && sectionUp.WarehouseId != 0 {
+		sec.WarehouseId = sectionUp.WarehouseId
+	}
+	if sec.ProductTypeId != sectionUp.ProductTypeId && sectionUp.ProductTypeId != 0 {
+		sec.ProductTypeId = sectionUp.ProductTypeId
+	}
+	return *sec
 }
