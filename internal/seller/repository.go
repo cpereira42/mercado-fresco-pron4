@@ -12,7 +12,6 @@ type RepositorySeller interface {
 	Create(cid, company, address, telephone string, localityId int) (Seller, error)
 	Update(id int, cid, company, adress, telephone string, localityId int) (Seller, error)
 	Delete(id int) error
-	// CheckLocality(id int) (bool, error)
 }
 
 type repositorySeller struct {
@@ -174,32 +173,3 @@ func handleSQLError(sqlError error) error {
 	}
 	return nil
 }
-
-// func (r *repositorySeller) CheckLocality(id int) (bool, error) {
-
-// 	type Locality struct {
-// 		Id           int
-// 		LocalityName string
-// 		ProvinceName string
-// 		CountryName  string
-// 	}
-
-// 	stmt, err := r.db.Prepare("SELECT * FROM localities WHERE id = ?")
-// 	if err != nil {
-// 		return false, err
-// 	}
-// 	defer stmt.Close()
-
-// 	locality := Locality{}
-
-// 	err = stmt.QueryRow(id).Scan(
-// 		&locality.Id,
-// 		&locality.LocalityName,
-// 		&locality.ProvinceName,
-// 		&locality.CountryName,
-// 	)
-// 	if err != nil {
-// 		return false, fmt.Errorf("Locality %d not found", id)
-// 	}
-// 	return true, nil
-// }

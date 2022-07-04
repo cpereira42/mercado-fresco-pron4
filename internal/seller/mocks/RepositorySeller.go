@@ -12,27 +12,6 @@ type RepositorySeller struct {
 	mock.Mock
 }
 
-// CheckLocality provides a mock function with given fields: id
-func (_m *RepositorySeller) CheckLocality(id int) (bool, error) {
-	ret := _m.Called(id)
-
-	var r0 bool
-	if rf, ok := ret.Get(0).(func(int) bool); ok {
-		r0 = rf(id)
-	} else {
-		r0 = ret.Get(0).(bool)
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(int) error); ok {
-		r1 = rf(id)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // Create provides a mock function with given fields: cid, company, address, telephone, localityId
 func (_m *RepositorySeller) Create(cid string, company string, address string, telephone string, localityId int) (seller.Seller, error) {
 	ret := _m.Called(cid, company, address, telephone, localityId)

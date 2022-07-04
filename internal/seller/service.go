@@ -4,7 +4,6 @@ type Service interface {
 	GetAll() ([]Seller, error)
 	GetId(id int) (Seller, error)
 	Create(cid, company, address, telephone string, localityId int) (Seller, error)
-	// CheckCid(cid string) (bool, error)
 	Update(id int, cid, company, address, telephone string, localityId int) (Seller, error)
 	Delete(id int) error
 }
@@ -29,19 +28,6 @@ func (s *service) Create(cid, company, address, telephone string, localityId int
 	return seller, nil
 
 }
-
-// func (s service) CheckCid(cid string) (bool, error) {
-// 	sellers, err := s.repository.GetAll()
-// 	if err != nil {
-// 		return false, err
-// 	}
-// 	for _, seller := range sellers {
-// 		if seller.Cid == cid {
-// 			return false, nil
-// 		}
-// 	}
-// 	return true, nil
-// }
 
 func (s *service) GetAll() ([]Seller, error) {
 	sellers, err := s.repository.GetAll()
