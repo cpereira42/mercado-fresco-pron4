@@ -44,7 +44,7 @@ func (r *repositoryLocality) Create(localityName, provinceName, countryName stri
 		countryName,
 	)
 	if err != nil {
-		return Locality{}, err
+		return Locality{}, fmt.Errorf("Locality already registered")
 	}
 	lastID, err := rows.LastInsertId()
 	if err != nil {

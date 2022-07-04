@@ -1,12 +1,10 @@
 package seller
 
-import "errors"
-
 type Service interface {
 	GetAll() ([]Seller, error)
 	GetId(id int) (Seller, error)
 	Create(cid, company, address, telephone string, localityId int) (Seller, error)
-	CheckCid(cid string) (bool, error)
+	// CheckCid(cid string) (bool, error)
 	Update(id int, cid, company, address, telephone string, localityId int) (Seller, error)
 	Delete(id int) error
 }
@@ -22,22 +20,6 @@ func NewService(r RepositorySeller) Service {
 }
 
 func (s *service) Create(cid, company, address, telephone string, localityId int) (Seller, error) {
-	checkCid, err := s.CheckCid(cid)
-	if err != nil {
-		return Seller{}, err
-	}
-	if !checkCid {
-		return Seller{}, errors.New("Cid already registered")
-	}
-
-	checkLocality, err := s.repository.CheckLocality(localityId)
-	if err != nil {
-		return Seller{}, err
-	}
-	if !checkLocality {
-		return Seller{}, errors.New("Locality not found")
-	}
-
 	seller, err := s.repository.Create(cid, company, address, telephone, localityId)
 
 	if err != nil {
@@ -48,18 +30,18 @@ func (s *service) Create(cid, company, address, telephone string, localityId int
 
 }
 
-func (s service) CheckCid(cid string) (bool, error) {
-	sellers, err := s.repository.GetAll()
-	if err != nil {
-		return false, err
-	}
-	for _, seller := range sellers {
-		if seller.Cid == cid {
-			return false, nil
-		}
-	}
-	return true, nil
-}
+// func (s service) CheckCid(cid string) (bool, error) {
+// 	sellers, err := s.repository.GetAll()
+// 	if err != nil {
+// 		return false, err
+// 	}
+// 	for _, seller := range sellers {
+// 		if seller.Cid == cid {
+// 			return false, nil
+// 		}
+// 	}
+// 	return true, nil
+// }
 
 func (s *service) GetAll() ([]Seller, error) {
 	sellers, err := s.repository.GetAll()

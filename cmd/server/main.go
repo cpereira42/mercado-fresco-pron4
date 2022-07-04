@@ -2,25 +2,14 @@ package main
 
 import (
 	"database/sql"
-<<<<<<< HEAD
-
-	_ "github.com/go-sql-driver/mysql"
-
-=======
->>>>>>> 39634193caf82ae505e42806c8384b5d8ed94405
 	"fmt"
 	"log"
 	"os"
 
-<<<<<<< HEAD
-	//sectionRepository "github.com/cpereira42/mercado-fresco-pron4/internal/section/repository/file"
-	"github.com/cpereira42/mercado-fresco-pron4/internal/locality"
-	sectionRepository "github.com/cpereira42/mercado-fresco-pron4/internal/section/repository/mariadb"
-=======
 	_ "github.com/go-sql-driver/mysql"
 
+	"github.com/cpereira42/mercado-fresco-pron4/internal/locality"
 	sectionRepository "github.com/cpereira42/mercado-fresco-pron4/internal/section/repository"
->>>>>>> 39634193caf82ae505e42806c8384b5d8ed94405
 	sectionService "github.com/cpereira42/mercado-fresco-pron4/internal/section/service"
 
 	"github.com/cpereira42/mercado-fresco-pron4/cmd/server/handler"
@@ -38,10 +27,6 @@ import (
 var Conn *sql.DB
 
 func main() {
-<<<<<<< HEAD
-
-=======
->>>>>>> 39634193caf82ae505e42806c8384b5d8ed94405
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal(".Env cant be load")
@@ -65,15 +50,8 @@ func main() {
 	svcWarehouse := warehouse.NewService(repoWarehouse)
 	w := handler.NewWarehouse(svcWarehouse)
 
-<<<<<<< HEAD
-	//dbSection := store.New(store.FileType, "./internal/repositories/sections.json")
-	//repSection := sectionRepository.NewRepository(dbSection)
-
-	repSection := sectionRepository.NewRepository(Conn)
-=======
 	dbSection := store.New(store.FileType, "./internal/repositories/sections.json")
 	repSection := sectionRepository.NewRepository(dbSection)
->>>>>>> 39634193caf82ae505e42806c8384b5d8ed94405
 	serviceSection := sectionService.NewService(repSection)
 	sectionController := handler.NewSectionController(serviceSection)
 
