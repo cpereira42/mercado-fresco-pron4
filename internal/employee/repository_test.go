@@ -1,93 +1,165 @@
 package employee_test
 
-// import (
-// 	"fmt"
-// 	"testing"
+import (
+	"database/sql"
+	"fmt"
+	"regexp"
+	"testing"
 
-// 	"github.com/cpereira42/mercado-fresco-pron4/internal/employee"
-// 	"github.com/cpereira42/mercado-fresco-pron4/pkg/store"
-// 	"github.com/cpereira42/mercado-fresco-pron4/pkg/store/mocks"
-// 	"github.com/stretchr/testify/assert"
-// )
+	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/cpereira42/mercado-fresco-pron4/internal/employee"
+	"github.com/stretchr/testify/assert"
+)
 
-// var emply12 = employee.Employee{1, "123", "Eduardo", "Araujo", 1}
+var emply1DB = employee.Employee{1, "123", "Eduardo", "Araujo", 1}
+var emply2DB = employee.Employee{2, "1234", "Edu", "Araujo", 1}
 
-// func Test_Store(t *testing.T) {
+func TestGetAll(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	assert.NoError(t, err)
+	defer db.Close()
+	employees := []employee.Employee{emply1DB, emply2DB}
+	employeesRepo := employee.NewRepository(db)
 
-// 	var es []employee.Employee
-// 	employees := []employee.Employee{emply12}
+	t.Run("if GetAll is everything ok in the scan, it should return an array of employees", func(t *testing.T) {
+		rows := sqlmock.NewRows([]string{
+			"ID",
+			"CardNumberID",
+			"FirstName",
+			"LastName",
+			"WarehouseID",
+		}).AddRow(
+			employees[0].ID,
+			employees[0].CardNumberID,
+			employees[0].FirstName,
+			employees[0].LastName,
+			employees[0].WarehouseID,
+		).AddRow(
+			employees[1].ID,
+			employees[1].CardNumberID,
+			employees[1].FirstName,
+			employees[1].LastName,
+			employees[1].WarehouseID,
+		)
+		mock.ExpectQuery(employee.GET_ALL_EMPLOYEES).WillReturnRows(rows)
+		result, err := employeesRepo.GetAll()
+		assert.NoError(t, err)
 
-// 	dbEmply := store.New(store.FileType, "../repositories/employees_test.json")
-// 	repoProd := employee.NewRepository(dbEmply)
+		assert.Equal(t, employees[0].CardNumberID, result[0].CardNumberID)
+		assert.Equal(t, employees[1].CardNumberID, result[1].CardNumberID)
+	})
 
-// 	store := &mocks.Store{}
-// 	store.On("Write", employees).Return(fmt.Errorf("error"))
-// 	store.On("Read", &es).Return(fmt.Errorf("error"))
-// 	repoProdError := employee.NewRepository(store)
+	t.Run("if there is an error to scan in the GetAll, it should return an error message", func(t *testing.T) {
+		rows := sqlmock.NewRows([]string{
+			"ID",
+			"CardNumberID",
+			"FirstName",
+			"LastName",
+			"WarehouseID",
+		}).AddRow("", "", "", "", "")
 
-// 	t.Run("Create Ok", func(t *testing.T) {
-// 		es, err := repoProd.Create(emply12.CardNumberID, emply12.FirstName, emply12.LastName, emply12.WarehouseID)
-// 		assert.Equal(t, err, err)
-// 		assert.Equal(t, es, es)
-// 	})
+		mock.ExpectQuery(employee.GET_ALL_EMPLOYEES).WillReturnRows(rows)
+		_, err = employeesRepo.GetAll()
 
-// 	t.Run("Create Fail", func(t *testing.T) {
-// 		es, err := repoProdError.Create(emply12.CardNumberID, emply12.FirstName, emply12.LastName, emply12.WarehouseID)
-// 		assert.Equal(t, err, err)
-// 		assert.Equal(t, es, es)
-// 	})
+		assert.Error(t, err)
+	})
 
-// 	t.Run("Find GetAll", func(t *testing.T) {
-// 		es, err := repoProd.GetAll()
-// 		assert.Equal(t, es, es)
-// 		assert.Equal(t, err, err)
-// 	})
+	t.Run("if there is an error in the GetAll select, it should return an error", func(t *testing.T) {
+		_, err = employeesRepo.GetAll()
+		assert.Error(t, err)
+		mock.ExpectQuery(employee.GET_ALL_EMPLOYEES).WillReturnError(sql.ErrNoRows)
+	})
+}
 
-// 	t.Run("Find GetId Valid", func(t *testing.T) {
-// 		es, err := repoProd.GetByID(1)
-// 		assert.Equal(t, es, es)
-// 		assert.Equal(t, err, err)
-// 	})
+func TestGetByID(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	assert.NoError(t, err)
+	defer db.Close()
 
-// 	t.Run("Last ID", func(t *testing.T) {
-// 		es, err := repoProd.LastID()
-// 		assert.Equal(t, es, es)
-// 		assert.Equal(t, err, err)
-// 	})
+	employees := []employee.Employee{emply1DB, emply2DB}
+	employeesRepo := employee.NewRepository(db)
 
-// 	t.Run("Last ID - Error", func(t *testing.T) {
-// 		es, err := repoProd.LastID()
-// 		assert.Equal(t, es, es)
-// 		assert.Equal(t, err, err)
-// 	})
+	t.Run("if GetByID is OK, it should return an employee", func(t *testing.T) {
+		rows := sqlmock.NewRows([]string{
+			"ID",
+			"CardNumberID",
+			"FirstName",
+			"LastName",
+			"WarehouseID",
+		}).AddRow(
+			emply1DB.ID,
+			emply1DB.CardNumberID,
+			emply1DB.FirstName,
+			emply1DB.LastName,
+			emply1DB.WarehouseID,
+		)
 
-// 	t.Run("Last ID - Error", func(t *testing.T) {
-// 		emplys, err := repoProdError.LastID()
-// 		assert.Equal(t, emplys, emplys)
-// 		assert.Equal(t, err, err)
-// 	})
+		stmt := mock.ExpectPrepare(regexp.QuoteMeta(employee.GET_EMPLOYEE_BY_ID))
+		stmt.ExpectQuery().WithArgs(1).WillReturnRows(rows)
 
-// 	t.Run("Update Ok", func(t *testing.T) {
-// 		es, err := repoProd.Update(1, emply12.CardNumberID, emply12.FirstName, emply12.LastName, emply12.WarehouseID)
-// 		assert.Equal(t, err, err)
-// 		assert.Equal(t, es, es)
-// 	})
+		result, _ := employeesRepo.GetByID(1)
+		assert.NoError(t, err)
+		assert.Equal(t, employees[0].CardNumberID, result.CardNumberID)
+	})
+	t.Run("if there is an error to Prepare in the GetByID, it should return an error", func(t *testing.T) {
+		db, mock, err := sqlmock.New()
+		assert.NoError(t, err)
+		defer db.Close()
 
-// 	t.Run("Update not found Ok", func(t *testing.T) {
-// 		es, err := repoProd.Update(9, emply12.CardNumberID, emply12.FirstName, emply12.LastName, emply12.WarehouseID)
-// 		assert.Equal(t, err, err)
-// 		assert.Equal(t, es, es)
-// 	})
+		mock.ExpectQuery(employee.GET_EMPLOYEE_BY_ID).WithArgs(1).WillReturnError(fmt.Errorf(employee.FAIL_TO_PREPARE_QUERY))
+		_, err = employeesRepo.GetByID(1)
 
-// 	t.Run("Update Fail", func(t *testing.T) {
-// 		es, err := repoProdError.Update(1, emply12.CardNumberID, emply12.FirstName, emply12.LastName, emply12.WarehouseID)
-// 		assert.Equal(t, err, err)
-// 		assert.Equal(t, es, es)
-// 	})
+		assert.Equal(t, fmt.Errorf(employee.FAIL_TO_PREPARE_QUERY), err)
+	})
 
-// 	t.Run("Delete Ok", func(t *testing.T) {
-// 		err := repoProd.Delete(1)
-// 		assert.Equal(t, err, err)
-// 	})
+	t.Run("if there is an error to find an employee in the GetByID, it should return an error", func(t *testing.T) {
+		stmt := mock.ExpectPrepare(regexp.QuoteMeta(employee.GET_EMPLOYEE_BY_ID))
+		stmt.ExpectQuery().WithArgs(1).WillReturnError(fmt.Errorf(employee.EMPLOYEE_NOT_FOUND))
 
-// }
+		_, err := employeesRepo.GetByID(1)
+		assert.NotNil(t, err)
+		assert.Equal(t, fmt.Errorf(employee.EMPLOYEE_NOT_FOUND), err)
+
+	})
+}
+
+func TestCreate(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	assert.NoError(t, err)
+	defer db.Close()
+
+	// employees := []employee.Employee{emply1DB}
+	employeesRepo := employee.NewRepository(db)
+
+	t.Run("if Create is OK, it should return an employee", func(t *testing.T) {
+		mock.ExpectExec(regexp.QuoteMeta(employee.CREATE_EMPLOYEE)).WithArgs(
+			emply2DB.CardNumberID,
+			emply2DB.FirstName,
+			emply2DB.LastName,
+			emply2DB.WarehouseID,
+		).WillReturnResult(sqlmock.NewResult(1, 1))
+
+		emp, err := employeesRepo.Create(emply2DB.CardNumberID, emply2DB.FirstName, emply2DB.LastName, emply2DB.WarehouseID)
+
+		assert.NoError(t, err)
+
+		expectedCardNumberID := "1234"
+
+		assert.Equal(t, expectedCardNumberID, emp.CardNumberID)
+	})
+
+	t.Run("if there is an error to Exec in the Create, it should return an error", func(t *testing.T) {
+		rows := sqlmock.NewRows([]string{
+			"ID",
+			"CardNumberID",
+			"FirstName",
+			"LastName",
+			"WarehouseID",
+		}).AddRow("", "", "", "", "")
+
+		mock.ExpectQuery(employee.CREATE_EMPLOYEE).WillReturnRows(rows)
+		_, err = employeesRepo.Create(emply2DB.CardNumberID, emply2DB.FirstName, emply2DB.LastName, 10)
+
+		assert.Error(t, err)
+	})
+}

@@ -16,21 +16,19 @@ type Repository interface {
 
 func handleSQLError(sqlError error) error {
 	switch {
-	case strings.Contains(sqlError.Error(), "Cannot add or update a child row"):
-		return fmt.Errorf("warehouse id does not exists")
+	case strings.Contains(sqlError.Error(), "no rows in result set"):
+		return fmt.Errorf("data not found")
 	case strings.Contains(sqlError.Error(), "Duplicate entry"):
-		return fmt.Errorf("employee with this card number id exists")
+		err := strings.Split(sqlError.Error(), "'")
+		msg := fmt.Sprint(err[3], " is Unique, and ", err[1], " already registered")
+		return fmt.Errorf(msg)
+	case strings.Contains(sqlError.Error(), "Cannot add"):
+		err := strings.Split(sqlError.Error(), "`")
+		msg := fmt.Sprint(err[7], " is not registered on ", err[9])
+		return fmt.Errorf(msg)
 	}
-	return nil
+	return sqlError
 }
-
-const (
-	GetAllEmployees = `SELECT id, card_number_id, first_name, last_name, warehouse_id FROM employees`
-	CreateEmployee  = `INSERT INTO employees (card_number_id, first_name,last_name,warehouse_id) VALUES(?,?,?,?)`
-	UpdateEmployee  = `UPDATE employees SET card_number_id=?, first_name=?,	last_name=?, warehouse_id=? WHERE id=?`
-	GetEmployeeByID = `SELECT id, card_number_id, first_name, last_name, warehouse_id FROM employees WHERE id=?`
-	DeleteEmployee  = `DELETE FROM employees WHERE id=?`
-)
 
 type repository struct {
 	db *sql.DB
@@ -39,7 +37,7 @@ type repository struct {
 func (r *repository) GetAll() ([]Employee, error) {
 	var employees []Employee
 
-	rows, err := r.db.Query(GetAllEmployees)
+	rows, err := r.db.Query(GET_ALL_EMPLOYEES)
 	if err != nil {
 		return employees, err
 	}
@@ -65,9 +63,9 @@ func (r *repository) GetAll() ([]Employee, error) {
 }
 
 func (r *repository) GetByID(id int) (Employee, error) {
-	stmt, err := r.db.Prepare(GetEmployeeByID)
+	stmt, err := r.db.Prepare(GET_EMPLOYEE_BY_ID)
 	if err != nil {
-		return Employee{}, err
+		return Employee{}, fmt.Errorf(FAIL_TO_PREPARE_QUERY)
 	}
 	defer stmt.Close()
 
@@ -82,7 +80,7 @@ func (r *repository) GetByID(id int) (Employee, error) {
 	)
 
 	if err != nil {
-		return Employee{}, err
+		return Employee{}, fmt.Errorf(EMPLOYEE_NOT_FOUND)
 	}
 
 	return employee, nil
@@ -91,7 +89,7 @@ func (r *repository) GetByID(id int) (Employee, error) {
 func (r *repository) Create(cardNumberID, firstName, lastName string, warehouseID int) (Employee, error) {
 	employee := Employee{CardNumberID: cardNumberID, FirstName: firstName, LastName: lastName, WarehouseID: warehouseID}
 
-	stmt, err := r.db.Exec(CreateEmployee, cardNumberID, firstName, lastName,
+	stmt, err := r.db.Exec(CREATE_EMPLOYEE, cardNumberID, firstName, lastName,
 		warehouseID)
 	if err != nil {
 		if handleSQLError(err) != nil {
@@ -102,7 +100,7 @@ func (r *repository) Create(cardNumberID, firstName, lastName string, warehouseI
 
 	RowsAffected, _ := stmt.RowsAffected()
 	if RowsAffected == 0 {
-		return Employee{}, fmt.Errorf("fail to save")
+		return Employee{}, fmt.Errorf(FAIL_TO_SAVE)
 	}
 
 	lastID, err := stmt.LastInsertId()
@@ -121,7 +119,7 @@ func (r *repository) Create(cardNumberID, firstName, lastName string, warehouseI
 func (r *repository) Update(id int, cardNumberID, firstName, lastName string, warehouseID int) (Employee, error) {
 	employee := Employee{id, cardNumberID, firstName, lastName, warehouseID}
 
-	_, err := r.db.Exec(UpdateEmployee, cardNumberID, firstName, lastName,
+	_, err := r.db.Exec(UPDATE_EMPLOYEE, cardNumberID, firstName, lastName,
 		warehouseID, id)
 
 	if err != nil {
@@ -141,13 +139,13 @@ func (r *repository) Update(id int, cardNumberID, firstName, lastName string, wa
 }
 
 func (r *repository) Delete(id int) error {
-	stmt, err := r.db.Exec(DeleteEmployee, id)
+	stmt, err := r.db.Exec(DELETE_EMPLOYEE, id)
 	if err != nil {
 		return err
 	}
 	RowsAffected, _ := stmt.RowsAffected()
 	if RowsAffected == 0 {
-		return fmt.Errorf("employee with id %d not found", id)
+		return fmt.Errorf(EMPLOYEE_NOT_FOUND)
 	}
 	return nil
 }
