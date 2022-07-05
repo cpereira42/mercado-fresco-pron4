@@ -3,7 +3,8 @@ package seller
 import (
 	"database/sql"
 	"fmt"
-	"strings"
+
+	"github.com/cpereira42/mercado-fresco-pron4/pkg/util"
 )
 
 type RepositorySeller interface {
@@ -46,7 +47,7 @@ func (r *repositorySeller) Create(cid, company, address, telephone string, local
 		localityId,
 	)
 	if err != nil {
-		handledError := handleSQLError(err)
+		handledError := util.CheckError(err)
 		return Seller{}, handledError
 	}
 	lastID, err := rows.LastInsertId()
@@ -130,7 +131,7 @@ func (r *repositorySeller) Update(id int, cid, company, address, telephone strin
 		localityId,
 		id)
 	if err != nil {
-		handledError := handleSQLError(err)
+		handledError := util.CheckError(err)
 		return updatedSeller, handledError
 	}
 
@@ -164,12 +165,12 @@ func (r *repositorySeller) Delete(id int) error {
 	return nil
 }
 
-func handleSQLError(sqlError error) error {
-	switch {
-	case strings.Contains(sqlError.Error(), "Cannot add or update a child row"):
-		return fmt.Errorf("Locality id not found")
-	case strings.Contains(sqlError.Error(), "Duplicate entry"):
-		return fmt.Errorf("Cid already registered")
-	}
-	return nil
-}
+// func handleSQLError(sqlError error) error {
+// 	switch {
+// 	case strings.Contains(sqlError.Error(), "Cannot add or update a child row"):
+// 		return fmt.Errorf("Locality id not found")
+// 	case strings.Contains(sqlError.Error(), "Duplicate entry"):
+// 		return fmt.Errorf("Cid already registered")
+// 	}
+// 	return nil
+// }
