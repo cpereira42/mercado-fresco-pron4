@@ -48,8 +48,6 @@ type Repository interface {
 	UpdateSection(section Section) (Section, error)
 	ListarSectionOne(id int64) (Section, error)
 	DeleteSection(id int64) error
-	getProductTypes(id int64) (ProductTypes, error)
-	getWarehouse(id int64) (int, error)
 }
 type ProductTypes struct {
 	ID          int    `json:"id"`
@@ -62,8 +60,8 @@ type ProductTypes struct {
  */
 type Service interface {
 	ListarSectionAll() ([]Section, error)
-	CreateSection(section SectionRequestCreate) (SectionRequestCreate, error)
 	ListarSectionOne(id int64) (Section, error)
+	CreateSection(section SectionRequestCreate) (SectionRequestCreate, error)
 	UpdateSection(id int64, sectionUp SectionRequestUpdate) (Section, error)
 	DeleteSection(id int64) error
 }
@@ -72,18 +70,9 @@ type Service interface {
  * -- DATABASE QUERIES
  */
 const (
-	SqlSelect = `
-		SELECT id,section_number,current_capacity,current_temperature,maximum_capacity,minimum_capacity,minimum_temperature,product_type_id,warehouse_id
-		FROM mercadofresco.sections`
-	SqlSelectByID = `
-		SELECT id,section_number,current_capacity,current_temperature,maximum_capacity,minimum_capacity,minimum_temperature,product_type_id,warehouse_id
-		FROM mercadofresco.sections WHERE id=?`
-	SqlCreateSection = `
-		INSERT INTO mercadofresco.sections (section_number,current_capacity,current_temperature,maximum_capacity,minimum_capacity,minimum_temperature,product_type_id,warehouse_id)
-		VALUES (?,?,?,?,?,?,?,?)`
-	SqlUpdateSection = `
-		UPDATE mercadofresco.sections 
-		SET section_number=?,current_capacity=?,current_temperature=?,maximum_capacity=?,minimum_capacity=?,
-		minimum_temperature=?,product_type_id=?, warehouse_id=? WHERE id=?`
+	SqlSelect        = `SELECT id,section_number,current_capacity,current_temperature,maximum_capacity,minimum_capacity,minimum_temperature,product_type_id,warehouse_id FROM mercadofresco.sections`
+	SqlSelectByID    = `SELECT id,section_number,current_capacity,current_temperature,maximum_capacity,minimum_capacity,minimum_temperature,product_type_id,warehouse_id FROM mercadofresco.sections WHERE id=?`
+	SqlCreateSection = `INSERT INTO mercadofresco.sections (section_number,current_capacity,current_temperature,maximum_capacity,minimum_capacity,minimum_temperature,product_type_id,warehouse_id) VALUES (?,?,?,?,?,?,?,?)`
+	SqlUpdateSection = `UPDATE mercadofresco.sections SET section_number=?,current_capacity=?,current_temperature=?,maximum_capacity=?,minimum_capacity=?,minimum_temperature=?,product_type_id=?, warehouse_id=? WHERE id=?`
 	SqlDeleteSection = `DELETE FROM mercadofresco.sections WHERE id=?`
 )

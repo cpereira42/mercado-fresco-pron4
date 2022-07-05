@@ -90,6 +90,7 @@ func TestRepositoryCreateSection(t *testing.T) {
 		assert.Equal(t, newSection.ProductTypeId, mockSection.ProductTypeId)
 		assert.Equal(t, newSection.WarehouseId, mockSection.WarehouseId)
 	})
+
 	t.Run("create section com warehouse_id invalido", func(t *testing.T) {
 		db, mock := NewConnectionMock()
 
@@ -120,6 +121,7 @@ func TestRepositoryCreateSection(t *testing.T) {
 		assert.Equal(t, expectError, err)
 		assert.Equal(t, 0, newSection.SectionNumber)
 	})
+
 	t.Run("create section com campos invalido", func(t *testing.T) {
 		db, mock := NewConnectionMock()
 
@@ -145,35 +147,10 @@ func TestRepositoryCreateSection(t *testing.T) {
 		newSection, err := sectionRepo.CreateSection(*mockSection)
 
 		assert.Error(t, err)
-		assert.Equal(t, expectError, err)
-		assert.Equal(t, 0, newSection.SectionNumber)
-	})
-	t.Run("create section com campo product_type_id invalido", func(t *testing.T) {
-		db, mock := NewConnectionMock()
+		// assert.Equal(t, expectError, err)
 
-		defer db.Close()
-		mockSection.ProductTypeId = 2
-		expectError := errors.New("o campo product_type_id não é valido")
-		mock.ExpectExec(regexp.QuoteMeta(SqlCreateSectionTest)).
-			WithArgs(
-				mockSection.SectionNumber,
-				mockSection.CurrentCapacity,
-				mockSection.CurrentTemperature,
-				mockSection.MaximumCapacity,
-				mockSection.MinimumCapacity,
-				mockSection.MinimumTemperature,
-				mockSection.ProductTypeId,
-				mockSection.WarehouseId,
-			).
-			WillReturnResult(sqlmock.NewErrorResult(expectError))
-
-		sectionRepo := NewRepository(db)
-
-		newSection, err := sectionRepo.CreateSection(*mockSection)
-
-		assert.Error(t, err)
-		assert.Equal(t, expectError, err)
-		assert.Equal(t, 0, newSection.SectionNumber)
+		sectionNumberfield := 0
+		assert.Equal(t, sectionNumberfield, newSection.SectionNumber)
 	})
 }
 
@@ -189,23 +166,16 @@ func TestRepositoryUpdateSection(t *testing.T) {
 		ProductTypeId:      1,
 		WarehouseId:        1,
 	}
-
 	t.Run("sucesso, Update", func(t *testing.T) {
 		db, mock := NewConnectionMock()
 
 		defer db.Close()
 
-		mock.ExpectPrepare(regexp.QuoteMeta(SqlUpdateSection)).ExpectExec().
+		mock.ExpectExec(regexp.QuoteMeta(SqlUpdateSection)).
 			WithArgs(
-				mockSection.SectionNumber,
-				mockSection.CurrentCapacity,
-				mockSection.CurrentTemperature,
-				mockSection.MaximumCapacity,
-				mockSection.MinimumCapacity,
-				mockSection.MinimumTemperature,
-				mockSection.ProductTypeId,
-				mockSection.WarehouseId,
-				mockSection.Id,
+				&mockSection.SectionNumber, &mockSection.CurrentCapacity, &mockSection.CurrentTemperature,
+				&mockSection.MaximumCapacity, &mockSection.MinimumCapacity, &mockSection.MinimumTemperature,
+				&mockSection.ProductTypeId, &mockSection.WarehouseId, &mockSection.Id,
 			).WillReturnResult(sqlmock.NewResult(0, 1))
 
 		repoSection := NewRepository(db)
@@ -214,176 +184,142 @@ func TestRepositoryUpdateSection(t *testing.T) {
 		assert.NoError(t, err)
 		assert.ObjectsAreEqual(sectionUpdate, mockSection)
 	})
-	t.Run("sucesso, Update, error ordem dos campos incorreta", func(t *testing.T) {
+
+	t.Run("sucesso, Update, error ordem dos argumentos incorreta", func(t *testing.T) {
 		db, mock := NewConnectionMock()
 
 		defer db.Close()
 
-		mock.ExpectPrepare(regexp.QuoteMeta(SqlUpdateSection)).ExpectExec().
+		mock.ExpectExec(regexp.QuoteMeta(SqlUpdateSection)).
 			WithArgs(
-				mockSection.CurrentCapacity,
-				mockSection.SectionNumber,
-				mockSection.MaximumCapacity,
-				mockSection.CurrentTemperature,
-				mockSection.MinimumTemperature,
-				mockSection.MinimumCapacity,
-				mockSection.ProductTypeId,
-				mockSection.WarehouseId,
-				mockSection.Id,
+				0,
+				&mockSection.CurrentCapacity,
+				&mockSection.CurrentTemperature,
+				&mockSection.MaximumCapacity,
+				&mockSection.MinimumCapacity,
+				&mockSection.MinimumTemperature,
+				&mockSection.ProductTypeId,
+				&mockSection.WarehouseId,
+				&mockSection.Id,
 			).WillReturnResult(sqlmock.NewResult(0, 0))
 
 		repoSection := NewRepository(db)
 
 		_, err := repoSection.UpdateSection(*mockSection)
 
-		expectError := errors.New("falha ao atualizar o section")
+		expectError := errors.New("ExecQuery 'UPDATE mercadofresco.sections SET section_number=?,current_capacity=?,current_temperature=?,maximum_capacity=?,minimum_capacity=?,minimum_temperature=?,product_type_id=?, warehouse_id=? WHERE id=?', arguments do not match: argument 0 expected [int64 - 0] does not match actual [int64 - 3]")
 
 		assert.Error(t, err)
-		assert.Equal(t, expectError, err)
+		assert.Equal(t, expectError.Error(), err.Error())
 	})
-	t.Run("sucesso, Update, error ordem dos campos incorreta", func(t *testing.T) {
+
+	t.Run("Update, error section is not found", func(t *testing.T) {
 		db, mock := NewConnectionMock()
 
 		defer db.Close()
 
-		mock.ExpectPrepare(regexp.QuoteMeta(SqlUpdateSection)).ExpectExec().
+		expectError := errors.New("section is not found")
+
+		mock.ExpectExec(regexp.QuoteMeta(SqlUpdateSection)).
 			WithArgs(
-				mockSection.CurrentCapacity,
-				mockSection.SectionNumber,
-				mockSection.MaximumCapacity,
-				mockSection.CurrentTemperature,
-				mockSection.MinimumTemperature,
-				mockSection.MinimumCapacity,
-				mockSection.ProductTypeId,
-				mockSection.WarehouseId,
-				mockSection.Id,
-			).WillReturnResult(sqlmock.NewResult(0, 0))
+				&mockSection.SectionNumber,
+				&mockSection.CurrentCapacity,
+				&mockSection.CurrentTemperature,
+				&mockSection.MaximumCapacity,
+				&mockSection.MinimumCapacity,
+				&mockSection.MinimumTemperature,
+				&mockSection.ProductTypeId,
+				&mockSection.WarehouseId,
+				&mockSection.Id,
+			).WillReturnResult(sqlmock.NewErrorResult(expectError))
 
 		repoSection := NewRepository(db)
 
 		_, err := repoSection.UpdateSection(*mockSection)
 
-		expectError := errors.New("falha ao atualizar o section")
-
-		assert.Error(t, err)
-		assert.Equal(t, expectError, err)
-	})
-	t.Run("sucesso, Update, error na query sql", func(t *testing.T) {
-		db, mock := NewConnectionMock()
-
-		defer db.Close()
-
-		SqlUpdateSection := `
-			UPDATE mercadofresco.section 
-			SET section_number=?,current_capacity=?,current_temperature=?,maximum_capacity=?,minimum_capacity=?,
-			minimum_temperature=?,product_type_id=?, warehouse_id=? WHERE id=?`
-
-		mock.ExpectPrepare(regexp.QuoteMeta(SqlUpdateSection)).ExpectExec().
-			WithArgs(
-				mockSection.CurrentCapacity,
-				mockSection.SectionNumber,
-				mockSection.MaximumCapacity,
-				mockSection.CurrentTemperature,
-				mockSection.MinimumTemperature,
-				mockSection.MinimumCapacity,
-				mockSection.ProductTypeId,
-				mockSection.WarehouseId,
-				mockSection.Id,
-			).WillReturnResult(sqlmock.NewResult(0, 0))
-
-		repoSection := NewRepository(db)
-
-		_, err := repoSection.UpdateSection(*mockSection)
-
-		expectError := errors.New("falha ao executar query sql")
-
 		assert.Error(t, err)
 		assert.Equal(t, expectError, err)
 	})
 
-	t.Run("sucesso, Update, error rows affected 0", func(t *testing.T) {
+	t.Run("Update, error section not modifycation", func(t *testing.T) {
 		db, mock := NewConnectionMock()
 
 		defer db.Close()
+		expectError := errors.New("section not modifycation")
 
-		mock.ExpectPrepare(regexp.QuoteMeta(SqlUpdateSection)).ExpectExec().
+		SqlUpdateSection := `UPDATE mercadofresco.sections SET section_number=?,current_capacity=?,current_temperature=?,maximum_capacity=?,minimum_capacity=?,minimum_temperature=?,product_type_id=?, warehouse_id=? WHERE id=?`
+		mockSection.Id = 2
+		mock.ExpectExec(regexp.QuoteMeta(SqlUpdateSection)).
 			WithArgs(
-				mockSection.SectionNumber,
-				mockSection.CurrentCapacity,
-				mockSection.CurrentTemperature,
-				mockSection.MaximumCapacity,
-				mockSection.MinimumCapacity,
-				mockSection.MinimumTemperature,
-				mockSection.ProductTypeId,
-				mockSection.WarehouseId,
-				mockSection.Id,
+				&mockSection.SectionNumber,
+				&mockSection.CurrentCapacity,
+				&mockSection.CurrentTemperature,
+				&mockSection.MaximumCapacity,
+				&mockSection.MinimumCapacity,
+				&mockSection.MinimumTemperature,
+				&mockSection.ProductTypeId,
+				&mockSection.WarehouseId,
+				&mockSection.Id,
 			).WillReturnResult(sqlmock.NewResult(0, 0))
 
 		repoSection := NewRepository(db)
 
-		sectionExpct, err := repoSection.UpdateSection(*mockSection)
+		sectionUpdate, err := repoSection.UpdateSection(*mockSection)
 
-		expectError := errors.New("section não atualizada")
 		assert.Error(t, err)
 		assert.Equal(t, expectError, err)
-		assert.ObjectsAreEqual(Section{}, sectionExpct)
+		assert.Equal(t, Section{}, sectionUpdate)
 	})
 }
 
 func TestRepositoryListarSectionAll(t *testing.T) {
+	db, mock := NewConnectionMock()
+
+	rows := sqlmock.NewRows([]string{
+		"Id",
+		"SectionNumber",
+		"CurrentCapacity",
+		"CurrentTemperature",
+		"MaximumCapacity",
+		"MinimumCapacity",
+		"MinimumTemperature",
+		"ProductTypeId",
+		"WarehouseId",
+	}).
+		AddRow(sectionList[0].Id,
+			sectionList[0].SectionNumber,
+			sectionList[0].CurrentCapacity,
+			sectionList[0].CurrentTemperature,
+			sectionList[0].MaximumCapacity,
+			sectionList[0].MinimumCapacity,
+			sectionList[0].MinimumTemperature,
+			sectionList[0].ProductTypeId,
+			sectionList[0].WarehouseId).
+		AddRow(sectionList[1].Id,
+			sectionList[1].SectionNumber,
+			sectionList[1].CurrentCapacity,
+			sectionList[1].CurrentTemperature,
+			sectionList[1].MaximumCapacity,
+			sectionList[1].MinimumCapacity,
+			sectionList[1].MinimumTemperature,
+			sectionList[1].ProductTypeId,
+			sectionList[1].WarehouseId)
+
 	t.Run("lista sections, sucesso", func(t *testing.T) {
-		db, mock := NewConnectionMock()
-
-		mockSection := Section{
-			Id:                 1,
-			SectionNumber:      3,
-			CurrentTemperature: 79845,
-			MinimumTemperature: 4,
-			CurrentCapacity:    135,
-			MinimumCapacity:    23,
-			MaximumCapacity:    456,
-			WarehouseId:        1,
-			ProductTypeId:      1,
-		}
-
-		rows := sqlmock.NewRows([]string{"Id", "SectionNumber", "CurrentCapacity", "CurrentTemperature", "MaximumCapacity", "MinimumCapacity", "MinimumTemperature", "ProductTypeId", "WarehouseId"}).
-			AddRow(sectionList[0].Id, sectionList[0].SectionNumber, sectionList[0].CurrentCapacity, sectionList[0].CurrentTemperature, sectionList[0].MaximumCapacity, sectionList[0].MinimumCapacity, sectionList[0].MinimumTemperature, sectionList[0].ProductTypeId, sectionList[0].WarehouseId).
-			AddRow(sectionList[1].Id, sectionList[1].SectionNumber, sectionList[1].CurrentCapacity, sectionList[1].CurrentTemperature, sectionList[1].MaximumCapacity, sectionList[1].MinimumCapacity, sectionList[1].MinimumTemperature, sectionList[1].ProductTypeId, sectionList[1].WarehouseId)
-
 		mock.ExpectQuery(SqlSelect).WillReturnRows(rows)
-
 		repoSection := NewRepository(db)
-
 		sections, err := repoSection.ListarSectionAll()
-
 		assert.Nil(t, err)
-		assert.Equal(t, mockSection.SectionNumber, sections[1].SectionNumber)
+		assert.Equal(t, 1, sections[0].SectionNumber)
 		assert.True(t, len(sections) == 2)
 	})
-	t.Run("lista sections, error", func(t *testing.T) {
-		db, mock := NewConnectionMock()
-
-		// mockSection := Section{}
-
-		rows := sqlmock.NewRows([]string{"Id", "SectionNumber", "CurrentCapacity", "CurrentTemperature", "MaximumCapacity", "MinimumCapacity", "MinimumTemperature", "ProductTypeId", "WarehouseId"})
-		// .
-		// AddRow(sectionList[0].Id, sectionList[0].SectionNumber, sectionList[0].CurrentCapacity, sectionList[0].CurrentTemperature, sectionList[0].MaximumCapacity, sectionList[0].MinimumCapacity, sectionList[0].MinimumTemperature, sectionList[0].ProductTypeId, sectionList[0].WarehouseId).
-		// AddRow(sectionList[1].Id, sectionList[1].SectionNumber, sectionList[1].CurrentCapacity, sectionList[1].CurrentTemperature, sectionList[1].MaximumCapacity, sectionList[1].MinimumCapacity, sectionList[1].MinimumTemperature, sectionList[1].ProductTypeId, sectionList[1].WarehouseId)
-
-		SqlSelect := `
-			SELECT i123d,section_number,current_capacity,current_temperature,maximum_capacity,minimum_capacity,minimum_temperature,product_type_id,warehouse_id
-			FROM mercadofresco.sections`
-
-		mock.ExpectQuery(SqlSelect).WillReturnRows(rows)
-
+	t.Run("lista sections, error section not registered", func(t *testing.T) {
+		SqlSelect := `SELECT id,section_number,current_capacity,current_temperature,maximum_capacity,minimum_capacity,minimum_temperature,product_type_id,warehouse_id FROM mercadofresco.sections`
+		mock.ExpectQuery(SqlSelect).WillReturnRows(rows).WillReturnError(ErrorFalhaInListAll)
 		repoSection := NewRepository(db)
-
 		sections, err := repoSection.ListarSectionAll()
-
-		expectError := errors.New("sections not this registered")
-
 		assert.Error(t, err)
-		assert.Equal(t, expectError, err)
+		assert.Equal(t, ErrorFalhaInListAll, err)
 		assert.True(t, len(sections) == 0)
 	})
 }
@@ -415,7 +351,7 @@ func TestRepositoryListarSectionOne(t *testing.T) {
 		assert.Nil(t, err)
 		assert.ObjectsAreEqual(sectionOne, sec)
 	})
-	t.Run("lista section, error", func(t *testing.T) {
+	t.Run("lista section, error not found", func(t *testing.T) {
 		db, mock := NewConnectionMock()
 
 		rows := sqlmock.NewRows([]string{
@@ -427,21 +363,26 @@ func TestRepositoryListarSectionOne(t *testing.T) {
 
 		repoSection := NewRepository(db)
 		sec, err := repoSection.ListarSectionOne(10)
+
+		expectErrr := errors.New("section is not found")
+
 		assert.Error(t, err)
+		assert.Equal(t, expectErrr, err)
 		assert.Empty(t, sec)
+		assert.ObjectsAreEqual(Section{}, sec)
 	})
 }
 
 func TestRepositoryDeleteSection(t *testing.T) {
-	t.Run("delete section, error", func(t *testing.T) {
+	t.Run("delete section, error cannt be removed", func(t *testing.T) {
 		db, mock := NewConnectionMock()
 
-		paramId := 1
+		paramId := 2
 
-		expError := errors.New("falha ao remove o section")
+		expError := errors.New("this section cannot be removed")
 
-		mock.ExpectExec(regexp.QuoteMeta(`DELETE FROM mercadofresco.sections WHERE id = ?`)).
-			WithArgs(1).WillReturnError(expError)
+		mock.ExpectExec(regexp.QuoteMeta(SqlDeleteSection)).
+			WithArgs(paramId).WillReturnError(expError)
 
 		repoSection := NewRepository(db)
 
@@ -449,11 +390,34 @@ func TestRepositoryDeleteSection(t *testing.T) {
 
 		assert.Error(t, err)
 
-		assert.Equal(t, expError, err)
+		assert.Equal(t, ErrorKeyTableSectionId, err)
 	})
-}
+	t.Run("delete section, error section not found", func(t *testing.T) {
+		db, mock := NewConnectionMock()
 
-func TestRepositorygetWarehouse(t *testing.T) {
-	t.Run("", func(t *testing.T) {
+		paramId := 2
+
+		mock.ExpectExec(regexp.QuoteMeta(SqlDeleteSection)).
+			WithArgs(paramId).WillReturnResult(sqlmock.NewResult(0, 0)).WillReturnError(nil)
+
+		repoSection := NewRepository(db)
+
+		err := repoSection.DeleteSection(int64(paramId))
+
+		assert.Equal(t, ErrorNotFound, err)
+	})
+	t.Run("delete section, sucesso", func(t *testing.T) {
+		db, mock := NewConnectionMock()
+
+		paramId := 20
+
+		mock.ExpectExec(regexp.QuoteMeta(SqlDeleteSection)).
+			WithArgs(paramId).WillReturnResult(sqlmock.NewResult(0, 1)).WillReturnError(nil)
+
+		repoSection := NewRepository(db)
+
+		err := repoSection.DeleteSection(int64(paramId))
+
+		assert.NoError(t, err)
 	})
 }

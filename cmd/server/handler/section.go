@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -79,7 +78,6 @@ func (controller *SectionController) UpdateSection() gin.HandlerFunc {
 		if web.CheckIfErrorRequest(context, &sectionUp) {
 			return
 		}
-		fmt.Println("Controller = ", sectionUp)
 		updateSection, err := controller.service.UpdateSection(paramId, sectionUp)
 		if err != nil {
 			context.JSON(
