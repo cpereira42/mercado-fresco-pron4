@@ -2,7 +2,6 @@ package seller_test
 
 import (
 	"database/sql"
-	"log"
 	"testing"
 
 	"github.com/cpereira42/mercado-fresco-pron4/internal/seller"
@@ -66,7 +65,7 @@ func TestGetAll(t *testing.T) {
 			"Address",
 			"Telephone",
 			"LocalityId",
-		}).AddRow("", "", "", "", "", 0)
+		}).AddRow("", "", "", "", "", "")
 
 		mock.ExpectQuery(query).WillReturnRows(rows)
 
@@ -87,26 +86,30 @@ func TestGetId(t *testing.T) {
 	sellers := []seller.Seller{seller1, seller2}
 	sellersRepo := seller.NewRepositorySeller(db)
 
-	query := "SELECT \\* FROM sellers WHERE id = ?"
+	query := "SELECT \\* FROM sellers WHERE id = \\?"
 	t.Run("Get ID - OK", func(t *testing.T) {
-		rows := []string{
+		rows := sqlmock.NewRows([]string{
 			"Id",
 			"Cid",
 			"CompanyName",
 			"Address",
 			"Telephone",
 			"LocalityId",
-		}
+		}).AddRow(
+			sellers[0].Id,
+			sellers[0].Cid,
+			sellers[0].CompanyName,
+			sellers[0].Address,
+			sellers[0].Telephone,
+			sellers[0].LocalityId,
+		)
 
-		mock.ExpectQuery(query).
-			WithArgs(1).
-			WillReturnRows(sqlmock.NewRows(rows).AddRow(seller1))
-
-		result, err := sellersRepo.GetId(1)
-
-		log.Println(result)
+		stmt := mock.ExpectPrepare(query)
+		stmt.ExpectQuery().WithArgs(1).WillReturnRows(rows)
+		result, _ := sellersRepo.GetId(1)
 		assert.NoError(t, err)
 
 		assert.Equal(t, sellers[0].Cid, result.Cid)
+
 	})
 }
