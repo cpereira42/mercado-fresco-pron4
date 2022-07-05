@@ -2,6 +2,8 @@ package section
 
 import (
 	"database/sql"
+
+	"github.com/cpereira42/mercado-fresco-pron4/pkg/util"
 )
 
 type repository struct {
@@ -57,11 +59,11 @@ func (repoSection *repository) CreateSection(newSection Section) (Section, error
 		&newSection.MaximumCapacity, &newSection.MinimumCapacity, &newSection.MinimumTemperature,
 		&newSection.ProductTypeId, &newSection.WarehouseId)
 	if err != nil {
-		return sectionErro, checkError(err)
+		return sectionErro, util.CheckError(err)
 	}
 	rowsAffexcted, err := result.RowsAffected()
 	if rowsAffexcted == 0 {
-		return sectionErro, checkError(err)
+		return sectionErro, util.CheckError(err)
 	}
 	return newSection, nil
 }
@@ -74,7 +76,7 @@ func (repoSection *repository) UpdateSection(sectionUp Section) (Section, error)
 		&sectionUp.ProductTypeId, &sectionUp.WarehouseId, &sectionUp.Id,
 	)
 	if err != nil {
-		return Section{}, checkError(err)
+		return Section{}, util.CheckError(err)
 	}
 	rowsAffexcted, err := result.RowsAffected()
 	if err != nil {
