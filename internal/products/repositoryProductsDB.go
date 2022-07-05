@@ -4,38 +4,9 @@ import (
 	"database/sql"
 	"fmt"
 
-	_ "github.com/go-sql-driver/mysql"
-)
+	"github.com/cpereira42/mercado-fresco-pron4/pkg/util"
 
-const (
-	QUERY_GETALL    = "SELECT * FROM products"
-	QUERY_GETID     = "SELECT * FROM products Where id = ?"
-	QUERY_CHECKCODE = "SELECT product_code FROM products Where id != ? and product_code = ?"
-	QUERY_DELETE    = "DELETE FROM products WHERE id = ?"
-	QUERY_INSERT    = `INSERT INTO products (
-		product_code, 
-		description, 
-		width, 
-		length,	
-		height,	
-		net_weight,	
-		expiration_rate, 
-		recommended_freezing_temperature, 
-		freezing_rate, 
-		product_type_id,
-		seller_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-	QUERY_UPDATE = `UPDATE products SET 
-		product_code=?,
-		description=?, 
-		width=? ,
-		length=?,	
-		height=?,	
-		net_weight=?,	
-		expiration_rate=?, 
-		recommended_freezing_temperature=? ,
-		freezing_rate=? ,
-		product_type_id=?,
-		seller_id=? WHERE id=?`
+	_ "github.com/go-sql-driver/mysql"
 )
 
 type Repository interface {
@@ -61,7 +32,7 @@ func (r *repository) GetAll() ([]Product, error) {
 
 	rows, err := r.db.Query(QUERY_GETALL)
 	if err != nil {
-		return products, err
+		return products, util.CheckError(err)
 	}
 	defer rows.Close()
 
@@ -82,7 +53,7 @@ func (r *repository) GetAll() ([]Product, error) {
 			&product.SellerId,
 		)
 		if err != nil {
-			return products, err
+			return products, util.CheckError(err)
 		}
 		products = append(products, product)
 	}
@@ -112,7 +83,7 @@ func (r *repository) GetId(id int) (Product, error) {
 	defer stmt.Close()
 
 	if err != nil {
-		return Product{}, fmt.Errorf("Product not found")
+		return Product{}, util.CheckError(err)
 	}
 	return product, nil
 }
@@ -121,14 +92,14 @@ func (r *repository) Delete(id int) error {
 
 	stmt, err := r.db.Prepare(QUERY_DELETE)
 	if err != nil {
-		return err
+		return util.CheckError(err)
 	}
 
 	defer stmt.Close()
 
 	res, err := stmt.Exec(id)
 	if err != nil {
-		return err
+		return util.CheckError(err)
 	}
 	RowsAffected, _ := res.RowsAffected()
 	if RowsAffected == 0 {
@@ -143,7 +114,7 @@ func (r *repository) Create(p Product) (Product, error) {
 	stmt, err := r.db.Prepare(QUERY_INSERT)
 
 	if err != nil {
-		return Product{}, err
+		return Product{}, util.CheckError(err)
 	}
 	defer stmt.Close()
 
@@ -160,7 +131,7 @@ func (r *repository) Create(p Product) (Product, error) {
 		p.ProductTypeId,
 		p.SellerId)
 	if err != nil {
-		return Product{}, err
+		return Product{}, util.CheckError(err)
 	}
 
 	RowsAffected, _ := res.RowsAffected()
@@ -194,7 +165,7 @@ func (r *repository) Update(id int, p Product) (Product, error) {
 		p.SellerId,
 		id)
 	if err != nil {
-		return Product{}, err
+		return Product{}, util.CheckError(err)
 	}
 
 	RowsAffected, _ := res.RowsAffected()

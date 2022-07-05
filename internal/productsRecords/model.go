@@ -10,10 +10,9 @@ type ProductRecords struct {
 }
 
 type RequestProductRecordsCreate struct {
-	LastUpdateDate string  `json:"last_update_date" binding:"required"`
-	PurchasePrice  float64 `json:"purchase_price" binding:"required"`
-	SalePrice      float64 `json:"sale_price" binding:"required"`
-	ProductId      int     `json:"product_id" binding:"required"`
+	PurchasePrice float64 `json:"purchase_price" binding:"required"`
+	SalePrice     float64 `json:"sale_price" binding:"required"`
+	ProductId     int     `json:"product_id" binding:"required"`
 }
 
 type ReturnProductRecords struct {
@@ -27,3 +26,18 @@ type Repository interface {
 	GetAllRecords() ([]ReturnProductRecords, error)
 	Create(p ProductRecords) (ProductRecords, error)
 }
+
+const (
+	QUERY_GETALL = `SELECT p.id, p.description, COUNT(pr.product_id) AS records_count
+	FROM product_records pr 
+	JOIN products p ON p.id = pr.product_id
+	GROUP BY p.id`
+
+	QUERY_GETID = `SELECT pr.product_id, p.description, COUNT(pr.product_id) AS records_count
+	FROM product_records pr 
+	JOIN products p ON p.id = pr.product_id
+	WHERE pr.product_id = ?
+	GROUP BY pr.product_id`
+
+	QUERY_INSERT = `INSERT INTO product_records (last_update_date, purchase_price, sale_price,product_id) VALUES (?, ?, ?, ?)`
+)

@@ -116,7 +116,7 @@ func Test_RepositoryFindAll(t *testing.T) {
 
 		repo.On("GetAll").Return(produtos, nil)
 
-		service := products.NewService(repo, repoSeller)
+		service := products.NewService(repo)
 		ps, err := service.GetAll()
 
 		assert.Nil(t, err)
@@ -129,7 +129,7 @@ func Test_RepositoryFindAll(t *testing.T) {
 		repo := &mocks.Repository{}
 		repo.On("GetAll").Return([]products.Product{}, fmt.Errorf("Fail to get all"))
 
-		service := products.NewService(repo, repoSeller)
+		service := products.NewService(repo)
 		ps, err := service.GetAll()
 		assert.True(t, len(ps) == 0)
 		assert.Equal(t, fmt.Errorf("Fail to get all"), err)
@@ -144,7 +144,7 @@ func Test_RepositoryFindId(t *testing.T) {
 		repo := &mocks.Repository{}
 		repo.On("GetId", 1).Return(produtos[0], nil)
 
-		service := products.NewService(repo, repoSeller)
+		service := products.NewService(repo)
 		ps, err := service.GetId(1)
 
 		assert.Nil(t, err)
@@ -156,7 +156,7 @@ func Test_RepositoryFindId(t *testing.T) {
 		repo := &mocks.Repository{}
 		repo.On("GetId", 3).Return(products.Product{}, fmt.Errorf("Product not Found"))
 
-		service := products.NewService(repo, repoSeller)
+		service := products.NewService(repo)
 		_, err := service.GetId(3)
 
 		assert.NotNil(t, err)
@@ -171,7 +171,7 @@ func Test_RepositoryDelete(t *testing.T) {
 		repo := &mocks.Repository{}
 		repo.On("Delete", 1).Return(nil)
 
-		service := products.NewService(repo, repoSeller)
+		service := products.NewService(repo)
 		err := service.Delete(1)
 
 		assert.Nil(t, err)
@@ -182,7 +182,7 @@ func Test_RepositoryDelete(t *testing.T) {
 		repo := &mocks.Repository{}
 		repo.On("Delete", 9).Return(fmt.Errorf("produto não encontrado"))
 
-		service := products.NewService(repo, repoSeller)
+		service := products.NewService(repo)
 		err := service.Delete(9)
 
 		assert.Equal(t, fmt.Errorf("produto não encontrado"), err)
@@ -197,7 +197,7 @@ func Test_RepositoryUpdate(t *testing.T) {
 		repo.On("GetId", 3).Return(produtos[2], nil)
 		prod3.NetWeight = 9.9
 		repo.On("Update", 3, prod3).Return(prod3, nil)
-		service := products.NewService(repo, repoSeller)
+		service := products.NewService(repo)
 		ps, err := service.Update(3, prodUp)
 
 		assert.Nil(t, err)
@@ -209,7 +209,7 @@ func Test_RepositoryUpdate(t *testing.T) {
 		repo := &mocks.Repository{}
 		repo.On("GetId", 5).Return(products.Product{}, fmt.Errorf("Product not found"))
 		repo.On("Update", 5, prod3).Return(products.Product{}, fmt.Errorf("Product not found"))
-		service := products.NewService(repo, repoSeller)
+		service := products.NewService(repo)
 		_, err := service.Update(5, prodUp)
 
 		assert.Equal(t, fmt.Errorf("Product not found"), err)
@@ -237,7 +237,7 @@ func Test_RepositoryCreate(t *testing.T) {
 		repo.On("CheckCode", 0, prodNew.ProductCode).Return(nil)
 		repo.On("GetProductsTypes", prodNew.ProductTypeId).Return("TV", nil)
 		repo.On("Create", prodNew).Return(prod4, nil)
-		service := products.NewService(repo, repoSeller)
+		service := products.NewService(repo)
 		ps, err := service.Create(prodCreate)
 		lastId++
 		ps.Id = 4
@@ -252,7 +252,7 @@ func Test_RepositoryCreate(t *testing.T) {
 		repo.On("GetProductsTypes", prodNew.ProductTypeId).Return("TV", nil)
 
 		repo.On("Create", prodNew).Return(products.Product{}, fmt.Errorf("Fail to save"))
-		service := products.NewService(repo, repoSeller)
+		service := products.NewService(repo)
 		_, err := service.Create(prodCreate)
 
 		assert.NotNil(t, err)

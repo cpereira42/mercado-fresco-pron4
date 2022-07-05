@@ -1,5 +1,9 @@
 package productsRecords
 
+import (
+	"time"
+)
+
 type Service interface {
 	GetIdRecords(id int) (ReturnProductRecords, error)
 	GetAllRecords() ([]ReturnProductRecords, error)
@@ -34,8 +38,18 @@ func (s *service) GetAllRecords() ([]ReturnProductRecords, error) {
 
 func (s *service) Create(p RequestProductRecordsCreate) (ProductRecords, error) {
 	var prod ProductRecords
+	currentTime := time.Now()
 
-	prod.LastUpdateDate = p.LastUpdateDate
+	theTime := time.Date(currentTime.Year(),
+		currentTime.Month(),
+		currentTime.Day(),
+		currentTime.Hour(),
+		currentTime.Minute(),
+		currentTime.Second(),
+		100,
+		time.Local).Format("2006-01-02 15:04:05")
+
+	prod.LastUpdateDate = theTime
 	prod.PurchasePrice = p.PurchasePrice
 	prod.SalePrice = p.SalePrice
 	prod.ProductId = p.ProductId

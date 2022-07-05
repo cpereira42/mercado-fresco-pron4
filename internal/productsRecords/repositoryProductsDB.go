@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/cpereira42/mercado-fresco-pron4/pkg/util"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -20,13 +21,10 @@ func NewRepositoryProductsRecordsDB(db *sql.DB) Repository {
 func (r *repository) GetAllRecords() ([]ReturnProductRecords, error) {
 	var ProductRecords []ReturnProductRecords
 
-	rows, err := r.db.Query(` SELECT p.id, p.description, COUNT(pr.product_id) AS records_count
-	FROM product_records pr 
-	JOIN products p ON p.id = pr.product_id
-	GROUP BY p.id`)
+	rows, err := r.db.Query(QUERY_GETALL)
 
 	if err != nil {
-		return ProductRecords, fmt.Errorf("ProductsRecords not Found")
+		return ProductRecords, util.CheckError(err)
 	}
 	defer rows.Close()
 
@@ -39,7 +37,7 @@ func (r *repository) GetAllRecords() ([]ReturnProductRecords, error) {
 			&ProductRecord.RecordsCount,
 		)
 		if err != nil {
-			return ProductRecords, err
+			return ProductRecords, fmt.Errorf("Fail to scan")
 		}
 		ProductRecords = append(ProductRecords, ProductRecord)
 	}
@@ -51,14 +49,10 @@ func (r *repository) GetIdRecords(id int) (ReturnProductRecords, error) {
 
 	var ProductRecords ReturnProductRecords
 
-	stmt, err := r.db.Prepare(`SELECT pr.product_id, p.description, COUNT(pr.product_id) AS records_count
-	FROM product_records pr 
-	JOIN products p ON p.id = pr.product_id
-	WHERE pr.product_id = ?
-	GROUP BY pr.product_id`)
+	stmt, err := r.db.Prepare(QUERY_GETID)
 
 	if err != nil {
-		return ProductRecords, fmt.Errorf("ProductsRecords not Found")
+		return ProductRecords, util.CheckError(err)
 	}
 
 	err = stmt.QueryRow(id).Scan(
@@ -68,7 +62,7 @@ func (r *repository) GetIdRecords(id int) (ReturnProductRecords, error) {
 	)
 
 	if err != nil {
-		return ProductRecords, fmt.Errorf("ProductsRecords not Found")
+		return ProductRecords, util.CheckError(err)
 	}
 	defer stmt.Close()
 	return ProductRecords, nil
@@ -76,15 +70,10 @@ func (r *repository) GetIdRecords(id int) (ReturnProductRecords, error) {
 
 func (r *repository) Create(p ProductRecords) (ProductRecords, error) {
 
-	stmt, err := r.db.Prepare(`INSERT INTO product_records (
-		last_update_date, 
-		purchase_price, 
-		sale_price,
-		product_id
-		) VALUES (?, ?, ?, ?)`)
+	stmt, err := r.db.Prepare(QUERY_INSERT)
 
 	if err != nil {
-		return ProductRecords{}, err
+		return ProductRecords{}, util.CheckError(err)
 	}
 	defer stmt.Close()
 
@@ -94,7 +83,7 @@ func (r *repository) Create(p ProductRecords) (ProductRecords, error) {
 		p.SalePrice,
 		p.ProductId)
 	if err != nil {
-		return ProductRecords{}, err
+		return ProductRecords{}, util.CheckError(err)
 	}
 
 	RowsAffected, _ := res.RowsAffected()

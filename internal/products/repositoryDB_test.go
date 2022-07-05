@@ -21,8 +21,8 @@ var prodNewDB = products.Product{
 	ProductCode:                    "prod12s",
 	RecommendedFreezingTemperature: 6.6,
 	Width:                          7.7,
-	ProductTypeId:                  8,
-	SellerId:                       9}
+	ProductTypeId:                  1,
+	SellerId:                       1}
 
 var prod1DB = products.Product{
 	Id:                             1,
@@ -63,13 +63,13 @@ func TestGetAll(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	assert.NoError(t, err)
 	defer db.Close()
-	produtos := []products.Product{prod1DB, prod2DB}
 
 	productsRepo := products.NewRepositoryProductsDB(db)
 
-	query := "SELECT \\* FROM products"
+	//query := "SELECT \\* FROM products"
 
-	t.Run("GetAll Fail Scan", func(t *testing.T) {
+	t.Run("GetAll Fail Ok", func(t *testing.T) {
+		produtos := []products.Product{prod1DB, prod2DB}
 		rows := sqlmock.NewRows([]string{
 			"Id",
 			"ProductCode",
@@ -111,7 +111,7 @@ func TestGetAll(t *testing.T) {
 			produtos[1].SellerId,
 		)
 
-		mock.ExpectQuery(query).WillReturnRows(rows)
+		mock.ExpectQuery(regexp.QuoteMeta(products.QUERY_GETALL)).WillReturnRows(rows)
 
 		result, err := productsRepo.GetAll()
 		assert.NoError(t, err)
@@ -136,16 +136,17 @@ func TestGetAll(t *testing.T) {
 			"SellerId",
 		}).AddRow("", "", "", "", "", "", "", "", "", "", "", "")
 
-		mock.ExpectQuery(query).WillReturnRows(rows)
+		mock.ExpectQuery(regexp.QuoteMeta(products.QUERY_GETALL)).WillReturnRows(rows)
 
 		_, err = productsRepo.GetAll()
 		assert.Error(t, err)
 	})
 
 	t.Run("GetAll Fail Select", func(t *testing.T) {
+		mock.ExpectQuery(regexp.QuoteMeta(products.QUERY_GETALL)).WillReturnError(sql.ErrNoRows)
 		_, err = productsRepo.GetAll()
 		assert.Error(t, err)
-		mock.ExpectQuery(query).WillReturnError(sql.ErrNoRows)
+
 	})
 }
 
@@ -208,7 +209,7 @@ func TestGetId(t *testing.T) {
 
 	t.Run("Get ID - Fail, product not found", func(t *testing.T) {
 		stmt := mock.ExpectPrepare(regexp.QuoteMeta(products.QUERY_GETID))
-		stmt.ExpectQuery().WithArgs(1).WillReturnError(fmt.Errorf("error"))
+		stmt.ExpectQuery().WithArgs(1).WillReturnError(sql.ErrNoRows)
 
 		_, err := productsRepo.GetId(1)
 		assert.NotNil(t, err)
@@ -335,7 +336,7 @@ func TestCreate(t *testing.T) {
 
 func TestUpdate(t *testing.T) {
 
-	t.Run("Create Error", func(t *testing.T) {
+	t.Run("Update Error", func(t *testing.T) {
 		db, mock, err := sqlmock.New()
 		productsRepo := products.NewRepositoryProductsDB(db)
 		stmt := mock.ExpectPrepare(regexp.QuoteMeta(products.QUERY_UPDATE))
@@ -349,6 +350,67 @@ func TestUpdate(t *testing.T) {
 		_, err = productsRepo.Update(1, prodUpdate)
 		defer db.Close()
 		assert.NotNil(t, err)
+	})
+
+	t.Run("Update - Fail prepar query", func(t *testing.T) {
+		db, mock, err := sqlmock.New()
+		assert.NoError(t, err)
+		defer db.Close()
+		productsRepo := products.NewRepositoryProductsDB(db)
+		mock.ExpectQuery(products.QUERY_UPDATE).WithArgs(prodUpdate.ProductCode,
+			prodUpdate.Description,
+			prodUpdate.Width,
+			prodUpdate.Length,
+			prodUpdate.Height).WillReturnError(fmt.Errorf("Fail to prepar query"))
+
+		_, err = productsRepo.Update(1, prodUpdate)
+		assert.Equal(t, fmt.Errorf("Fail to prepar query"), err)
+
+	})
+
+	t.Run("Ok", func(t *testing.T) {
+		db, mock, err := sqlmock.New()
+		assert.NoError(t, err)
+		defer db.Close()
+		stmt := mock.ExpectPrepare(regexp.QuoteMeta(products.QUERY_UPDATE))
+		stmt.ExpectExec().WithArgs(
+			prod1DB.ProductCode,
+			prod1DB.Description,
+			prod1DB.Width,
+			prod1DB.Length,
+			prod1DB.Height,
+			prod1DB.NetWeight,
+			prod1DB.ExpirationRate,
+			prod1DB.RecommendedFreezingTemperature,
+			prod1DB.FreezingRate,
+			prod1DB.ProductTypeId,
+			prod1DB.SellerId, 1).WillReturnResult(sqlmock.NewResult(0, 1))
+		productsRepo := products.NewRepositoryProductsDB(db)
+		_, err = productsRepo.Update(1, prod1DB)
+		assert.NoError(t, err)
+	})
+
+	t.Run("0 Rows", func(t *testing.T) {
+		db, mock, err := sqlmock.New()
+		assert.NoError(t, err)
+		defer db.Close()
+		stmt := mock.ExpectPrepare(regexp.QuoteMeta(products.QUERY_UPDATE))
+		stmt.ExpectExec().WithArgs(
+			prod1DB.ProductCode,
+			prod1DB.Description,
+			prod1DB.Width,
+			prod1DB.Length,
+			prod1DB.Height,
+			prod1DB.NetWeight,
+			prod1DB.ExpirationRate,
+			prod1DB.RecommendedFreezingTemperature,
+			prod1DB.FreezingRate,
+			prod1DB.ProductTypeId,
+			prod1DB.SellerId, 1).WillReturnResult(sqlmock.NewResult(0, 0))
+		productsRepo := products.NewRepositoryProductsDB(db)
+		_, err = productsRepo.Update(1, prod1DB)
+		assert.NotNil(t, err)
+		assert.Equal(t, fmt.Errorf("Fail to save"), err)
 	})
 
 }
