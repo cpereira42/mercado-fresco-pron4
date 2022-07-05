@@ -26,5 +26,4 @@ type Repository interface {
 	GetIdRecords(id int) (ReturnProductRecords, error)
 	GetAllRecords() ([]ReturnProductRecords, error)
 	Create(p ProductRecords) (ProductRecords, error)
-	//CheckCode(code string) error
 }

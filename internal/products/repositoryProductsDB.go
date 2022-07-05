@@ -95,7 +95,7 @@ func (r *repository) GetId(id int) (Product, error) {
 
 	stmt, err := r.db.Prepare(QUERY_GETID)
 	if err != nil {
-		return product, err
+		return product, fmt.Errorf("Fail to prepar query")
 	}
 	err = stmt.QueryRow(id).Scan(&product.Id,
 		&product.ProductCode,
@@ -112,7 +112,7 @@ func (r *repository) GetId(id int) (Product, error) {
 	defer stmt.Close()
 
 	if err != nil {
-		return Product{}, err
+		return Product{}, fmt.Errorf("Product not found")
 	}
 	return product, nil
 }
@@ -176,7 +176,7 @@ func (r *repository) Update(id int, p Product) (Product, error) {
 	stmt, err := r.db.Prepare(QUERY_UPDATE)
 
 	if err != nil {
-		return Product{}, err
+		return Product{}, fmt.Errorf("Fail to prepar query")
 	}
 	defer stmt.Close()
 

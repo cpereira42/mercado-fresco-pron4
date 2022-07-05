@@ -49,9 +49,9 @@ func main() {
 	serviceSeller := seller.NewService(repoSeller)
 
 	repoProd := products.NewRepositoryProductsDB(conn)
-	serviceProd := products.NewService(repoProd, repoSeller)
+	serviceProd := products.NewService(repoProd)
 	repoProdRecord := productsRecords.NewRepositoryProductsRecordsDB(conn)
-	serviceProdRecord := productsRecords.NewService(repoProdRecord, repoProd)
+	serviceProdRecord := productsRecords.NewService(repoProdRecord)
 
 	dbWarehouse := store.New(store.FileType, "./internal/repositories/warehouse.json")
 	repoWarehouse := warehouse.NewRepository(dbWarehouse)

@@ -1,9 +1,5 @@
 package productsRecords
 
-import (
-	"github.com/cpereira42/mercado-fresco-pron4/internal/products"
-)
-
 type Service interface {
 	GetIdRecords(id int) (ReturnProductRecords, error)
 	GetAllRecords() ([]ReturnProductRecords, error)
@@ -11,14 +7,12 @@ type Service interface {
 }
 
 type service struct {
-	repositoryRecords  Repository
-	repositoryProducts products.Repository
+	repositoryRecords Repository
 }
 
-func NewService(r Repository, repositoryProducts products.Repository) Service {
+func NewService(r Repository) Service {
 	return &service{
-		repositoryRecords:  r,
-		repositoryProducts: repositoryProducts,
+		repositoryRecords: r,
 	}
 }
 
@@ -41,10 +35,6 @@ func (s *service) GetAllRecords() ([]ReturnProductRecords, error) {
 func (s *service) Create(p RequestProductRecordsCreate) (ProductRecords, error) {
 	var prod ProductRecords
 
-	_, err := s.repositoryProducts.GetId(p.ProductId)
-	if err != nil {
-		return ProductRecords{}, err
-	}
 	prod.LastUpdateDate = p.LastUpdateDate
 	prod.PurchasePrice = p.PurchasePrice
 	prod.SalePrice = p.SalePrice
