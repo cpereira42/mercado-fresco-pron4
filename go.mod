@@ -5,6 +5,8 @@ go 1.18
 require (
 	github.com/fatih/structs v1.1.0
 	github.com/gin-gonic/gin v1.8.1
+	github.com/go-sql-driver/mysql v1.6.0
+	github.com/joho/godotenv v1.4.0
 	github.com/stretchr/testify v1.7.2
 )
 
@@ -14,18 +16,15 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-require (
-	github.com/go-sql-driver/mysql v1.6.0 // indirect
-	github.com/stretchr/objx v0.1.0 // indirect
-)
+require github.com/stretchr/objx v0.1.0 // indirect
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-playground/validator/v10 v10.11.0
 	github.com/goccy/go-json v0.9.7 // indirect
-	github.com/joho/godotenv v1.4.0
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
