@@ -2,12 +2,6 @@ package main
 
 import (
 	"database/sql"
-<<<<<<< HEAD
-
-	_ "github.com/go-sql-driver/mysql"
-
-=======
->>>>>>> ca33ee88b7a3c6b231fddc33f3aed9c7e17b335c
 	"fmt"
 	"log"
 	"os"
@@ -30,10 +24,6 @@ import (
 )
 
 func main() {
-<<<<<<< HEAD
-
-=======
->>>>>>> ca33ee88b7a3c6b231fddc33f3aed9c7e17b335c
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal(".Env cant be load")
@@ -59,23 +49,14 @@ func main() {
 	svcWarehouse := warehouse.NewService(repoWarehouse)
 	w := handler.NewWarehouse(svcWarehouse)
 
-<<<<<<< HEAD
-	//dbSection := store.New(store.FileType, "./internal/repositories/sections.json")
-	//repSection := sectionRepository.NewRepository(dbSection)
-
-	repSection := sectionRepository.NewRepository(Conn)
-	serviceSection := sectionService.NewService(repSection)
-	sectionController := handler.NewSectionController(serviceSection)
-=======
 	repoPB := productbatch.NewRepositoryProductBatches(conn)
 	servicePB := productbatch.NewServiceProductBatches(repoPB)
 	repSection := section.NewRepository(conn)
 	serviceSection := section.NewService(repSection)
 	sectionController := handler.NewSectionController(serviceSection, servicePB)
->>>>>>> ca33ee88b7a3c6b231fddc33f3aed9c7e17b335c
 
 	// dbSeller := store.New(store.FileType, "../mercado-fresco-pron4/internal/repositories/sellers.json")
-	repoSeller := seller.NewRepositorySeller(Conn)
+	repoSeller := seller.NewRepositorySeller(conn)
 	serviceSeller := seller.NewService(repoSeller)
 
 	dbEmployees := store.New(store.FileType, "./internal/repositories/employees.json")
@@ -142,15 +123,10 @@ func connection() (*sql.DB, error) {
 	host := os.Getenv("HOST_DB")
 	database := os.Getenv("DATABASE")
 	dataSource := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", user, pass, host, port, database)
-<<<<<<< HEAD
-	log.Println(dataSource)
-	return sql.Open("mysql", dataSource)
-=======
 	log.Println("conection Success")
 	conn, err := sql.Open("mysql", dataSource)
 	if err != nil {
 		log.Fatal(err)
 	}
 	return conn, nil
->>>>>>> ca33ee88b7a3c6b231fddc33f3aed9c7e17b335c
 }
