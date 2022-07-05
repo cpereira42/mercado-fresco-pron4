@@ -13,14 +13,14 @@ type Service struct {
 }
 
 // CreateSection provides a mock function with given fields: _a0
-func (_m *Service) CreateSection(_a0 section.SectionRequestCreate) (section.Section, error) {
+func (_m *Service) CreateSection(_a0 section.SectionRequestCreate) (section.SectionRequestCreate, error) {
 	ret := _m.Called(_a0)
 
-	var r0 section.Section
-	if rf, ok := ret.Get(0).(func(section.SectionRequestCreate) section.Section); ok {
+	var r0 section.SectionRequestCreate
+	if rf, ok := ret.Get(0).(func(section.SectionRequestCreate) section.SectionRequestCreate); ok {
 		r0 = rf(_a0)
 	} else {
-		r0 = ret.Get(0).(section.Section)
+		r0 = ret.Get(0).(section.SectionRequestCreate)
 	}
 
 	var r1 error

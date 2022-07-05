@@ -1,22 +1,17 @@
 package section
 
-import (
-	"github.com/cpereira42/mercado-fresco-pron4/internal/warehouse"
-)
-
 type service struct {
-	repository          Repository
-	repositoryWarehouse warehouse.Repository
+	repository Repository
 }
 
-func NewService(repository Repository, repositoryWarehouse warehouse.Repository) Service {
-	return &service{repository: repository, repositoryWarehouse: repositoryWarehouse}
+func NewService(repository Repository) Service {
+	return &service{repository: repository}
 }
 
 func (s service) ListarSectionAll() ([]Section, error) {
 	sectionList, err := s.repository.ListarSectionAll()
 	if err != nil {
-		return sectionList, err
+		return []Section{}, err
 	}
 	return sectionList, nil
 }
@@ -31,7 +26,7 @@ func (s service) ListarSectionOne(id int64) (Section, error) {
 
 func (s service) CreateSection(newSection SectionRequestCreate) (SectionRequestCreate, error) {
 	if _, err := s.repository.CreateSection(*factorySection(&newSection)); err != nil {
-		return newSection, err
+		return SectionRequestCreate{}, err
 	}
 	return newSection, nil
 }

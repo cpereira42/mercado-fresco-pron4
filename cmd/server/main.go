@@ -52,7 +52,7 @@ func main() {
 	repoPB := productbatch.NewRepositoryProductBatches(conn)
 	servicePB := productbatch.NewServiceProductBatches(repoPB)
 	repSection := section.NewRepository(conn)
-	serviceSection := section.NewService(repSection, repoWarehouse)
+	serviceSection := section.NewService(repSection)
 	sectionController := handler.NewSectionController(serviceSection, servicePB)
 
 	dbSeller := store.New(store.FileType, "../mercado-fresco-pron4/internal/repositories/sellers.json")
