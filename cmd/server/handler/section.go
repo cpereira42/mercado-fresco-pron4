@@ -74,7 +74,7 @@ func (controller *SectionController) UpdateSection() gin.HandlerFunc {
 				web.NewResponse(http.StatusInternalServerError, nil, errconv.Error()))
 			return
 		}
-		var sectionUp sectionEntites.SectionRequestUpdate
+		sectionUp := sectionEntites.SectionRequestUpdate{}
 		if web.CheckIfErrorRequest(context, &sectionUp) {
 			return
 		}
@@ -140,8 +140,8 @@ func (controller *SectionController) ReadPB() gin.HandlerFunc {
 		productBatchesResponse, err := controller.servicePB.ReadPBSectionTodo()
 		if err != nil {
 			context.JSON(http.StatusInternalServerError,
-			web.NewResponse(http.StatusInternalServerError, nil, err.Error()))
-			return 
+				web.NewResponse(http.StatusInternalServerError, nil, err.Error()))
+			return
 		}
 		context.JSON(http.StatusOK, web.NewResponse(http.StatusOK, productBatchesResponse, ""))
 	}

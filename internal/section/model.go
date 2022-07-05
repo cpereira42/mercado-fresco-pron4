@@ -7,15 +7,15 @@ package section
  * Request PATCH: SectionRequestUpdate{}
  */
 type Section struct {
-	Id                 int64 `json:"id,omitempty" binding:"numeric"`
-	SectionNumber      int   `json:"section_number,omitempty" binding:"alfa"`
-	CurrentCapacity    int   `json:"current_capacity,omitempty" binding:"numeric"`
-	CurrentTemperature int   `json:"current_temperature,omitempty" binding:"numeric"`
-	MaximumCapacity    int   `json:"maximum_capacity,omitempty" binding:"numeric"`
-	MinimumCapacity    int   `json:"minimum_capacity,omitempty" binding:"numeric"`
-	MinimumTemperature int   `json:"minimum_temperature,omitempty" binding:"numeric"`
-	WarehouseId        int64 `json:"warehouse_id,omitempty" binding:"numeric"`
-	ProductTypeId      int64 `json:"product_type_id,omitempty" binding:"numeric"`
+	Id                 int64 `json:"id" binding:"numeric"`
+	SectionNumber      int   `json:"section_number" binding:"numeric"`
+	CurrentCapacity    int   `json:"current_capacity" binding:"numeric"`
+	CurrentTemperature int   `json:"current_temperature" binding:"numeric"`
+	MaximumCapacity    int   `json:"maximum_capacity" binding:"numeric"`
+	MinimumCapacity    int   `json:"minimum_capacity" binding:"numeric"`
+	MinimumTemperature int   `json:"minimum_temperature" binding:"numeric"`
+	WarehouseId        int64 `json:"warehouse_id" binding:"numeric"`
+	ProductTypeId      int64 `json:"product_type_id" binding:"numeric"`
 }
 type SectionRequestCreate struct {
 	SectionNumber      int   `json:"section_number" binding:"required,numeric"`
@@ -28,14 +28,14 @@ type SectionRequestCreate struct {
 	ProductTypeId      int64 `json:"product_type_id" binding:"required,numeric"`
 }
 type SectionRequestUpdate struct {
-	SectionNumber      int   `json:"section_number" binding:"required,numeric,omitempty"`
-	CurrentCapacity    int   `json:"current_capacity" binding:"numeric,omitempty"`
-	CurrentTemperature int   `json:"current_temperature" binding:"numeric,omitempty"`
-	MaximumCapacity    int   `json:"maximum_capacity" binding:"numeric,omitempty"`
-	MinimumCapacity    int   `json:"minimum_capacity" binding:"numeric,omitempty"`
-	MinimumTemperature int   `json:"minimum_temperature" binding:"numeric,omitempty"`
-	WarehouseId        int64 `json:"warehouse_id" binding:"numeric,omitempty"`
-	ProductTypeId      int64 `json:"product_type_id" binding:"numeric,omitempty"`
+	SectionNumber      int   `json:"section_number" binding:"omitempty,numeric"`
+	CurrentCapacity    int   `json:"current_capacity" binding:"omitempty,numeric"`
+	CurrentTemperature int   `json:"current_temperature" binding:"omitempty,numeric"`
+	MaximumCapacity    int   `json:"maximum_capacity" binding:"omitempty,numeric"`
+	MinimumCapacity    int   `json:"minimum_capacity" binding:"omitempty,numeric"`
+	MinimumTemperature int   `json:"minimum_temperature" binding:"omitempty,numeric"`
+	WarehouseId        int64 `json:"warehouse_id" binding:"omitempty,numeric"`
+	ProductTypeId      int64 `json:"product_type_id" binding:"omitempty,numeric"`
 }
 
 /*
@@ -60,8 +60,8 @@ type ProductTypes struct {
  */
 type Service interface {
 	ListarSectionAll() ([]Section, error)
-	CreateSection(section SectionRequestCreate) (Section, error)
 	ListarSectionOne(id int64) (Section, error)
+	CreateSection(section SectionRequestCreate) (SectionRequestCreate, error)
 	UpdateSection(id int64, sectionUp SectionRequestUpdate) (Section, error)
 	DeleteSection(id int64) error
 }
@@ -70,18 +70,9 @@ type Service interface {
  * -- DATABASE QUERIES
  */
 const (
-	sqlSelect = `
-		SELECT id,section_number,current_capacity,current_temperature,maximum_capacity,minimum_capacity,minimum_temperature,product_type_id,warehouse_id
-		FROM mercadofresco.sections`
-	sqlSelectByID = `
-		SELECT id,section_number,current_capacity,current_temperature,maximum_capacity,minimum_capacity,minimum_temperature,product_type_id,warehouse_id
-		FROM mercadofresco.sections WHERE id=?`
-	sqlCreateSection = `
-		INSERT INTO mercadofresco.sections (section_number,current_capacity,current_temperature,maximum_capacity,minimum_capacity,minimum_temperature,product_type_id,warehouse_id)
-		VALUES (?,?,?,?,?,?,?,?)`
-	sqlUpdateSection = `
-		UPDATE mercadofresco.sections 
-		SET section_number=?,current_capacity=?,current_temperature=?,maximum_capacity=?,minimum_capacity=?,
-		minimum_temperature=?,product_type_id=?, warehouse_id=? WHERE id=?`
-	sqlDeleteSection = `DELETE FROM mercadofresco.sections WHERE id=?`
+	SqlSelect        = `SELECT id,section_number,current_capacity,current_temperature,maximum_capacity,minimum_capacity,minimum_temperature,product_type_id,warehouse_id FROM mercadofresco.sections`
+	SqlSelectByID    = `SELECT id,section_number,current_capacity,current_temperature,maximum_capacity,minimum_capacity,minimum_temperature,product_type_id,warehouse_id FROM mercadofresco.sections WHERE id=?`
+	SqlCreateSection = `INSERT INTO mercadofresco.sections (section_number,current_capacity,current_temperature,maximum_capacity,minimum_capacity,minimum_temperature,product_type_id,warehouse_id) VALUES (?,?,?,?,?,?,?,?)`
+	SqlUpdateSection = `UPDATE mercadofresco.sections SET section_number=?,current_capacity=?,current_temperature=?,maximum_capacity=?,minimum_capacity=?,minimum_temperature=?,product_type_id=?, warehouse_id=? WHERE id=?`
+	SqlDeleteSection = `DELETE FROM mercadofresco.sections WHERE id=?`
 )
