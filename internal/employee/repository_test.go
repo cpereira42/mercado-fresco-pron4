@@ -2,6 +2,7 @@ package employee_test
 
 import (
 	"database/sql"
+	"database/sql/driver"
 	"fmt"
 	"regexp"
 	"testing"
@@ -11,8 +12,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var emply1DB = employee.Employee{1, "123", "Eduardo", "Araujo", 1}
-var emply2DB = employee.Employee{2, "1234", "Edu", "Araujo", 1}
+var (
+	emply1DB       = employee.Employee{1, "123", "Eduardo", "Araujo", 1}
+	emply2DB       = employee.Employee{2, "1234", "Edu", "Araujo", 1}
+	emply2DBUpdate = employee.Employee{2, "12345", "Eduu", "Araujo", 1}
+)
 
 func TestGetAll(t *testing.T) {
 	db, mock, err := sqlmock.New()
@@ -112,7 +116,7 @@ func TestGetByID(t *testing.T) {
 		assert.Equal(t, fmt.Errorf(employee.FAIL_TO_PREPARE_QUERY), err)
 	})
 
-	t.Run("if there is an error to find an employee in the GetByID, it should return an error", func(t *testing.T) {
+	t.Run("if there is an error to find an employee in the GetByID, it should return employee not found", func(t *testing.T) {
 		stmt := mock.ExpectPrepare(regexp.QuoteMeta(employee.GET_EMPLOYEE_BY_ID))
 		stmt.ExpectQuery().WithArgs(1).WillReturnError(fmt.Errorf(employee.EMPLOYEE_NOT_FOUND))
 
@@ -124,14 +128,13 @@ func TestGetByID(t *testing.T) {
 }
 
 func TestCreate(t *testing.T) {
-	db, mock, err := sqlmock.New()
-	assert.NoError(t, err)
-	defer db.Close()
-
-	// employees := []employee.Employee{emply1DB}
-	employeesRepo := employee.NewRepository(db)
 
 	t.Run("if Create is OK, it should return an employee", func(t *testing.T) {
+		db, mock, err := sqlmock.New()
+		assert.NoError(t, err)
+		defer db.Close()
+
+		employeesRepo := employee.NewRepository(db)
 		mock.ExpectExec(regexp.QuoteMeta(employee.CREATE_EMPLOYEE)).WithArgs(
 			emply2DB.CardNumberID,
 			emply2DB.FirstName,
@@ -149,6 +152,11 @@ func TestCreate(t *testing.T) {
 	})
 
 	t.Run("if there is an error to Exec in the Create, it should return an error", func(t *testing.T) {
+		db, mock, err := sqlmock.New()
+		assert.NoError(t, err)
+		defer db.Close()
+
+		employeesRepo := employee.NewRepository(db)
 		rows := sqlmock.NewRows([]string{
 			"ID",
 			"CardNumberID",
@@ -158,8 +166,59 @@ func TestCreate(t *testing.T) {
 		}).AddRow("", "", "", "", "")
 
 		mock.ExpectQuery(employee.CREATE_EMPLOYEE).WillReturnRows(rows)
-		_, err = employeesRepo.Create(emply2DB.CardNumberID, emply2DB.FirstName, emply2DB.LastName, 10)
+		_, err = employeesRepo.Create(emply2DB.CardNumberID, emply2DB.FirstName, emply2DB.LastName, emply2DB.WarehouseID)
 
 		assert.Error(t, err)
+	})
+	t.Run("if no rows affected in the Create, it should return an error", func(t *testing.T) {
+		db, mock, err := sqlmock.New()
+		assert.NoError(t, err)
+		defer db.Close()
+
+		mock.ExpectExec(regexp.QuoteMeta(employee.CREATE_EMPLOYEE)).WithArgs(
+			emply2DB.CardNumberID,
+			emply2DB.FirstName,
+			emply2DB.LastName,
+			emply2DB.WarehouseID,
+		).WillReturnResult(sqlmock.NewResult(0, 0))
+		employeesRepo := employee.NewRepository(db)
+		_, err = employeesRepo.Create(emply2DB.CardNumberID, emply2DB.FirstName, emply2DB.LastName, emply2DB.WarehouseID)
+		assert.NotNil(t, err)
+		assert.Equal(t, fmt.Errorf(employee.FAIL_TO_SAVE), err)
+	})
+}
+
+func TestUpdate(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	assert.NoError(t, err)
+	defer db.Close()
+	employeesRepo := employee.NewRepository(db)
+
+	t.Run("if Update is OK, it should return an employee", func(t *testing.T) {
+
+		mock.ExpectExec(regexp.QuoteMeta(employee.UPDATE_EMPLOYEE)).WithArgs(
+			emply2DBUpdate.CardNumberID,
+			emply2DBUpdate.FirstName,
+			emply2DBUpdate.LastName,
+			emply2DBUpdate.WarehouseID,
+			emply2DBUpdate.ID,
+		).WillReturnResult(driver.RowsAffected(1))
+
+		emp, err := employeesRepo.Update(emply2DBUpdate.ID, emply2DBUpdate.CardNumberID, emply2DBUpdate.FirstName, emply2DBUpdate.LastName, emply2DBUpdate.WarehouseID)
+
+		assert.NoError(t, err)
+
+		assert.Equal(t, emply2DBUpdate.CardNumberID, emp.CardNumberID)
+		assert.Equal(t, emply2DBUpdate.FirstName, emp.FirstName)
+	})
+	t.Run("if Update has an error, it should return an error", func(t *testing.T) {
+
+		mock.ExpectExec(regexp.QuoteMeta(employee.UPDATE_EMPLOYEE)).WillReturnError(fmt.Errorf(employee.FAIL_TO_UPDATE))
+
+		_, err := employeesRepo.Update(emply2DBUpdate.ID, emply2DBUpdate.CardNumberID, emply2DBUpdate.FirstName, emply2DBUpdate.LastName, emply2DBUpdate.WarehouseID)
+
+		// assert.Error(t, err)
+		assert.NotNil(t, err)
+		assert.Equal(t, fmt.Errorf(employee.FAIL_TO_UPDATE), err)
 	})
 }

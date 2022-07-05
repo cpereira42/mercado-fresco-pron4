@@ -1,7 +1,5 @@
 package employee
 
-import "fmt"
-
 type Service interface {
 	GetAll() ([]Employee, error)
 	GetByID(id int) (Employee, error)
@@ -31,7 +29,7 @@ func (s service) GetAll() ([]Employee, error) {
 func (s service) GetByID(id int) (Employee, error) {
 	employee, err := s.repository.GetByID(id)
 	if err != nil {
-		return Employee{}, fmt.Errorf("employee with id %d not found", id)
+		return Employee{}, err
 	}
 	return employee, nil
 }

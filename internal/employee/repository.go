@@ -92,10 +92,7 @@ func (r *repository) Create(cardNumberID, firstName, lastName string, warehouseI
 	stmt, err := r.db.Exec(CREATE_EMPLOYEE, cardNumberID, firstName, lastName,
 		warehouseID)
 	if err != nil {
-		if handleSQLError(err) != nil {
-			return Employee{}, handleSQLError(err)
-		}
-		return Employee{}, err
+		return Employee{}, handleSQLError(err)
 	}
 
 	RowsAffected, _ := stmt.RowsAffected()
@@ -103,16 +100,9 @@ func (r *repository) Create(cardNumberID, firstName, lastName string, warehouseI
 		return Employee{}, fmt.Errorf(FAIL_TO_SAVE)
 	}
 
-	lastID, err := stmt.LastInsertId()
-	if err != nil {
-		return Employee{}, err
-	}
+	lastID, _ := stmt.LastInsertId()
 
 	employee.ID = int(lastID)
-
-	if err != nil {
-		return Employee{}, err
-	}
 
 	return employee, nil
 }
@@ -123,17 +113,8 @@ func (r *repository) Update(id int, cardNumberID, firstName, lastName string, wa
 		warehouseID, id)
 
 	if err != nil {
-		if handleSQLError(err) != nil {
-			return Employee{}, handleSQLError(err)
-		}
-		return Employee{}, err
+		return Employee{}, handleSQLError(err)
 	}
-
-	// RowsAffected, _ := stmt.RowsAffected()
-
-	// if RowsAffected == 0 {
-	// 	return Employee{}, fmt.Errorf("fail to update")
-	// }
 
 	return employee, nil
 }

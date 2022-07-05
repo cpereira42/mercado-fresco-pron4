@@ -5,4 +5,5 @@ const (
 	EMPLOYEE_NOT_FOUND          = "employee not found"
 	EMPLOYEE_ALREADY_REGISTERED = "employee already registered"
 	FAIL_TO_SAVE                = "fail to save"
+	FAIL_TO_UPDATE              = "fail to update"
 )
