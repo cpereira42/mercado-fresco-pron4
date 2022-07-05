@@ -36,6 +36,8 @@ type RepositoryProductBatches interface {
 	ReadPBSectionTodo() ([]ProductBatchesResponse, error)
 	ReadPBSectionId(id int64) (ProductBatchesResponse, error)
 	GetByBatcheNumber(batch_number string) (bool, error)
+	SearchProductById(id int) error
+	SearchSectionId(id int64) error 
 }
 
 type ServicePB interface {

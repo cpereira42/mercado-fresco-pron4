@@ -1,44 +1,19 @@
 package section_test
 
-/*
 import (
 	"errors"
-	"fmt"
 	"testing"
 
 	"github.com/cpereira42/mercado-fresco-pron4/internal/section"
-	mocks "github.com/cpereira42/mercado-fresco-pron4/internal/section/mock"
-	"github.com/cpereira42/mercado-fresco-pron4/internal/warehouse"
-	mocksWareshouse "github.com/cpereira42/mercado-fresco-pron4/internal/warehouse/mocks"
+	mocksSection "github.com/cpereira42/mercado-fresco-pron4/internal/section/mocks"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
+	tmock "github.com/stretchr/testify/mock"
 )
 
-var sectionObject = section.Section{
-	Id:                 3,
-	SectionNumber:      "123",
-	CurrentTemperature: 1,
-	MinimumTemperature: 1,
-	CurrentCapacity:    1,
-	MinimumCapacity:    1,
-	MaximumCapacity:    1,
-	WarehouseId:        14,
-	ProductTypeId:      1,
-}
-var newSectionRequest = section.SectionRequestCreate{
-	SectionNumber:      "1",
-	CurrentTemperature: 1,
-	MinimumTemperature: 1,
-	CurrentCapacity:    1,
-	MinimumCapacity:    1,
-	MaximumCapacity:    1,
-	WarehouseId:        13,
-	ProductTypeId:      1,
-}
 var sectionList []section.Section = []section.Section{
 	{
 		Id:                 1,
-		SectionNumber:      "3",
+		SectionNumber:      3,
 		CurrentTemperature: 79845,
 		MinimumTemperature: 4,
 		CurrentCapacity:    135,
@@ -48,7 +23,7 @@ var sectionList []section.Section = []section.Section{
 		ProductTypeId:      456,
 	}, {
 		Id:                 2,
-		SectionNumber:      "313",
+		SectionNumber:      313,
 		CurrentTemperature: 745,
 		MinimumTemperature: 344,
 		CurrentCapacity:    1345,
@@ -57,273 +32,267 @@ var sectionList []section.Section = []section.Section{
 		WarehouseId:        13,
 		ProductTypeId:      43456,
 	},
-	sectionObject,
 }
+
+var sectionIntance section.Section = section.Section{
+	Id:                 3,
+	SectionNumber:      45,
+	CurrentTemperature: 56,
+	MinimumTemperature: 3464,
+	CurrentCapacity:    22433,
+	MinimumCapacity:    346,
+	MaximumCapacity:    566,
+	WarehouseId:        1,
+	ProductTypeId:      1,
+}
+
+var sectionIntanceCreate section.SectionRequestCreate = section.SectionRequestCreate{
+	SectionNumber:      45,
+	CurrentTemperature: 56,
+	MinimumTemperature: 3464,
+	CurrentCapacity:    22433,
+	MinimumCapacity:    346,
+	MaximumCapacity:    566,
+	WarehouseId:        1,
+	ProductTypeId:      1,
+}
+
+var sectionIntanceUpdate section.SectionRequestUpdate = section.SectionRequestUpdate{
+	SectionNumber:      45,
+	CurrentTemperature: 56,
+	MinimumTemperature: 3464,
+	CurrentCapacity:    22433,
+	MinimumCapacity:    346,
+	MaximumCapacity:    566,
+	WarehouseId:        1,
+	ProductTypeId:      1,
+}
+var sectionIntanceError section.Section = section.Section{}
 
 func TestServiceListarSectionAll(t *testing.T) {
 	t.Run("test de integração de repository e service, metodo ListarSectionAll, caso de sucesso", func(t *testing.T) {
-		mockRep := new(mocks.SectionRepository)
-		mockRep.On("ListarSectionAll").
-			Return(sectionList, nil).
-			Once()
-		service := section.NewService(mockRep)
-		obSectionList, err := service.ListarSectionAll()
+		mockRepository := new(mocksSection.Repository)
+		mockRepository.On("ListarSectionAll").Return(sectionList, nil).Once()
+		service := section.NewService(mockRepository)
+		objSectionList, err := service.ListarSectionAll()
 		assert.Nil(t, err)
-		assert.Equal(t, sectionList[0].SectionNumber, obSectionList[0].SectionNumber)
-		assert.True(t, len(obSectionList) > 0)
+		assert.True(t, len(objSectionList) > 0)
+		sectionNumberField := 313
+		assert.Equal(t, sectionNumberField, sectionList[1].SectionNumber)
 	})
 	t.Run("test de integração de repository e service, metodo ListarSectionAll, caso de error", func(t *testing.T) {
-		mockRep := new(mocks.SectionRepository)
-		listaSectionNil := []section.Section{}
-		errList := fmt.Errorf("não há sections registrado")
-		mockRep.On("ListarSectionAll").
-			Return(listaSectionNil, errList).
-			Once()
-		service := section.NewService(mockRep)
-		obSectionList, err := service.ListarSectionAll()
+		mockRepository := new(mocksSection.Repository)
+		expectErro := errors.New("sections not this registered")
+		mockRepository.On("ListarSectionAll").Return([]section.Section{}, expectErro).Once()
+		service := section.NewService(mockRepository)
+		objSectionList, err := service.ListarSectionAll()
 		assert.Error(t, err)
-		assert.Equal(t, errList, err)
-		assert.Equal(t, listaSectionNil, obSectionList)
-		assert.True(t, len(obSectionList) == 0)
+		assert.Equal(t, expectErro, err)
+		assert.ObjectsAreEqual([]section.Section{}, objSectionList)
 	})
 }
 
 func TestServiceListarSectionOne(t *testing.T) {
 	t.Run("test de integração de repository e service, metodo ListarSectionOne, caso de sucesso", func(t *testing.T) {
-		mockRep := new(mocks.SectionRepository)
-
-		mockRep.On("ListarSectionAll").Return(sectionList, nil).Once()
-		mockRep.On("ListarSectionOne", mock.AnythingOfType("int")).
-			Return(sectionObject, nil).
+		mockRepository := new(mocksSection.Repository)
+		mockRepository.On("ListarSectionOne", tmock.Anything).
+			Return(sectionIntance, nil).
 			Once()
-		service := section.NewService(mockRep)
-		obSectionOne, err := service.ListarSectionOne(1)
-		assert.Nil(t, err)
-		assert.ObjectsAreEqual(sectionObject, obSectionOne)
+
+		paramId := 1
+
+		service := section.NewService(mockRepository)
+		objSection, err := service.ListarSectionOne(int64(paramId))
+		assert.NoError(t, err)
+		assert.Equal(t, objSection.SectionNumber, sectionIntance.SectionNumber)
 	})
 	t.Run("test de integração de repository e service, metodo ListarSectionOne, caso de error", func(t *testing.T) {
-		mockRep := new(mocks.SectionRepository)
-		expecErr := fmt.Errorf("section.Section is not registered")
-		sectionNil := section.Section{}
-		mockRep.On("ListarSectionAll").
-			Return(sectionList, nil).
+		mockRepository := new(mocksSection.Repository)
+		mockRepository.On("ListarSectionOne", tmock.Anything).
+			Return(sectionIntanceError, section.ErrorNotFound).
 			Once()
-		mockRep.On("ListarSectionOne", mock.AnythingOfType("int")).
-			Return(sectionNil, expecErr).
-			Once()
-		service := section.NewService(mockRep)
-		obSectionOne, err := service.ListarSectionOne(3)
+
+		paramId := 2
+
+		service := section.NewService(mockRepository)
+		objSection, err := service.ListarSectionOne(int64(paramId))
 		assert.Error(t, err)
-		assert.ObjectsAreEqual(sectionNil, obSectionOne)
+		assert.Equal(t, section.ErrorNotFound, err)
+		assert.Equal(t, sectionIntanceError.SectionNumber, objSection.SectionNumber)
 	})
 }
 
 func TestServiceCreateSection(t *testing.T) {
 	t.Run("metodo CreateSection, caso de sucesso", func(t *testing.T) {
-		mockRep := new(mocks.SectionRepository)
-		mockRep.On("ListarSectionAll").Return(sectionList, nil).Once()
-		mockRep.On("CreateSection", mock.AnythingOfType("section.Section")).
-			Return(sectionObject, nil).
-			Once()
-		service := section.NewService(mockRep)
-		expSection, _ := service.CreateSection(newSectionRequest)
-		assert.Equal(t, sectionObject.SectionNumber, expSection.SectionNumber)
+		mockRepository := new(mocksSection.Repository)
+		mockRepository.On("CreateSection", tmock.Anything).Return(sectionIntance, nil).Once()
+		service := section.NewService(mockRepository)
+		newSection, err := service.CreateSection(sectionIntanceCreate)
+		assert.NoError(t, err)
+		assert.ObjectsAreEqual(sectionIntance, newSection)
 	})
-	t.Run("metodo CreateSection, caso de caso de error ao listar sections dentro do metodo CriateSection", func(t *testing.T) {
-		mockSecRep := new(mocks.SectionRepository)
-		mockWareRepo := new(mocksWareshouse.Repository)
-		expectErrorList := fmt.Errorf("não há sections registrados")
-
-		mockWareRepo.On("GetByID").Return(warehouse.Warehouse{}, errors.New("Warehouse not found")).Once()
-		mockSecRep.On("ListarSectionAll").Return([]section.Section{}, expectErrorList).Once()
-		mockSecRep.On("CreateSection",
-			mock.AnythingOfType("section.Section")).
-			Return(section.Section{}, expectErrorList).
+	t.Run("metodo CreateSection, warehouse_id invalid", func(t *testing.T) {
+		mockRepository := new(mocksSection.Repository)
+		mockRepository.On("CreateSection", tmock.Anything).
+			Return(sectionIntanceError, errors.New("warehouse_id is not registred ON warehouse")).
 			Once()
-		service := section.NewService(mockSecRep)
-		expSection, err := service.CreateSection(newSectionRequest)
+		service := section.NewService(mockRepository)
+		sectionIntanceCreate.WarehouseId = 90
+		newSection, err := service.CreateSection(sectionIntanceCreate)
 		assert.Error(t, err)
-		assert.Equal(t, expectErrorList, err)
-		assert.Equal(t, section.Section{}.SectionNumber, expSection.SectionNumber)
+		assert.ObjectsAreEqual(sectionIntanceError, newSection)
 	})
-	t.Run("metodo CreateSection, caso de caso de error ao criar um novo section", func(t *testing.T) {
-		mockRep := new(mocks.SectionRepository)
-		expectErrSectionCreate := fmt.Errorf("section invalid, section_number field must be unique")
-		mockRep.On("ListarSectionAll").Return(sectionList, nil).Once()
-		mockRep.On("CreateSection", mock.AnythingOfType("section.Section")).
-			Return(section.Section{}, expectErrSectionCreate).
+	t.Run("metodo CreateSection, product_type_id ivalid", func(t *testing.T) {
+		expectError := errors.New("product_type_id is not registred ON products_types")
+		mockRepository := new(mocksSection.Repository)
+		mockRepository.On("CreateSection", tmock.Anything).
+			Return(sectionIntanceError, expectError).
 			Once()
-		service := section.NewService(mockRep)
-
-		newSectionRequest.SectionNumber = "123" // injeta campo duplicado
-
-		expSection, err := service.CreateSection(newSectionRequest)
+		service := section.NewService(mockRepository)
+		sectionIntanceCreate.ProductTypeId = 91
+		newSection, err := service.CreateSection(sectionIntanceCreate)
 		assert.Error(t, err)
-		assert.Equal(t, expectErrSectionCreate, err)
-		assert.Equal(t, section.Section{}.SectionNumber, expSection.SectionNumber)
+		assert.ObjectsAreEqual(sectionIntanceError, newSection)
+	})
+	t.Run("metodo CreateSection, section_number duplicate", func(t *testing.T) {
+		expectError := errors.New("section_number_UNIQUE is Unique, and 151 already registred")
+		mockRepository := new(mocksSection.Repository)
+		mockRepository.On("CreateSection", tmock.Anything).
+			Return(sectionIntanceError, expectError).
+			Once()
+		service := section.NewService(mockRepository)
+		sectionIntanceCreate.SectionNumber = 151
+		newSection, err := service.CreateSection(sectionIntanceCreate)
+		assert.Error(t, err)
+		assert.Equal(t, sectionIntanceError.SectionNumber, newSection.SectionNumber)
 	})
 }
 
 func TestServiceUpdateSection(t *testing.T) {
 	t.Run("test servoce no metodo UpdateSection, caso de sucesso", func(t *testing.T) {
-		mockRep := new(mocks.SectionRepository)
-		updateSection := section.SectionRequestUpdate{
-			SectionNumber:      "30",
-			CurrentTemperature: 3,
-			MinimumTemperature: 1,
-			CurrentCapacity:    1,
-			MinimumCapacity:    1,
-			MaximumCapacity:    1,
-			WarehouseId:        1,
-			ProductTypeId:      2,
-		}
-		mockRep.On("ListarSectionOne", mock.AnythingOfType("int")).
-			Return(sectionObject, nil).Once()
-		mockRep.On("ListarSectionAll").
-			Return(sectionList, nil).
+		mockRepository := new(mocksSection.Repository)
+		mockRepository.On("ListarSectionOne", tmock.AnythingOfType("int64")).
+			Return(sectionList[1], nil).
 			Once()
-		mockRep.On("UpdateSection",
-			mock.AnythingOfType("int"),
-			mock.Anything).
-			Return(sectionObject, nil).
+		mockRepository.On("UpdateSection",
+			tmock.AnythingOfType("section.Section"),
+		).
+			Return(sectionList[1], nil).
 			Once()
+		service := section.NewService(mockRepository)
 
-		service := section.NewService(mockRep)
-
-		obUpdateSection, err := service.UpdateSection(3, updateSection)
-
+		sectionId := int64(1)
+		sectionResult, err := service.UpdateSection(sectionId, sectionIntanceUpdate)
 		assert.Nil(t, err)
-
-		assert.ObjectsAreEqual(sectionObject, obUpdateSection)
+		assert.Equal(t, sectionIntanceUpdate.SectionNumber, sectionResult.SectionNumber)
 	})
 	t.Run("test servoce no metodo UpdateSection, caso de error section_number duplicado", func(t *testing.T) {
-		mockRep := new(mocks.SectionRepository)
-		updateSection := section.SectionRequestUpdate{
-			SectionNumber:      "313",
-			CurrentTemperature: 79845,
-			MinimumTemperature: 4,
-			CurrentCapacity:    135,
-			MinimumCapacity:    23,
-			MaximumCapacity:    456,
-			WarehouseId:        78,
-			ProductTypeId:      456,
-		}
-		expectUpdateSection := section.Section{}
-		expectedError := fmt.Errorf("this section_number %v is already registered", updateSection.SectionNumber)
-		notFoundErr := fmt.Errorf("sections not found")
+		mockRepository := new(mocksSection.Repository)
+		expectError := errors.New("section_number_UNIQUE is Unique, and 3 already registred")
+		mockRepository.On("ListarSectionOne", tmock.AnythingOfType("int64")).
+			Return(sectionIntance, nil).
+			Once()
+		mockRepository.On("UpdateSection", tmock.AnythingOfType("section.Section")).
+			Return(sectionIntanceError, expectError).
+			Once()
+		service := section.NewService(mockRepository)
 
-		mockRep.On("ListarSectionOne", mock.AnythingOfType("int")).
-			Return(expectUpdateSection, notFoundErr).Once()
-
-		mockRep.On("ListarSectionAll").
-			Return(sectionList, nil).Once()
-		mockRep.On("UpdateSection",
-			mock.AnythingOfType("int"),
-			mock.AnythingOfType("section.Section")).
-			Return(expectUpdateSection, expectedError).Once()
-		service := section.NewService(mockRep)
-		obUpdateSectionConflict, errConflict := service.UpdateSection(1, updateSection)
-		assert.Equal(t, notFoundErr, errConflict)
-		assert.ObjectsAreEqual(expectUpdateSection, obUpdateSectionConflict)
+		sectionId := int64(2)
+		sectionResult, err := service.UpdateSection(sectionId, sectionIntanceUpdate)
+		assert.Error(t, err)
+		assert.Equal(t, expectError, err)
+		assert.Equal(t, sectionIntanceError.SectionNumber, sectionResult.SectionNumber)
 	})
-	t.Run("test service no metodo UpdateSection, caso de error, lista de section retorna vazia dentro do metodo update", func(t *testing.T) {
-		var sectionList []section.Section = []section.Section{}
-		mockRep := new(mocks.SectionRepository)
-		updateSection := section.SectionRequestUpdate{
-			SectionNumber:      "313",
-			CurrentTemperature: 79845,
-			MinimumTemperature: 4,
-			CurrentCapacity:    135,
-			MinimumCapacity:    23,
-			MaximumCapacity:    456,
-			WarehouseId:        78,
-			ProductTypeId:      456,
-		}
-		expectUpdateSection := section.Section{}
-		expectedError := fmt.Errorf("não há sections registrado")
-		updateErr := fmt.Errorf("sections not found")
-		mockRep.On("ListarSectionOne", mock.AnythingOfType("int")).
-			Return(expectUpdateSection, fmt.Errorf("sections not found")).Once()
-		mockRep.On("ListarSectionAll").
-			Return(sectionList, expectedError)
-		mockRep.On("UpdateSection",
-			mock.AnythingOfType("int"),
-			mock.AnythingOfType("section.Section")).
-			Return(expectUpdateSection, expectedError)
+	t.Run("test service no metodo UpdateSection, caso de error, warehouse_id is not registred", func(t *testing.T) {
+		mockRepository := new(mocksSection.Repository)
+		expectError := errors.New("warehouse_id is not registred ON warehouse")
+		mockRepository.On("ListarSectionOne", tmock.AnythingOfType("int64")).
+			Return(sectionIntance, nil).
+			Once()
+		mockRepository.On("UpdateSection", tmock.AnythingOfType("section.Section")).
+			Return(sectionIntanceError, expectError).
+			Once()
+		service := section.NewService(mockRepository)
 
-		service := section.NewService(mockRep)
-
-		listNil, errListNil := service.ListarSectionAll()
-
-		assert.Equal(t, expectedError, errListNil)
-
-		assert.ObjectsAreEqual(sectionList, listNil)
-
-		obUpdateSectionConflict, errConflict := service.UpdateSection(1, updateSection)
-
-		assert.Equal(t, updateErr, errConflict)
-
-		assert.ObjectsAreEqual(expectUpdateSection, obUpdateSectionConflict)
+		sectionId := int64(2)
+		sectionResult, err := service.UpdateSection(sectionId, sectionIntanceUpdate)
+		assert.Error(t, err)
+		assert.Equal(t, expectError, err)
+		assert.Equal(t, sectionIntanceError.SectionNumber, sectionResult.SectionNumber)
 	})
-	t.Run("test service no metodo UpdateSection, caso de error, section não encontrado", func(t *testing.T) {
-		mockRep := new(mocks.SectionRepository)
+	t.Run("test service no metodo UpdateSection, caso de error, product_type_id is not registred", func(t *testing.T) {
+		mockRepository := new(mocksSection.Repository)
+		expectError := errors.New("product_type_id is not registred ON products_types")
+		mockRepository.On("ListarSectionOne", tmock.AnythingOfType("int64")).
+			Return(sectionIntance, nil).
+			Once()
+		mockRepository.On("UpdateSection", tmock.AnythingOfType("section.Section")).
+			Return(sectionIntanceError, expectError).
+			Once()
+		service := section.NewService(mockRepository)
 
-		updateSection := section.SectionRequestUpdate{
-			SectionNumber:      "313",
-			CurrentTemperature: 79845,
-			MinimumTemperature: 4,
-			CurrentCapacity:    135,
-			MinimumCapacity:    23,
-			MaximumCapacity:    456,
-			WarehouseId:        78,
-			ProductTypeId:      456,
-		}
-		expectUpdateSection := section.Section{}
-
-		mockRep.On("ListarSectionOne", mock.AnythingOfType("int")).
-			Return(expectUpdateSection, fmt.Errorf("não há sections registrado")).Once()
-
-			expectError := fmt.Errorf("unable to update section")
-
-		mockRep.On("ListarSectionAll").
-			Return(sectionList, nil)
-
-		mockRep.On("UpdateSection",
-			mock.AnythingOfType("int"),
-			mock.AnythingOfType("section.Section")).
-			Return(expectUpdateSection, expectError)
-		service := section.NewService(mockRep)
-
-		obUpdateSectionNotFound, errNotFound := service.UpdateSection(5, updateSection)
-
-		assert.ObjectsAreEqual(expectUpdateSection, obUpdateSectionNotFound)
-
-		assert.Error(t, errNotFound)
+		sectionId := int64(2)
+		sectionResult, err := service.UpdateSection(sectionId, sectionIntanceUpdate)
+		assert.Error(t, err)
+		assert.Equal(t, expectError, err)
+		assert.Equal(t, sectionIntanceError.SectionNumber, sectionResult.SectionNumber)
 	})
 }
 
 func TestServiceDeleteSection(t *testing.T) {
-	t.Run("test de integração de repository e service, metodo ListarSectionOne, caso de sucesso", func(t *testing.T) {
-		mockRep := new(mocks.SectionRepository)
-		mockRep.On("ListarSectionAll").Return(sectionList, nil).Once()
-		mockRep.On("DeleteSection", mock.AnythingOfType("int")).
+	t.Run("test de integração de repository e service, metodo DeleteSection, caso de sucesso", func(t *testing.T) {
+		mockRepository := new(mocksSection.Repository)
+		mockRepository.On("ListarSectionOne", tmock.Anything).
+			Return(sectionIntance, nil).
+			Once()
+		mockRepository.On("DeleteSection", tmock.Anything).
 			Return(nil).
 			Once()
-		service := section.NewService(mockRep)
-		err := service.DeleteSection(3)
-		assert.Nil(t, err)
+		service := section.NewService(mockRepository)
+		sectionDeleteId := 1
+		err := service.DeleteSection(int64(sectionDeleteId))
+		assert.NoError(t, err)
 	})
-	t.Run("test de integração de repository e service, metodo ListarSectionOne, caso de error", func(t *testing.T) {
-		mockRep := new(mocks.SectionRepository)
-		errSection := fmt.Errorf("section not Found")
-		mockRep.On("ListarSectionAll").Return(sectionList, nil).Once()
-		mockRep.On("DeleteSection", mock.AnythingOfType("int")).
-			Return(errSection).
+	t.Run("test de integração de repository e service, metodo DeleteSection, caso de error no db", func(t *testing.T) {
+		mockRepository := new(mocksSection.Repository)
+		mockRepository.On("ListarSectionOne", tmock.Anything).
+			Return(sectionIntance, nil).
 			Once()
-		service := section.NewService(mockRep)
-		err := service.DeleteSection(20)
+		mockRepository.On("DeleteSection", tmock.Anything).
+			Return(section.ErrorKeyTableSectionId).
+			Once()
+		service := section.NewService(mockRepository)
+		sectionDeleteId := 1
+		err := service.DeleteSection(int64(sectionDeleteId))
 		assert.Error(t, err)
-		assert.Equal(t, errSection, err)
+		assert.Equal(t, section.ErrorKeyTableSectionId, err)
+	})
+	t.Run("test de integração de repository e service, metodo DeleteSection, caso de error not found", func(t *testing.T) {
+		mockRepository := new(mocksSection.Repository)
+		mockRepository.On("ListarSectionOne", tmock.Anything).
+			Return(sectionIntance, nil).
+			Once()
+		mockRepository.On("DeleteSection", tmock.Anything).
+			Return(section.ErrorNotFound).
+			Once()
+		service := section.NewService(mockRepository)
+		sectionDeleteId := 10
+		err := service.DeleteSection(int64(sectionDeleteId))
+		assert.Error(t, err)
+		assert.Equal(t, section.ErrorNotFound, err)
+	})
+	t.Run("test de integração de repository e service, metodo DeleteSection, erro in list one section", func(t *testing.T) {
+		mockRepository := new(mocksSection.Repository)
+		mockRepository.On("ListarSectionOne", tmock.Anything).
+			Return(sectionIntanceError, section.ErrorNotFound).
+			Once()
+		mockRepository.On("DeleteSection", tmock.Anything).
+			Return(section.ErrorNotFound).
+			Once()
+		service := section.NewService(mockRepository)
+		sectionDeleteId := 10
+		err := service.DeleteSection(int64(sectionDeleteId))
+		assert.Error(t, err)
+		assert.Equal(t, section.ErrorNotFound, err)
 	})
 }
-*/

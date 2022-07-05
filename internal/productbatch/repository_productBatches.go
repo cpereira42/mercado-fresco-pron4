@@ -9,20 +9,6 @@ import (
 	"github.com/cpereira42/mercado-fresco-pron4/pkg/store"
 )
 
-const (
-	sqlrelatorioTodo = `SELECT s.id AS 'section_id', s.section_number AS 'section_number', count(*) AS 'products_count'
-		FROM mercadofresco.products_batches as pbs
-		INNER JOIN mercadofresco.sections AS s ON s.id = pbs.section_id 
-		INNER JOIN mercadofresco.products AS pcts ON pbs.product_id = pcts.id
-		GROUP BY s.id`
-
-	sqlrelatorioSectioId = `SELECT s.id as 'section_id', s.section_number, count(*) as 'products_count'
-		from mercadofresco.products_batches as pbs
-		INNER JOIN mercadofresco.sections as s on s.id = pbs.section_id 
-		INNER JOIN mercadofresco.products as pcts on pbs.product_id = pcts.id
-		WHERE s.id=?`
-)
-
 type repositoryProductBatches struct {
 	db *sql.DB
 }
@@ -32,17 +18,7 @@ func NewRepositoryProductBatches(conn *sql.DB) RepositoryProductBatches {
 }
 
 func (repo *repositoryProductBatches) CreatePB(object ProductBatches) (ProductBatches, error) {
-	if err := repo.SearchProductById(object.ProductId); err != nil {
-		return object, err
-	}
-	if err := repo.SearchSectionId(int64(object.SectionId)); err != nil {
-		return object, err
-	}
-
-	query := `insert into mercadofresco.products_batches (batch_number,current_quantity
-		,current_temperature,due_date,initial_quantity,manufacturing_date,manufacturing_hour,minimum_temperature,product_id,section_id)
-		values(?,?,?,?,?,?,?,?,?,?)`
-	res, err := repo.db.Exec(query,
+	res, err := repo.db.Exec(sqlCreatePB,
 		&object.BatchNumber,
 		&object.CurrentQuantity,
 		&object.CurrentTemperature,
@@ -133,8 +109,7 @@ func (repo *repositoryProductBatches) SearchProductById(id int) error {
 }
 
 func (repo *repositoryProductBatches) GetByBatcheNumber(batch_number string) (bool, error) {
-	query := `SELECT batch_number FROM mercadofresco.products_batches WHERE batch_number=?`
-	rows, err := repo.db.Query(query, batch_number)
+	rows, err := repo.db.Query(sqlBatcheNumber, batch_number)
 	if err != nil {
 		return false, err
 	}
