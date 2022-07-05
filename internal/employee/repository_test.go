@@ -222,3 +222,47 @@ func TestUpdate(t *testing.T) {
 		assert.Equal(t, fmt.Errorf(employee.FAIL_TO_UPDATE), err)
 	})
 }
+
+func TestDelete(t *testing.T) {
+	t.Run("if Delete is OK, it should not return error", func(t *testing.T) {
+		db, mock, err := sqlmock.New()
+		assert.NoError(t, err)
+		defer db.Close()
+		employeesRepo := employee.NewRepository(db)
+
+		mock.ExpectExec(regexp.QuoteMeta(employee.DELETE_EMPLOYEE)).WithArgs(emply1DB.ID).WillReturnResult(driver.RowsAffected(1))
+
+		err = employeesRepo.Delete(emply1DB.ID)
+
+		assert.NoError(t, err)
+		assert.Nil(t, err)
+	})
+	t.Run("if there is an error en the exec of Delete, it should return an error", func(t *testing.T) {
+		db, mock, err := sqlmock.New()
+		assert.NoError(t, err)
+		defer db.Close()
+
+		employeesRepo := employee.NewRepository(db)
+		mock.ExpectExec(regexp.QuoteMeta(employee.DELETE_EMPLOYEE)).WillReturnError(fmt.Errorf("error"))
+
+		err = employeesRepo.Delete(emply2DB.ID)
+
+		assert.Error(t, err)
+
+		assert.NotNil(t, err)
+	})
+	t.Run("if there is no rows affected in Delete, it should return an error", func(t *testing.T) {
+		db, mock, err := sqlmock.New()
+		assert.NoError(t, err)
+		defer db.Close()
+
+		employeesRepo := employee.NewRepository(db)
+		mock.ExpectExec(regexp.QuoteMeta(employee.DELETE_EMPLOYEE)).WillReturnResult(driver.ResultNoRows)
+
+		err = employeesRepo.Delete(emply2DB.ID)
+
+		assert.Error(t, err)
+
+		assert.NotNil(t, err)
+	})
+}

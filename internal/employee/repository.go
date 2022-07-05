@@ -3,7 +3,8 @@ package employee
 import (
 	"database/sql"
 	"fmt"
-	"strings"
+
+	"github.com/cpereira42/mercado-fresco-pron4/pkg/util"
 )
 
 type Repository interface {
@@ -12,22 +13,6 @@ type Repository interface {
 	Create(cardNumberID, firstName, lastName string, warehouseID int) (Employee, error)
 	Update(id int, cardNumberID, firstName, lastName string, warehouseID int) (Employee, error)
 	Delete(id int) error
-}
-
-func handleSQLError(sqlError error) error {
-	switch {
-	case strings.Contains(sqlError.Error(), "no rows in result set"):
-		return fmt.Errorf("data not found")
-	case strings.Contains(sqlError.Error(), "Duplicate entry"):
-		err := strings.Split(sqlError.Error(), "'")
-		msg := fmt.Sprint(err[3], " is Unique, and ", err[1], " already registered")
-		return fmt.Errorf(msg)
-	case strings.Contains(sqlError.Error(), "Cannot add"):
-		err := strings.Split(sqlError.Error(), "`")
-		msg := fmt.Sprint(err[7], " is not registered on ", err[9])
-		return fmt.Errorf(msg)
-	}
-	return sqlError
 }
 
 type repository struct {
@@ -92,7 +77,7 @@ func (r *repository) Create(cardNumberID, firstName, lastName string, warehouseI
 	stmt, err := r.db.Exec(CREATE_EMPLOYEE, cardNumberID, firstName, lastName,
 		warehouseID)
 	if err != nil {
-		return Employee{}, handleSQLError(err)
+		return Employee{}, util.CheckError(err)
 	}
 
 	RowsAffected, _ := stmt.RowsAffected()
@@ -113,7 +98,7 @@ func (r *repository) Update(id int, cardNumberID, firstName, lastName string, wa
 		warehouseID, id)
 
 	if err != nil {
-		return Employee{}, handleSQLError(err)
+		return Employee{}, util.CheckError(err)
 	}
 
 	return employee, nil
@@ -122,7 +107,7 @@ func (r *repository) Update(id int, cardNumberID, firstName, lastName string, wa
 func (r *repository) Delete(id int) error {
 	stmt, err := r.db.Exec(DELETE_EMPLOYEE, id)
 	if err != nil {
-		return err
+		return util.CheckError(err)
 	}
 	RowsAffected, _ := stmt.RowsAffected()
 	if RowsAffected == 0 {
