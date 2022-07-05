@@ -14,6 +14,7 @@ import (
 	"github.com/cpereira42/mercado-fresco-pron4/cmd/server/handler"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/buyer"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/employee"
+	"github.com/cpereira42/mercado-fresco-pron4/internal/locality"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/products"
 
 	"github.com/cpereira42/mercado-fresco-pron4/internal/seller"
@@ -56,10 +57,10 @@ func main() {
 	sectionController := handler.NewSectionController(serviceSection, servicePB)
 
 	// dbSeller := store.New(store.FileType, "../mercado-fresco-pron4/internal/repositories/sellers.json")
-	repoSeller := seller.NewRepositorySeller(Conn)
+	repoSeller := seller.NewRepositorySeller(conn)
 	serviceSeller := seller.NewService(repoSeller)
 
-	repoLocality := locality.NewRepositoryLocality(Conn)
+	repoLocality := locality.NewRepositoryLocality(conn)
 	serviceLocality := locality.NewService(repoLocality)
 	l := handler.NewLocality(serviceLocality)
 
