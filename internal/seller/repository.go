@@ -3,6 +3,8 @@ package seller
 import (
 	"database/sql"
 	"fmt"
+
+	"github.com/cpereira42/mercado-fresco-pron4/pkg/util"
 )
 
 type RepositorySeller interface {
@@ -11,7 +13,6 @@ type RepositorySeller interface {
 	Create(cid, company, address, telephone string, localityId int) (Seller, error)
 	Update(id int, cid, company, adress, telephone string, localityId int) (Seller, error)
 	Delete(id int) error
-	CheckLocality(id int) (bool, error)
 }
 
 type repositorySeller struct {
@@ -46,7 +47,8 @@ func (r *repositorySeller) Create(cid, company, address, telephone string, local
 		localityId,
 	)
 	if err != nil {
-		return Seller{}, err
+		handledError := util.CheckError(err)
+		return Seller{}, handledError
 	}
 	lastID, err := rows.LastInsertId()
 	if err != nil {
@@ -129,7 +131,8 @@ func (r *repositorySeller) Update(id int, cid, company, address, telephone strin
 		localityId,
 		id)
 	if err != nil {
-		return updatedSeller, err
+		handledError := util.CheckError(err)
+		return updatedSeller, handledError
 	}
 
 	totLines, err := rows.RowsAffected()
@@ -162,29 +165,12 @@ func (r *repositorySeller) Delete(id int) error {
 	return nil
 }
 
-func (r *repositorySeller) CheckLocality(id int) (bool, error) {
-
-	type Locality struct {
-		Id           int
-		LocalityName string
-		ProvinceId   int
-	}
-
-	stmt, err := r.db.Prepare("SELECT * FROM localities WHERE id = ?")
-	if err != nil {
-		return false, err
-	}
-	defer stmt.Close()
-
-	locality := Locality{}
-
-	err = stmt.QueryRow(id).Scan(
-		&locality.Id,
-		&locality.LocalityName,
-		&locality.ProvinceId,
-	)
-	if err != nil {
-		return false, fmt.Errorf("Locality %d not found", id)
-	}
-	return true, nil
-}
+// func handleSQLError(sqlError error) error {
+// 	switch {
+// 	case strings.Contains(sqlError.Error(), "Cannot add or update a child row"):
+// 		return fmt.Errorf("Locality id not found")
+// 	case strings.Contains(sqlError.Error(), "Duplicate entry"):
+// 		return fmt.Errorf("Cid already registered")
+// 	}
+// 	return nil
+// }
