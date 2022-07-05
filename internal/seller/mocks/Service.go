@@ -12,27 +12,6 @@ type Service struct {
 	mock.Mock
 }
 
-// CheckCid provides a mock function with given fields: cid
-func (_m *Service) CheckCid(cid string) (bool, error) {
-	ret := _m.Called(cid)
-
-	var r0 bool
-	if rf, ok := ret.Get(0).(func(string) bool); ok {
-		r0 = rf(cid)
-	} else {
-		r0 = ret.Get(0).(bool)
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(cid)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // Create provides a mock function with given fields: cid, company, address, telephone, localityId
 func (_m *Service) Create(cid string, company string, address string, telephone string, localityId int) (seller.Seller, error) {
 	ret := _m.Called(cid, company, address, telephone, localityId)
