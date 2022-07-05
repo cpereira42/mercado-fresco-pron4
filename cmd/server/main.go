@@ -59,8 +59,7 @@ func main() {
 	repoSeller := seller.NewRepositorySeller(dbSeller)
 	serviceSeller := seller.NewService(repoSeller)
 
-	dbEmployees := store.New(store.FileType, "./internal/repositories/employees.json")
-	repositoryEmployees := employee.NewRepository(dbEmployees)
+	repositoryEmployees := employee.NewRepository(conn)
 	serviceEmployees := employee.NewService(repositoryEmployees)
 	handlerEmployees := handler.NewEmployee(serviceEmployees)
 
