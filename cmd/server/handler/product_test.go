@@ -1,7 +1,6 @@
 package handler_test
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -11,6 +10,7 @@ import (
 	"github.com/cpereira42/mercado-fresco-pron4/cmd/server/handler"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/products"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/products/mocks"
+	"github.com/cpereira42/mercado-fresco-pron4/pkg/util"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
@@ -84,11 +84,11 @@ var prodNew = products.RequestProductsCreate{
 	SellerId:                       9,
 }
 
-func createRequestTest(method string, url string, body string) (*http.Request, *httptest.ResponseRecorder) {
+/*func createRequestTest(method string, url string, body string) (*http.Request, *httptest.ResponseRecorder) {
 	req := httptest.NewRequest(method, url, bytes.NewBuffer([]byte(body)))
 	req.Header.Add("Content-Type", "application/json")
 	return req, httptest.NewRecorder()
-}
+}*/
 
 func createServer(serv *mocks.Service, method string, url string, body string) *httptest.ResponseRecorder {
 	p := handler.NewProduct(serv)
@@ -100,7 +100,7 @@ func createServer(serv *mocks.Service, method string, url string, body string) *
 	pr.POST("/", p.Create())
 	pr.PUT("/:id", p.Update())
 	pr.PATCH("/:id", p.Update())
-	req, rr := createRequestTest(method, url, body)
+	req, rr := util.CreateRequestTest(method, url, body)
 	r.ServeHTTP(rr, req)
 	return rr
 }

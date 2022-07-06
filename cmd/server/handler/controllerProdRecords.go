@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/cpereira42/mercado-fresco-pron4/internal/productsRecords"
@@ -43,17 +42,6 @@ func (c *ProductRecords) GetId() gin.HandlerFunc {
 	}
 }
 
-func (c *ProductRecords) GetAll() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		p, err := c.service.GetAllRecords()
-		if err != nil {
-			ctx.JSON(404, web.NewResponse(404, nil, err.Error()))
-			return
-		}
-		ctx.JSON(200, web.NewResponse(200, p, ""))
-	}
-}
-
 func (c *ProductRecords) Create() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var request productsRecords.RequestProductRecordsCreate
@@ -62,8 +50,6 @@ func (c *ProductRecords) Create() gin.HandlerFunc {
 		}
 		p, err := c.service.Create(request)
 		if err != nil {
-			fmt.Println(err)
-
 			if err.Error() == "Product not found" {
 				ctx.JSON(409, web.NewResponse(409, nil, err.Error()))
 			} else {
