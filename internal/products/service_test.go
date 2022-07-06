@@ -4,15 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	//"github.com/cpereira42/mercado-fresco-pron4/internal/employee/mocks"
-
-	//"github.com/meliBootcamp/go-web/aula03/ex01a/internal/products/mocks"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/products"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/products/mocks"
-	"github.com/cpereira42/mercado-fresco-pron4/internal/seller"
-	mockSeller "github.com/cpereira42/mercado-fresco-pron4/internal/seller/mocks"
 	"github.com/stretchr/testify/assert"
-	//products "github.com/meliBootcamp/go-web/aula03/ex01a/internal/products/repository"
 )
 
 var lastId = 3
@@ -106,7 +100,7 @@ var prodUp = products.RequestProductsUpdate{
 	ProductTypeId: 8,
 	SellerId:      9}
 
-var repoSeller = &mockSeller.RepositorySeller{}
+//var repoSeller = &mockSeller.RepositorySeller{}
 
 func Test_RepositoryFindAll(t *testing.T) {
 
@@ -233,7 +227,7 @@ func Test_RepositoryCreate(t *testing.T) {
 
 	t.Run("Create Ok", func(t *testing.T) {
 		repo := &mocks.Repository{}
-		repoSeller.On("GetId", prodNew.SellerId).Return(seller.Seller{}, nil)
+		//repoSeller.On("GetId", prodNew.SellerId).Return(seller.Seller{}, nil)
 		repo.On("CheckCode", 0, prodNew.ProductCode).Return(nil)
 		repo.On("GetProductsTypes", prodNew.ProductTypeId).Return("TV", nil)
 		repo.On("Create", prodNew).Return(prod4, nil)
@@ -247,7 +241,7 @@ func Test_RepositoryCreate(t *testing.T) {
 
 	t.Run("Create Fail to Save ", func(t *testing.T) {
 		repo := &mocks.Repository{}
-		repoSeller.On("GetId", prodNew.SellerId).Return(seller.Seller{}, nil)
+		//repoSeller.On("GetId", prodNew.SellerId).Return(seller.Seller{}, nil)
 		repo.On("CheckCode", 0, prodNew.ProductCode).Return(nil)
 		repo.On("GetProductsTypes", prodNew.ProductTypeId).Return("TV", nil)
 
