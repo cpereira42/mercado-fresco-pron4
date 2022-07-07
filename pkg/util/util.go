@@ -1,7 +1,10 @@
 package util
 
 import (
+	"bytes"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"strings"
 	"time"
 )
@@ -32,4 +35,10 @@ func GetCurrentDateTime() string {
 		currentTime.Second(),
 		100,
 		time.Local).Format("2006-01-02 15:04:05")
+}
+
+func CreateRequestTest(method string, url string, body string) (*http.Request, *httptest.ResponseRecorder) {
+	req := httptest.NewRequest(method, url, bytes.NewBuffer([]byte(body)))
+	req.Header.Add("Content-Type", "application/json")
+	return req, httptest.NewRecorder()
 }
