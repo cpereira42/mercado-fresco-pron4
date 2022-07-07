@@ -79,11 +79,12 @@ func Test_RepositoryIDRecordsProducts(t *testing.T) {
 		serv := &mocks.Service{}
 		serv.On("GetAllRecords").Return(produtos, fmt.Errorf("Invalid ID"))
 		rr := createServerRecordsProducts(serv, http.MethodGet, "/api/v1/products/reportRecords/", "")
-		assert.Equal(t, 404, rr.Code)
+		assert.Equal(t, http.StatusNotFound, rr.Code)
 		err := json.Unmarshal(rr.Body.Bytes(), &objProductsRecords)
 		assert.Equal(t, produtos, objProductsRecords.Data)
 		assert.Nil(t, err)
 		assert.Equal(t, "Invalid ID", objProductsRecords.Error)
+		serv.AssertExpectations(t)
 	})
 
 	t.Run("Get All OK", func(t *testing.T) {
@@ -91,11 +92,12 @@ func Test_RepositoryIDRecordsProducts(t *testing.T) {
 		serv := &mocks.Service{}
 		serv.On("GetAllRecords").Return(produtos, nil)
 		rr := createServerRecordsProducts(serv, http.MethodGet, "/api/v1/products/reportRecords/", "")
-		assert.Equal(t, 200, rr.Code)
+		assert.Equal(t, http.StatusOK, rr.Code)
 		err := json.Unmarshal(rr.Body.Bytes(), &objProductsRecords)
 		assert.Equal(t, produtos, objProductsRecords.Data)
 		assert.Nil(t, err)
 		assert.True(t, len(objProductsRecords.Data) > 0)
+		serv.AssertExpectations(t)
 	})
 
 	t.Run("Get ID Not Found", func(t *testing.T) {
@@ -103,24 +105,25 @@ func Test_RepositoryIDRecordsProducts(t *testing.T) {
 		produto := productsRecords.ReturnProductRecords{}
 		serv.On("GetIdRecords", 5).Return(produto, fmt.Errorf("Not Found"))
 		rr := createServerRecordsProducts(serv, http.MethodGet, "/api/v1/products/reportRecords/?id=5", "")
-		assert.Equal(t, 404, rr.Code)
+		assert.Equal(t, http.StatusNotFound, rr.Code)
 		err := json.Unmarshal(rr.Body.Bytes(), &objProductsRecord)
 		assert.Equal(t, produto, objProductsRecord.Data)
 		assert.Nil(t, err)
 		assert.Equal(t, "Not Found", objProductsRecord.Error)
+		serv.AssertExpectations(t)
 
 	})
 
 	t.Run("Get ID A", func(t *testing.T) {
 		serv := &mocks.Service{}
 		produto := productsRecords.ReturnProductRecords{}
-		serv.On("GetIdRecords", "A").Return(produto, fmt.Errorf("Invalid ID"))
 		rr := createServerRecordsProducts(serv, http.MethodGet, "/api/v1/products/reportRecords/?id=A", "")
-		assert.Equal(t, 404, rr.Code)
+		assert.Equal(t, http.StatusNotFound, rr.Code)
 		err := json.Unmarshal(rr.Body.Bytes(), &objProductsRecord)
 
 		assert.Equal(t, produto, objProductsRecord.Data)
 		assert.Nil(t, err)
+		serv.AssertExpectations(t)
 
 	})
 
@@ -128,11 +131,12 @@ func Test_RepositoryIDRecordsProducts(t *testing.T) {
 		serv := &mocks.Service{}
 		serv.On("GetIdRecords", 6).Return(prod2Records, nil)
 		rr := createServerRecordsProducts(serv, http.MethodGet, "/api/v1/products/reportRecords/?id=6", "")
-		assert.Equal(t, 200, rr.Code)
+		assert.Equal(t, http.StatusOK, rr.Code)
 		err := json.Unmarshal(rr.Body.Bytes(), &objProductsRecord)
 
 		assert.Equal(t, prod2Records, objProductsRecord.Data)
 		assert.Nil(t, err)
+		serv.AssertExpectations(t)
 
 	})
 
@@ -140,27 +144,27 @@ func Test_RepositoryIDRecordsProducts(t *testing.T) {
 
 func Test_RepositoryCreateRecordsProducts(t *testing.T) {
 	t.Run("Create Fail less fields", func(t *testing.T) {
-
 		serv := &mocks.Service{}
-
 		rr := createServerRecordsProducts(serv, http.MethodPost, "/api/v1/productsRecords/", `{
 			purchase_price: 150,
 			product_id: 150,
 		}`)
-		assert.Equal(t, 422, rr.Code)
+		assert.Equal(t, http.StatusUnprocessableEntity, rr.Code)
+		serv.AssertExpectations(t)
 	})
 
 	t.Run("Create product not found", func(t *testing.T) {
 
 		serv := &mocks.Service{}
-		serv.On("Create", prodNewRecords).Return(productsRecords.ProductRecords{}, fmt.Errorf("Product not found"))
+		serv.On("Create", prodNewRecords).Return(productsRecords.ProductRecords{}, fmt.Errorf("product_id is not registered on products"))
 
 		rr := createServerRecordsProducts(serv, http.MethodPost, "/api/v1/productsRecords/", `{
 			"purchase_price": 150,
 			"sale_price":150,
 			"product_id": 1
 		}`)
-		assert.Equal(t, 409, rr.Code)
+		assert.Equal(t, http.StatusConflict, rr.Code)
+		serv.AssertExpectations(t)
 	})
 
 	t.Run("CreateFail other", func(t *testing.T) {
@@ -173,7 +177,8 @@ func Test_RepositoryCreateRecordsProducts(t *testing.T) {
 			"sale_price":150,
 			"product_id": 1
 		}`)
-		assert.Equal(t, 422, rr.Code)
+		assert.Equal(t, http.StatusUnprocessableEntity, rr.Code)
+		serv.AssertExpectations(t)
 	})
 
 	t.Run("CreateOk", func(t *testing.T) {
@@ -186,11 +191,11 @@ func Test_RepositoryCreateRecordsProducts(t *testing.T) {
 			"sale_price":150,
 			"product_id": 1
 		}`)
-		assert.Equal(t, 201, rr.Code)
+		assert.Equal(t, http.StatusCreated, rr.Code)
 		err := json.Unmarshal(rr.Body.Bytes(), &objProductsRecordsRet)
 		assert.NoError(t, err)
 		assert.Equal(t, prodRecordsReturn, objProductsRecordsRet.Data)
-
+		serv.AssertExpectations(t)
 	})
 
 }

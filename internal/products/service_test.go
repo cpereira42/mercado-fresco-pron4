@@ -100,14 +100,11 @@ var prodUp = products.RequestProductsUpdate{
 	ProductTypeId: 8,
 	SellerId:      9}
 
-//var repoSeller = &mockSeller.RepositorySeller{}
-
 func Test_RepositoryFindAll(t *testing.T) {
 
 	produtos := []products.Product{prod1, prod2}
 	t.Run("Find All Ok", func(t *testing.T) {
 		repo := &mocks.Repository{}
-
 		repo.On("GetAll").Return(produtos, nil)
 
 		service := products.NewService(repo)
@@ -126,7 +123,7 @@ func Test_RepositoryFindAll(t *testing.T) {
 		service := products.NewService(repo)
 		ps, err := service.GetAll()
 		assert.True(t, len(ps) == 0)
-		assert.Equal(t, fmt.Errorf("Fail to get all"), err)
+		assert.Equal(t, "Fail to get all", err.Error())
 		repo.AssertExpectations(t)
 	})
 }
@@ -149,12 +146,10 @@ func Test_RepositoryFindId(t *testing.T) {
 	t.Run("GetId Fail", func(t *testing.T) {
 		repo := &mocks.Repository{}
 		repo.On("GetId", 3).Return(products.Product{}, fmt.Errorf("Product not Found"))
-
 		service := products.NewService(repo)
 		_, err := service.GetId(3)
-
 		assert.NotNil(t, err)
-		assert.Equal(t, fmt.Errorf("Product not Found"), err)
+		assert.Equal(t, "Product not Found", err.Error())
 		repo.AssertExpectations(t)
 	})
 }
@@ -164,10 +159,8 @@ func Test_RepositoryDelete(t *testing.T) {
 	t.Run("Delete Ok", func(t *testing.T) {
 		repo := &mocks.Repository{}
 		repo.On("Delete", 1).Return(nil)
-
 		service := products.NewService(repo)
 		err := service.Delete(1)
-
 		assert.Nil(t, err)
 		repo.AssertExpectations(t)
 	})
@@ -175,11 +168,9 @@ func Test_RepositoryDelete(t *testing.T) {
 	t.Run("TestDeleteFail", func(t *testing.T) {
 		repo := &mocks.Repository{}
 		repo.On("Delete", 9).Return(fmt.Errorf("produto não encontrado"))
-
 		service := products.NewService(repo)
 		err := service.Delete(9)
-
-		assert.Equal(t, fmt.Errorf("produto não encontrado"), err)
+		assert.Equal(t, "produto não encontrado", err.Error())
 		repo.AssertExpectations(t)
 	})
 }
@@ -202,94 +193,38 @@ func Test_RepositoryUpdate(t *testing.T) {
 	t.Run("Update Fail", func(t *testing.T) {
 		repo := &mocks.Repository{}
 		repo.On("GetId", 5).Return(products.Product{}, fmt.Errorf("Product not found"))
-		repo.On("Update", 5, prod3).Return(products.Product{}, fmt.Errorf("Product not found"))
 		service := products.NewService(repo)
 		_, err := service.Update(5, prodUp)
 
-		assert.Equal(t, fmt.Errorf("Product not found"), err)
+		assert.Equal(t, "Product not found", err.Error())
+		repo.AssertExpectations(t)
 
 	})
-
-	/*t.Run("Update Code already Registred Fail", func(t *testing.T) {
-		repo := &mocks.Repository{}
-		repo.On("GetId", 3).Return(produtos[2], nil)
-		repo.On("Update", 3, prod3).Return(products.Product{}, fmt.Errorf("Product not found"))
-		prod3.NetWeight = 9.9
-		service := products.NewService(repo, repoSeller)
-		_, err := service.Update(3, prodUp)
-
-		assert.Equal(t, fmt.Errorf("code Product prod2 already registred"), err)
-
-	})*/
 }
 
 func Test_RepositoryCreate(t *testing.T) {
 
 	t.Run("Create Ok", func(t *testing.T) {
 		repo := &mocks.Repository{}
-		//repoSeller.On("GetId", prodNew.SellerId).Return(seller.Seller{}, nil)
-		repo.On("CheckCode", 0, prodNew.ProductCode).Return(nil)
-		repo.On("GetProductsTypes", prodNew.ProductTypeId).Return("TV", nil)
 		repo.On("Create", prodNew).Return(prod4, nil)
 		service := products.NewService(repo)
 		ps, err := service.Create(prodCreate)
 		lastId++
 		ps.Id = 4
 		assert.Nil(t, err)
-		assert.Equal(t, ps, prod4)
+		assert.Equal(t, prod4, ps)
+		repo.AssertExpectations(t)
 	})
 
 	t.Run("Create Fail to Save ", func(t *testing.T) {
 		repo := &mocks.Repository{}
-		//repoSeller.On("GetId", prodNew.SellerId).Return(seller.Seller{}, nil)
-		repo.On("CheckCode", 0, prodNew.ProductCode).Return(nil)
-		repo.On("GetProductsTypes", prodNew.ProductTypeId).Return("TV", nil)
-
 		repo.On("Create", prodNew).Return(products.Product{}, fmt.Errorf("Fail to save"))
 		service := products.NewService(repo)
 		_, err := service.Create(prodCreate)
 
 		assert.NotNil(t, err)
-		assert.Equal(t, err, fmt.Errorf("Fail to save"))
+		assert.Equal(t, "Fail to save", err.Error())
+		repo.AssertExpectations(t)
 
 	})
-
-	/*t.Run("Create Code already Registred Fail ", func(t *testing.T) {
-		repo := &mocks.Repository{}
-		repoSeller.On("GetId", prodNew.SellerId).Return(seller.Seller{}, nil)
-		repo.On("CheckCode", 0, prodNew.ProductCode).Return(fmt.Errorf("code Product prod4 already registred"))
-		repo.On("GetProductsTypes", prodNew.ProductTypeId).Return("TV", nil)
-		repo.On("Create", prodNew).Return(prod4, nil)
-		service := products.NewService(repo, repoSeller)
-		_, err := service.Create(prodCreate)
-
-		assert.NotNil(t, err)
-		assert.Equal(t, err, fmt.Errorf("code Product prod4 already registred"))
-
-	})*/
-
-	/*t.Run("Create invalid product types ", func(t *testing.T) {
-		repo := &mocks.Repository{}
-		repoSeller.On("GetId", prodNew.SellerId).Return(seller.Seller{}, nil)
-		repo.On("GetProductsTypes", prodNew.ProductTypeId).Return("", fmt.Errorf("Product type not found"))
-		service := products.NewService(repo, repoSeller)
-		_, err := service.Create(prodCreate)
-
-		assert.NotNil(t, err)
-		assert.Equal(t, err, fmt.Errorf("Product type not found"))
-
-	})
-
-	t.Run("Create invalid seller ", func(t *testing.T) {
-		repo := &mocks.Repository{}
-		repoSeller := &mockSeller.RepositorySeller{}
-		repoSeller.On("GetId", prodNew.SellerId).Return(seller.Seller{}, fmt.Errorf("Seller not found"))
-		service := products.NewService(repo, repoSeller)
-		_, err := service.Create(prodCreate)
-
-		assert.NotNil(t, err)
-		assert.Equal(t, err, fmt.Errorf("Seller not found"))
-
-	})*/
-
 }

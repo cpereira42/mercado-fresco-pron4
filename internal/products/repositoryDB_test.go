@@ -11,6 +11,20 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var header = sqlmock.NewRows([]string{
+	"Id",
+	"ProductCode",
+	"Description",
+	"Width",
+	"Length",
+	"Height",
+	"NetWeight",
+	"ExpirationRate",
+	"RecommendedFreezingTemperature",
+	"FreezingRate",
+	"ProductTypeId",
+	"SellerId"})
+
 var prodNewDB = products.Product{
 	Description:                    "prod1",
 	ExpirationRate:                 1,
@@ -65,25 +79,9 @@ func TestGetAll(t *testing.T) {
 	defer db.Close()
 
 	productsRepo := products.NewRepositoryProductsDB(db)
-
-	//query := "SELECT \\* FROM products"
-
 	t.Run("GetAll Fail Ok", func(t *testing.T) {
 		produtos := []products.Product{prod1DB, prod2DB}
-		rows := sqlmock.NewRows([]string{
-			"Id",
-			"ProductCode",
-			"Description",
-			"Width",
-			"Length",
-			"Height",
-			"NetWeight",
-			"ExpirationRate",
-			"RecommendedFreezingTemperature",
-			"FreezingRate",
-			"ProductTypeId",
-			"SellerId",
-		}).AddRow(
+		rows := header.AddRow(
 			produtos[0].Id,
 			produtos[0].ProductCode,
 			produtos[0].Description,
@@ -112,40 +110,26 @@ func TestGetAll(t *testing.T) {
 		)
 
 		mock.ExpectQuery(regexp.QuoteMeta(products.QUERY_GETALL)).WillReturnRows(rows)
-
 		result, err := productsRepo.GetAll()
 		assert.NoError(t, err)
+		assert.Equal(t, produtos[0].Description, result[0].Description)
+		assert.Equal(t, produtos[1].Description, result[1].Description)
 
-		assert.Equal(t, result[0].Description, produtos[0].Description)
-		assert.Equal(t, result[1].Description, produtos[1].Description)
 	})
 
 	t.Run("GetAll Fail Scan", func(t *testing.T) {
-		rows := sqlmock.NewRows([]string{
-			"Id",
-			"ProductCode",
-			"Description",
-			"Width",
-			"Length",
-			"Height",
-			"NetWeight",
-			"ExpirationRate",
-			"RecommendedFreezingTemperature",
-			"FreezingRate",
-			"ProductTypeId",
-			"SellerId",
-		}).AddRow("", "", "", "", "", "", "", "", "", "", "", "")
-
+		rows := sqlmock.NewRows([]string{"Id", "ProductCode", "Description"}).AddRow("", "", "")
 		mock.ExpectQuery(regexp.QuoteMeta(products.QUERY_GETALL)).WillReturnRows(rows)
-
 		_, err = productsRepo.GetAll()
 		assert.Error(t, err)
+
 	})
 
 	t.Run("GetAll Fail Select", func(t *testing.T) {
 		mock.ExpectQuery(regexp.QuoteMeta(products.QUERY_GETALL)).WillReturnError(sql.ErrNoRows)
 		_, err = productsRepo.GetAll()
 		assert.Error(t, err)
+		assert.Equal(t, "data not found", err.Error())
 
 	})
 }

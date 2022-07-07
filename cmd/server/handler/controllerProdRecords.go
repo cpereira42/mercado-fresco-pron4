@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"net/http"
 	"strconv"
 
 	"github.com/cpereira42/mercado-fresco-pron4/internal/productsRecords"
@@ -22,22 +23,22 @@ func (c *ProductRecords) GetId() gin.HandlerFunc {
 		if ctx.Query("id") == "" {
 			p, err := c.service.GetAllRecords()
 			if err != nil {
-				ctx.JSON(404, web.NewResponse(404, nil, "Invalid ID"))
+				ctx.JSON(http.StatusNotFound, web.NewResponse(http.StatusNotFound, nil, "Invalid ID"))
 				return
 			}
-			ctx.JSON(200, web.NewResponse(200, p, ""))
+			ctx.JSON(http.StatusOK, web.NewResponse(http.StatusOK, p, ""))
 		} else {
 			id, err := strconv.ParseInt(ctx.Query("id"), 10, 64)
 			if err != nil {
-				ctx.JSON(404, web.NewResponse(404, nil, "Invalid ID"))
+				ctx.JSON(http.StatusNotFound, web.NewResponse(http.StatusNotFound, nil, "Invalid ID"))
 				return
 			}
 			p, err := c.service.GetIdRecords(int(id))
 			if err != nil {
-				ctx.JSON(404, web.NewResponse(404, nil, err.Error()))
+				ctx.JSON(http.StatusNotFound, web.NewResponse(http.StatusNotFound, nil, err.Error()))
 				return
 			}
-			ctx.JSON(200, web.NewResponse(200, p, ""))
+			ctx.JSON(http.StatusOK, web.NewResponse(http.StatusOK, p, ""))
 		}
 	}
 }
@@ -50,13 +51,13 @@ func (c *ProductRecords) Create() gin.HandlerFunc {
 		}
 		p, err := c.service.Create(request)
 		if err != nil {
-			if err.Error() == "Product not found" {
-				ctx.JSON(409, web.NewResponse(409, nil, err.Error()))
+			if err.Error() == "product_id is not registered on products" {
+				ctx.JSON(http.StatusConflict, web.NewResponse(http.StatusConflict, nil, err.Error()))
 			} else {
-				ctx.JSON(422, web.NewResponse(422, nil, err.Error()))
+				ctx.JSON(http.StatusUnprocessableEntity, web.NewResponse(http.StatusUnprocessableEntity, nil, err.Error()))
 			}
 			return
 		}
-		ctx.JSON(201, web.NewResponse(201, p, ""))
+		ctx.JSON(http.StatusCreated, web.NewResponse(http.StatusCreated, p, ""))
 	}
 }

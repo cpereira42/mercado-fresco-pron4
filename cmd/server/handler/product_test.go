@@ -84,12 +84,6 @@ var prodNew = products.RequestProductsCreate{
 	SellerId:                       9,
 }
 
-/*func createRequestTest(method string, url string, body string) (*http.Request, *httptest.ResponseRecorder) {
-	req := httptest.NewRequest(method, url, bytes.NewBuffer([]byte(body)))
-	req.Header.Add("Content-Type", "application/json")
-	return req, httptest.NewRecorder()
-}*/
-
 func createServer(serv *mocks.Service, method string, url string, body string) *httptest.ResponseRecorder {
 	p := handler.NewProduct(serv)
 	r := gin.Default()
@@ -112,11 +106,12 @@ func Test_RepositoryGetAll(t *testing.T) {
 		serv := &mocks.Service{}
 		serv.On("GetAll").Return(produtos, nil)
 		rr := createServer(serv, http.MethodGet, "/api/v1/products/", "")
-		assert.Equal(t, 200, rr.Code)
+		assert.Equal(t, http.StatusOK, rr.Code)
 		err := json.Unmarshal(rr.Body.Bytes(), &objProducts)
 		assert.Equal(t, objProducts.Data, produtos)
 		assert.Nil(t, err)
 		assert.True(t, len(objProducts.Data) > 0)
+		serv.AssertExpectations(t)
 	})
 
 	t.Run("Get All Fail", func(t *testing.T) {
@@ -124,10 +119,11 @@ func Test_RepositoryGetAll(t *testing.T) {
 		serv.On("GetAll").Return([]products.Product{}, fmt.Errorf("error"))
 
 		rr := createServer(serv, http.MethodGet, "/api/v1/products/", "")
-		assert.Equal(t, 401, rr.Code)
+		assert.Equal(t, http.StatusNotFound, rr.Code)
 		err := json.Unmarshal(rr.Body.Bytes(), &objProducts)
-		assert.Equal(t, objProducts.Code, 401)
+		assert.Equal(t, objProducts.Code, http.StatusNotFound)
 		assert.Nil(t, err)
+		serv.AssertExpectations(t)
 	})
 }
 
@@ -139,30 +135,31 @@ func Test_RepositoryGetId(t *testing.T) {
 		serv.On("GetId", 1).Return(produtos[0], nil)
 
 		rr := createServer(serv, http.MethodGet, "/api/v1/products/1", "")
-		assert.Equal(t, 200, rr.Code)
+		assert.Equal(t, http.StatusOK, rr.Code)
 		err := json.Unmarshal(rr.Body.Bytes(), &objProduct)
 		assert.Equal(t, objProduct.Data, produtos[0])
 		assert.Nil(t, err)
+		serv.AssertExpectations(t)
 	})
 
 	t.Run("Get Id Wrong id ", func(t *testing.T) {
 		serv := &mocks.Service{}
-		serv.On("GetId", "A").Return(products.Product{}, fmt.Errorf("error"))
-
 		rr := createServer(serv, http.MethodGet, "/api/v1/products/A", "")
-		assert.Equal(t, 404, rr.Code)
+		assert.Equal(t, http.StatusNotFound, rr.Code)
 
 		err := json.Unmarshal(rr.Body.Bytes(), &objProduct)
 		assert.Nil(t, err)
+		serv.AssertExpectations(t)
 	})
 
 	t.Run("Get Id Non Exist ", func(t *testing.T) {
 		serv := &mocks.Service{}
 		serv.On("GetId", 9).Return(products.Product{}, fmt.Errorf("error"))
 		rr := createServer(serv, http.MethodGet, "/api/v1/products/9", "")
-		assert.Equal(t, 404, rr.Code)
+		assert.Equal(t, http.StatusNotFound, rr.Code)
 		err := json.Unmarshal(rr.Body.Bytes(), &objProduct)
 		assert.Nil(t, err)
+		serv.AssertExpectations(t)
 	})
 }
 
@@ -172,19 +169,21 @@ func Test_RepositoryDelete(t *testing.T) {
 
 		serv.On("Delete", 1).Return(nil)
 		rr := createServer(serv, http.MethodDelete, "/api/v1/products/1", "")
-		assert.Equal(t, 204, rr.Code)
+		assert.Equal(t, http.StatusNoContent, rr.Code)
+		serv.AssertExpectations(t)
 	})
 
 	t.Run("Delete Fail id = A", func(t *testing.T) {
 		serv := &mocks.Service{}
 
 		rr := createServer(serv, http.MethodDelete, "/api/v1/products/A", "")
-		assert.Equal(t, 404, rr.Code)
+		assert.Equal(t, http.StatusNotFound, rr.Code)
 
 		err := json.Unmarshal(rr.Body.Bytes(), &objProduct)
 		assert.Nil(t, err)
 		assert.NotNil(t, objProduct.Error)
 		assert.Equal(t, "Invalid ID", objProduct.Error)
+		serv.AssertExpectations(t)
 	})
 
 	t.Run("Delete Fail id non exist", func(t *testing.T) {
@@ -193,12 +192,13 @@ func Test_RepositoryDelete(t *testing.T) {
 		serv.On("Delete", 9).Return(fmt.Errorf("Product 9 not found"))
 
 		rr := createServer(serv, http.MethodDelete, "/api/v1/products/9", "")
-		assert.Equal(t, 404, rr.Code)
+		assert.Equal(t, http.StatusNotFound, rr.Code)
 
 		err := json.Unmarshal(rr.Body.Bytes(), &objProduct)
 		assert.Nil(t, err)
 		assert.NotNil(t, objProduct.Error)
 		assert.Equal(t, "Product 9 not found", objProduct.Error)
+		serv.AssertExpectations(t)
 	})
 }
 
@@ -219,11 +219,12 @@ func Test_RepositoryCreate(t *testing.T) {
 			"Width":                          7.7,
 			"Product_type_id":                  8,
 			"Seller_id":                       9}`)
-		assert.Equal(t, 201, rr.Code)
+		assert.Equal(t, http.StatusCreated, rr.Code)
 
 		err := json.Unmarshal(rr.Body.Bytes(), &objProduct)
 		assert.Equal(t, prod1, objProduct.Data)
 		assert.Nil(t, err)
+		serv.AssertExpectations(t)
 	})
 
 	t.Run("Creat Fail - less field", func(t *testing.T) {
@@ -240,7 +241,7 @@ func Test_RepositoryCreate(t *testing.T) {
 					"Product_type_id":                  8,
 					"Seller_id":                       9}`)
 
-		assert.Equal(t, 422, rr.Code)
+		assert.Equal(t, http.StatusUnprocessableEntity, rr.Code)
 
 		objRes := struct {
 			Code int
@@ -256,7 +257,7 @@ func Test_RepositoryCreate(t *testing.T) {
 
 	t.Run("Creat Fail - Duplicated", func(t *testing.T) {
 		serv := &mocks.Service{}
-		serv.On("Create", prodNew).Return(products.Product{}, fmt.Errorf("Product prod1 already registred"))
+		serv.On("Create", prodNew).Return(products.Product{}, fmt.Errorf("product_code is unique, and prod1 already registered"))
 		rr := createServer(serv, http.MethodPost, "/api/v1/products/", `{
 					"Description":                    "prod1",
 					"Expiration_rate":                 1,
@@ -270,11 +271,12 @@ func Test_RepositoryCreate(t *testing.T) {
 					"Product_type_id":                  8,
 					"Seller_id":                       9}`)
 
-		assert.Equal(t, 409, rr.Code)
+		assert.Equal(t, http.StatusConflict, rr.Code)
 
 		err := json.Unmarshal(rr.Body.Bytes(), &objProduct)
 		assert.Nil(t, err)
-		assert.Equal(t, "Product prod1 already registred", objProduct.Error)
+		assert.Equal(t, "product_code is unique, and prod1 already registered", objProduct.Error)
+		serv.AssertExpectations(t)
 	})
 
 	t.Run("Creat Fail", func(t *testing.T) {
@@ -294,7 +296,8 @@ func Test_RepositoryCreate(t *testing.T) {
 				"Width":                          7.7,
 				"Product_type_id":                  8,
 				"Seller_id":                       9}`)
-		assert.Equal(t, 422, rr.Code)
+		assert.Equal(t, http.StatusUnprocessableEntity, rr.Code)
+		serv.AssertExpectations(t)
 	})
 }
 
@@ -305,8 +308,6 @@ func Test_RepositoryUpdate(t *testing.T) {
 		}
 
 		serv := &mocks.Service{}
-		serv.On("getId", 1).Return(prod1, nil)
-		serv.On("CheckCode", 1, "prod1").Return(false)
 		prod1.Description = "prod10"
 		serv.On("Update", 1, prodNew).Return(prod1, nil)
 
@@ -314,28 +315,24 @@ func Test_RepositoryUpdate(t *testing.T) {
 			"Description":                    "prod10"
 			}`)
 
-		assert.Equal(t, 200, rr.Code)
+		assert.Equal(t, http.StatusOK, rr.Code)
 		err := json.Unmarshal(rr.Body.Bytes(), &objProduct)
 		assert.Nil(t, err)
 		assert.Equal(t, prod1, objProduct.Data)
+		serv.AssertExpectations(t)
 	})
 
 	t.Run("Update ID A", func(t *testing.T) {
-		prodNew := products.RequestProductsUpdate{
-			Description: "prod10",
-		}
 		serv := &mocks.Service{}
-
-		serv.On("Update", 1, prodNew).Return(prod1, nil)
 		rr := createServer(serv, http.MethodPatch, "/api/v1/products/A", `{
 			"Description":                    "prod10"
 			}`)
 
-		assert.Equal(t, 404, rr.Code)
-
+		assert.Equal(t, http.StatusNotFound, rr.Code)
 		err := json.Unmarshal(rr.Body.Bytes(), &objProduct)
 		assert.Nil(t, err)
 		assert.Equal(t, "Invali ID", objProduct.Error)
+		serv.AssertExpectations(t)
 	})
 
 	t.Run("Update ID non exist", func(t *testing.T) {
@@ -345,15 +342,16 @@ func Test_RepositoryUpdate(t *testing.T) {
 
 		serv := &mocks.Service{}
 
-		serv.On("Update", 99, prodNew).Return(products.Product{}, fmt.Errorf("Product not found"))
+		serv.On("Update", 99, prodNew).Return(products.Product{}, fmt.Errorf("data not found"))
 		rr := createServer(serv, http.MethodPatch, "/api/v1/products/99", `{
 			"Description":                    "prod10"
 			}`)
 
-		assert.Equal(t, 404, rr.Code)
+		assert.Equal(t, http.StatusNotFound, rr.Code)
 		err := json.Unmarshal(rr.Body.Bytes(), &objProduct)
 		assert.Nil(t, err)
-		assert.Equal(t, "Product not found", objProduct.Error)
+		assert.Equal(t, "data not found", objProduct.Error)
+		serv.AssertExpectations(t)
 	})
 
 	t.Run("Update Fail", func(t *testing.T) {
@@ -368,11 +366,12 @@ func Test_RepositoryUpdate(t *testing.T) {
 			"Description":                    "prod10"
 			}`)
 
-		assert.Equal(t, 422, rr.Code)
+		assert.Equal(t, http.StatusUnprocessableEntity, rr.Code)
 
 		err := json.Unmarshal(rr.Body.Bytes(), &objProduct)
 		assert.Nil(t, err)
 		assert.Equal(t, "Error to save", objProduct.Error)
+		serv.AssertExpectations(t)
 	})
 
 	t.Run("Update Fail - invalid args", func(t *testing.T) {
@@ -380,7 +379,7 @@ func Test_RepositoryUpdate(t *testing.T) {
 		rr := createServer(serv, http.MethodPatch, "/api/v1/products/99", `{
 			"Description":                    10
 			}`)
-		assert.Equal(t, 422, rr.Code)
+		assert.Equal(t, http.StatusUnprocessableEntity, rr.Code)
 
 		objRes := struct {
 			Code int
@@ -392,5 +391,6 @@ func Test_RepositoryUpdate(t *testing.T) {
 		err := json.Unmarshal(rr.Body.Bytes(), &objRes)
 		assert.Nil(t, err)
 		assert.Equal(t, "description", objRes.Data.Field)
+		serv.AssertExpectations(t)
 	})
 }
