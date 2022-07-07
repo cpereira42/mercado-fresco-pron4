@@ -3,6 +3,7 @@ package util
 import (
 	"fmt"
 	"strings"
+	"time"
 )
 
 func CheckError(sqlError error) error {
@@ -19,4 +20,16 @@ func CheckError(sqlError error) error {
 		return fmt.Errorf(msg)
 	}
 	return sqlError
+}
+
+func GetCurrentDateTime() string {
+	currentTime := time.Now()
+	return time.Date(currentTime.Year(),
+		currentTime.Month(),
+		currentTime.Day(),
+		currentTime.Hour(),
+		currentTime.Minute(),
+		currentTime.Second(),
+		100,
+		time.Local).Format("2006-01-02 15:04:05")
 }
