@@ -8,6 +8,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 
+	inboundOrders "github.com/cpereira42/mercado-fresco-pron4/internal/inbound_orders"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/productbatch"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/section"
 
@@ -59,6 +60,9 @@ func main() {
 	repoSeller := seller.NewRepositorySeller(dbSeller)
 	serviceSeller := seller.NewService(repoSeller)
 
+	repositoryInboundOrders := inboundOrders.NewRepository(conn)
+	serviceInboundOrders := inboundOrders.NewService(repositoryInboundOrders)
+
 	repositoryEmployees := employee.NewRepository(conn)
 	serviceEmployees := employee.NewService(repositoryEmployees)
 	handlerEmployees := handler.NewEmployee(serviceEmployees)
@@ -81,6 +85,8 @@ func main() {
 	sellers.POST("/", s.Create())
 	sellers.PATCH("/:id", s.Update())
 	sellers.DELETE("/:id", s.Delete())
+
+	handler.NewInboundOrders(r, serviceInboundOrders)
 
 	routesEmployees := r.Group("/api/v1/employees")
 	routesEmployees.GET("/", handlerEmployees.GetAll())
@@ -121,8 +127,8 @@ func connection() (*sql.DB, error) {
 	port := os.Getenv("PORT_DB")
 	host := os.Getenv("HOST_DB")
 	database := os.Getenv("DATABASE")
-	dataSource := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", user, pass, host, port, database)
-	log.Println("conection Success")
+	dataSource := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", user, pass, host, port, database)
+	log.Println("connection successful")
 	conn, err := sql.Open("mysql", dataSource)
 	if err != nil {
 		log.Fatal(err)

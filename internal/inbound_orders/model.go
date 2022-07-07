@@ -3,22 +3,22 @@ package inbound_orders
 type InboundOrders struct {
 	ID             int    `json:"id"`
 	OrderDate      string `json:"order_date"`
-	OrderNumber    int    `json:"order_number"`
+	OrderNumber    string `json:"order_number"`
 	EmployeeID     int    `json:"employee_id"`
 	ProductBatchID int    `json:"product_batch_id"`
 	WarehouseID    int    `json:"warehouse_id"`
 }
 
 type InboundOrdersCreate struct {
-	OrderNumber    int `json:"order_number" binding:"required"`
-	EmployeeID     int `json:"employee_id" binding:"required"`
-	ProductBatchID int `json:"product_batch_id" binding:"required"`
-	WarehouseID    int `json:"warehouse_id" binding:"required"`
+	OrderNumber    string `json:"order_number" binding:"required"`
+	EmployeeID     int    `json:"employee_id" binding:"required"`
+	ProductBatchID int    `json:"product_batch_id" binding:"required"`
+	WarehouseID    int    `json:"warehouse_id" binding:"required"`
 }
 
 type InboundOrdersResponse struct {
 	OrderDate      string `json:"order_date"`
-	OrderNumber    int    `json:"order_number"`
+	OrderNumber    string `json:"order_number"`
 	EmployeeID     int    `json:"employee_id"`
 	ProductBatchID int    `json:"product_batch_id"`
 	WarehouseID    int    `json:"warehouse_id"`
