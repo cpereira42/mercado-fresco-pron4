@@ -50,10 +50,6 @@ func (s *Seller) GetAll() gin.HandlerFunc {
 			ctx.JSON(http.StatusBadRequest, web.NewResponse(http.StatusBadRequest, nil, err.Error()))
 			return
 		}
-		if len(sellers) == 0 {
-			ctx.JSON(http.StatusBadRequest, web.NewResponse(http.StatusBadRequest, sellers, "Sellers is empty"))
-			return
-		}
 		ctx.JSON(http.StatusOK, web.NewResponse(http.StatusOK, sellers, ""))
 	}
 }
