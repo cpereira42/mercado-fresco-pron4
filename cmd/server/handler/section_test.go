@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -11,21 +10,11 @@ import (
 
 	"github.com/cpereira42/mercado-fresco-pron4/internal/section"
 	mocks "github.com/cpereira42/mercado-fresco-pron4/internal/section/mocks"
+	"github.com/cpereira42/mercado-fresco-pron4/pkg/util"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
-
-// * Inicia uma request
-// @param method string
-// @param url string
-// @param body string
-func CreateRequestServer(method, url, body string) (*http.Request, *httptest.ResponseRecorder) {
-	req := httptest.NewRequest(method, url, bytes.NewBuffer([]byte(body)))
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("TOKEN", "123456")
-	return req, httptest.NewRecorder()
-}
 
 /*
  * cria um server
@@ -43,7 +32,7 @@ func CreateServerSection(serv *mocks.Service, method, url, body string) *httptes
 	gp.POST("/", sectionController.CreateSection())
 	gp.PATCH("/:id", sectionController.UpdateSection())
 	gp.DELETE("/:id", sectionController.DeleteSection())
-	req, rr := CreateRequestServer(method, url, body)
+	req, rr := util.CreateRequestTest(method, url, body)
 	router.ServeHTTP(rr, req)
 	return rr
 }
