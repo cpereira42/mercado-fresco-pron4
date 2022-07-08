@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -10,21 +9,11 @@ import (
 
 	"github.com/cpereira42/mercado-fresco-pron4/internal/productbatch"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/productbatch/mocks"
+	"github.com/cpereira42/mercado-fresco-pron4/pkg/util"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
-
-// * Inicia uma request
-// @param method string
-// @param url string
-// @param body string
-func CreateRequestServerPB(method, url, body string) (*http.Request, *httptest.ResponseRecorder) {
-	req := httptest.NewRequest(method, url, bytes.NewBuffer([]byte(body)))
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("TOKEN", "123456")
-	return req, httptest.NewRecorder()
-}
 
 /*
  * cria um server
@@ -38,7 +27,7 @@ func CreateServerPB(serv *mocks.ServicePB, method, url, body string) *httptest.R
 	router := gin.Default()
 	router.GET("/api/v1/sections/reportProducts", sectionController.ReadPB())
 	router.POST("/api/v1/productBatches", sectionController.CreatePB())
-	req, rr := CreateRequestServerPB(method, url, body)
+	req, rr := util.CreateRequestTest(method, url, body)
 	router.ServeHTTP(rr, req)
 	return rr
 }
