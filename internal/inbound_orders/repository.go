@@ -46,26 +46,20 @@ func (r *repository) GetAll() ([]ReportInboundOrders, error) {
 }
 
 func (r *repository) GetByID(id int) (ReportInboundOrders, error) {
-	stmt, err := r.db.Prepare(GET_REPORT_INBOUND_ORDER_BY_ID)
-	if err != nil {
-		return ReportInboundOrders{}, fmt.Errorf(FAIL_TO_PREPARE_QUERY)
-	}
-	defer stmt.Close()
-
+	row := r.db.QueryRow(GET_REPORT_INBOUND_ORDER_BY_ID, id)
 	var reportInboundOrder ReportInboundOrders
 
-	err = stmt.QueryRow(id).Scan(
+	if err := row.Scan(
 		&reportInboundOrder.ID,
 		&reportInboundOrder.CardNumberID,
 		&reportInboundOrder.FirstName,
 		&reportInboundOrder.LastName,
 		&reportInboundOrder.WarehouseID,
 		&reportInboundOrder.InboundOrdersCount,
-	)
-
-	if err != nil {
+	); err != nil {
 		return ReportInboundOrders{}, fmt.Errorf(EMPLOYEE_NOT_FOUND)
 	}
+
 	return reportInboundOrder, nil
 }
 

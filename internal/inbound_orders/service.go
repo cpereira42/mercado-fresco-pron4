@@ -29,7 +29,7 @@ func (s service) GetAll() ([]ReportInboundOrders, error) {
 func (s service) GetByID(id int) (ReportInboundOrders, error) {
 	reportInboundOrder, err := s.repository.GetByID(id)
 	if err != nil {
-		return ReportInboundOrders{}, nil
+		return ReportInboundOrders{}, err
 	}
 	return reportInboundOrder, nil
 }
