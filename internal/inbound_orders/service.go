@@ -1,6 +1,8 @@
 package inbound_orders
 
-import "time"
+import (
+	"github.com/cpereira42/mercado-fresco-pron4/pkg/util"
+)
 
 type Service interface {
 	GetAll() ([]ReportInboundOrders, error)
@@ -34,18 +36,7 @@ func (s service) GetByID(id int) (ReportInboundOrders, error) {
 	return reportInboundOrder, nil
 }
 func (s service) Create(inboundOrders InboundOrdersCreate) (InboundOrdersResponse, error) {
-	currentTime := time.Now()
-
-	orderDate := time.Date(currentTime.Year(),
-		currentTime.Month(),
-		currentTime.Day(),
-		currentTime.Hour(),
-		currentTime.Minute(),
-		currentTime.Second(),
-		100,
-		time.Local).Format("2006-01-02 15:04:05")
-
-	inboundOrder, err := s.repository.Create(orderDate, inboundOrders)
+	inboundOrder, err := s.repository.Create(util.GetCurrentDateTime(), inboundOrders)
 
 	if err != nil {
 		return InboundOrdersResponse{}, err
