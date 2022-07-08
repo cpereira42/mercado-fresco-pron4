@@ -322,6 +322,28 @@ func TestRepositoryListarSectionAll(t *testing.T) {
 		assert.Equal(t, ErrorFalhaInListAll, err)
 		assert.True(t, len(sections) == 0)
 	})
+	t.Run("lista sections, error serializer fields of section", func(t *testing.T) {
+		SqlSelect := `SELECT id,section_number,current_capacity,current_temperature,maximum_capacity,minimum_capacity,minimum_temperature,product_type_id,warehouse_id FROM mercadofresco.sections`
+
+		rows := sqlmock.NewRows([]string{
+			"Id",
+			"SectionNumber",
+			"CurrentCapacity",
+			"CurrentTemperature",
+			"MaximumCapacity",
+			"MinimumCapacity",
+			"MinimumTemperature",
+			"ProductTypeId",
+			"WarehouseId",
+		}).AddRow("", "", "", "", "", "", "", "", "")
+
+		mock.ExpectQuery(SqlSelect).WillReturnRows(rows)
+		repoSection := NewRepository(db)
+		sections, err := repoSection.ListarSectionAll()
+		assert.Error(t, err)
+		assert.Equal(t, ErrorFalhaInserializerFields, err)
+		assert.True(t, len(sections) == 0)
+	})
 }
 
 func TestRepositoryListarSectionOne(t *testing.T) {

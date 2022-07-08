@@ -33,29 +33,8 @@ func (_m *ServicePB) CreatePB(productBatches productbatch.ProductBatches) (produ
 	return r0, r1
 }
 
-// ReadPBSectionId provides a mock function with given fields: id
-func (_m *ServicePB) ReadPBSectionId(id int64) (productbatch.ProductBatchesResponse, error) {
-	ret := _m.Called(id)
-
-	var r0 productbatch.ProductBatchesResponse
-	if rf, ok := ret.Get(0).(func(int64) productbatch.ProductBatchesResponse); ok {
-		r0 = rf(id)
-	} else {
-		r0 = ret.Get(0).(productbatch.ProductBatchesResponse)
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(int64) error); ok {
-		r1 = rf(id)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// ReadPBSectionTodo provides a mock function with given fields:
-func (_m *ServicePB) ReadPBSectionTodo() ([]productbatch.ProductBatchesResponse, error) {
+// GetAll provides a mock function with given fields:
+func (_m *ServicePB) GetAll() ([]productbatch.ProductBatchesResponse, error) {
 	ret := _m.Called()
 
 	var r0 []productbatch.ProductBatchesResponse
@@ -70,6 +49,27 @@ func (_m *ServicePB) ReadPBSectionTodo() ([]productbatch.ProductBatchesResponse,
 	var r1 error
 	if rf, ok := ret.Get(1).(func() error); ok {
 		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetId provides a mock function with given fields: id
+func (_m *ServicePB) GetId(id int64) (productbatch.ProductBatchesResponse, error) {
+	ret := _m.Called(id)
+
+	var r0 productbatch.ProductBatchesResponse
+	if rf, ok := ret.Get(0).(func(int64) productbatch.ProductBatchesResponse); ok {
+		r0 = rf(id)
+	} else {
+		r0 = ret.Get(0).(productbatch.ProductBatchesResponse)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(int64) error); ok {
+		r1 = rf(id)
 	} else {
 		r1 = ret.Error(1)
 	}

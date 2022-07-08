@@ -226,6 +226,7 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`products_batches` (
   PRIMARY KEY (`id`),
   INDEX `fk_products_batches_product1_idx` (`product_id` ASC) VISIBLE,
   INDEX `fk_products_batches_section1_idx` (`section_id` ASC) VISIBLE,
+  UNIQUE INDEX `batch_number_UNIQUE`(`batch_number` ASC) VISIBLE,
   CONSTRAINT `fk_products_batches_product1`
     FOREIGN KEY (`product_id`)
     REFERENCES `mercadofresco`.`products` (`id`)
