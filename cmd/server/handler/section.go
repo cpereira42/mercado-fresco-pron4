@@ -4,19 +4,17 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/cpereira42/mercado-fresco-pron4/internal/productbatch"
 	sectionEntites "github.com/cpereira42/mercado-fresco-pron4/internal/section"
 	"github.com/cpereira42/mercado-fresco-pron4/pkg/web"
 	"github.com/gin-gonic/gin"
 )
 
 type SectionController struct {
-	service   sectionEntites.Service
-	servicePB productbatch.ServicePB
+	service sectionEntites.Service
 }
 
-func NewSectionController(sectionService sectionEntites.Service, servPB productbatch.ServicePB) *SectionController {
-	return &SectionController{service: sectionService, servicePB: servPB}
+func NewSectionController(sectionService sectionEntites.Service) *SectionController {
+	return &SectionController{service: sectionService}
 }
 
 func (controller *SectionController) ListarSectionAll() gin.HandlerFunc {
@@ -51,9 +49,10 @@ func (controller *SectionController) CreateSection() gin.HandlerFunc {
 
 func (controller *SectionController) ListarSectionOne() gin.HandlerFunc {
 	return func(context *gin.Context) {
-		param, err := getRequestId(context, "Param")
+		param, err := getRequestId(context)
 		if err != nil {
-			context.JSON(http.StatusInternalServerError, web.NewResponse(http.StatusInternalServerError, nil, err.Error()))
+			context.JSON(http.StatusInternalServerError,
+				web.NewResponse(http.StatusInternalServerError, nil, err.Error()))
 			return
 		}
 		section, err := controller.service.ListarSectionOne(param)
@@ -67,7 +66,7 @@ func (controller *SectionController) ListarSectionOne() gin.HandlerFunc {
 
 func (controller *SectionController) UpdateSection() gin.HandlerFunc {
 	return func(context *gin.Context) {
-		paramId, errconv := getRequestId(context, "Param")
+		paramId, errconv := getRequestId(context)
 		if errconv != nil {
 			context.JSON(
 				http.StatusInternalServerError,
@@ -93,7 +92,7 @@ func (controller *SectionController) UpdateSection() gin.HandlerFunc {
 
 func (controller *SectionController) DeleteSection() gin.HandlerFunc {
 	return func(context *gin.Context) {
-		paramId, err := getRequestId(context, "Param")
+		paramId, err := getRequestId(context)
 		if err != nil {
 			context.JSON(
 				http.StatusInternalServerError,
@@ -102,13 +101,9 @@ func (controller *SectionController) DeleteSection() gin.HandlerFunc {
 		}
 		erro := controller.service.DeleteSection(paramId)
 		if erro != nil {
-			code := http.StatusNotFound
-			if erro.Error() == "falha ao remove o sections" {
-				code = http.StatusInternalServerError
-			}
 			context.JSON(
-				code,
-				web.NewResponse(code, nil, erro.Error()))
+				http.StatusNotFound,
+				web.NewResponse(http.StatusNotFound, nil, erro.Error()))
 			return
 		}
 		context.JSON(
@@ -117,67 +112,8 @@ func (controller *SectionController) DeleteSection() gin.HandlerFunc {
 	}
 }
 
-func (controller *SectionController) ReadPB() gin.HandlerFunc {
-	return func(context *gin.Context) {
-		paramId := context.Query("id")
-
-		if paramId != "" {
-			sectionId, err := getRequestId(context, "Query")
-			if err != nil {
-				context.JSON(http.StatusInternalServerError,
-					web.NewResponse(http.StatusInternalServerError, nil, err.Error()))
-				return
-			}
-			resultProductBatchesResponse, errPB := controller.servicePB.ReadPBSectionId(sectionId)
-			if errPB != nil {
-				context.JSON(http.StatusNotFound, web.NewResponse(http.StatusNotFound, nil, errPB.Error()))
-				return
-			}
-			context.JSON(http.StatusOK,
-				web.NewResponse(http.StatusOK, resultProductBatchesResponse, ""))
-			return
-		}
-		productBatchesResponse, err := controller.servicePB.ReadPBSectionTodo()
-		if err != nil {
-			context.JSON(http.StatusInternalServerError,
-				web.NewResponse(http.StatusInternalServerError, nil, err.Error()))
-			return
-		}
-		context.JSON(http.StatusOK, web.NewResponse(http.StatusOK, productBatchesResponse, ""))
-	}
-}
-
-func (controller *SectionController) CreatePB() gin.HandlerFunc {
-	return func(context *gin.Context) {
-		var productBatches productbatch.ProductBatches
-
-		if web.CheckIfErrorRequest(context, &productBatches) {
-			return
-		}
-
-		prodPb, err := controller.servicePB.CreatePB(productBatches)
-		if err != nil {
-			context.JSON(http.StatusConflict,
-				web.NewResponse(http.StatusConflict, nil, err.Error()))
-			return
-		}
-
-		context.JSON(
-			http.StatusCreated,
-			web.NewResponse(http.StatusCreated, prodPb, ""))
-	}
-}
-
-func getRequestId(context *gin.Context, typeParam string) (paramId int64, err error) {
-	switch typeParam {
-	case "Param":
-		id := context.Param("id")
-		paramId, err = strconv.ParseInt(id, 10, 64)
-		return
-	case "Query":
-		id := context.Query("id")
-		paramId, err = strconv.ParseInt(id, 10, 64)
-		return
-	}
+func getRequestId(context *gin.Context) (paramId int64, err error) {
+	id := context.Param("id")
+	paramId, err = strconv.ParseInt(id, 10, 64)
 	return
 }

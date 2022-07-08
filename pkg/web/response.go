@@ -7,8 +7,6 @@ import (
 	"reflect"
 	"strings"
 
-	//"github.com/cpereira42/mercado-fresco-pron4/internal/section"
-
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )
@@ -37,7 +35,7 @@ func msgForTag(tag string) string {
 		return "This field is required"
 	case "numeric":
 		return "This field only accepts numbers"
-	case "ascii":
+	case "datetime":
 		return "This field has an invalid date value"
 	}
 	return ""

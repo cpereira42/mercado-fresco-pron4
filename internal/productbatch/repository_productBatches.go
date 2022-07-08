@@ -3,10 +3,9 @@ package productbatch
 import (
 	"database/sql"
 	"errors"
+	"regexp"
 
-	"github.com/cpereira42/mercado-fresco-pron4/internal/products"
-	"github.com/cpereira42/mercado-fresco-pron4/internal/section"
-	"github.com/cpereira42/mercado-fresco-pron4/pkg/store"
+	"github.com/cpereira42/mercado-fresco-pron4/pkg/util"
 )
 
 type repositoryProductBatches struct {
@@ -17,8 +16,28 @@ func NewRepositoryProductBatches(conn *sql.DB) RepositoryProductBatches {
 	return &repositoryProductBatches{db: conn}
 }
 
+func (repo *repositoryProductBatches) validateFieldsDateAndTime(object ProductBatches) (bool, error) {
+	dataValidRe := regexp.MustCompile(`\d{4}-\d{2}-\d{2}`)
+	validateFullRe := regexp.MustCompile(`\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}`)
+	if !validateFullRe.MatchString(object.ManufacturingHour) {
+		return false, errors.New("manufacturing_hour is invalid must use ':' to separate the time, ex: '00:00:00'")
+	}
+	if !dataValidRe.MatchString(object.ManufacturingDate) {
+		return false, errors.New("manufacturing_date is invalid must use '-' to separate date ex: '000-00-00'")
+	}
+	if !dataValidRe.MatchString(object.DueDate) {
+		return false, errors.New("due_date is invalid must use '-' to separate date ex: '000-00-00'")
+	}
+	return true, nil
+}
+
 func (repo *repositoryProductBatches) CreatePB(object ProductBatches) (ProductBatches, error) {
-	res, err := repo.db.Exec(sqlCreatePB,
+	ok, err := repo.validateFieldsDateAndTime(object)
+	if !ok {
+		return ProductBatches{}, err
+	}
+
+	res, err := repo.db.Exec(SqlCreatePB,
 		&object.BatchNumber,
 		&object.CurrentQuantity,
 		&object.CurrentTemperature,
@@ -31,7 +50,7 @@ func (repo *repositoryProductBatches) CreatePB(object ProductBatches) (ProductBa
 		&object.SectionId,
 	)
 	if err != nil {
-		return object, err
+		return object, util.CheckError(err)
 	}
 	rows, err := res.RowsAffected()
 	if err != nil {
@@ -45,12 +64,12 @@ func (repo *repositoryProductBatches) CreatePB(object ProductBatches) (ProductBa
 	return object, nil
 }
 
-func (repo *repositoryProductBatches) ReadPBSectionTodo() ([]ProductBatchesResponse, error) {
+func (repo *repositoryProductBatches) GetAll() ([]ProductBatchesResponse, error) {
 	// consulta sem o section_id
 	productBatList := []ProductBatchesResponse{}
-	rows, err := repo.db.Query(sqlrelatorioTodo)
+	rows, err := repo.db.Query(SqlrelatorioTodo)
 	if err != nil {
-		return productBatList, err
+		return productBatList, errors.New("query sql invalid")
 	}
 	defer rows.Close()
 
@@ -63,59 +82,23 @@ func (repo *repositoryProductBatches) ReadPBSectionTodo() ([]ProductBatchesRespo
 			&productBatchesRes.ProductsCount,
 		)
 		if err != nil {
-			return []ProductBatchesResponse{}, err
+			return []ProductBatchesResponse{}, errors.New("failed to serialize product_batches_response fields")
 		}
 		productBatList = append(productBatList, productBatchesRes)
 	}
 	return productBatList, nil
 }
 
-func (repo *repositoryProductBatches) ReadPBSectionId(id int64) (ProductBatchesResponse, error) {
+func (repo *repositoryProductBatches) GetId(id int64) (ProductBatchesResponse, error) {
 	messageErr := errors.New("section_id not found")
-	result, err := repo.db.Query(sqlrelatorioSectioId, id)
-	if err != nil {
+	result := repo.db.QueryRow(SqlrelatorioSectioId, id)
+
+	productBatchesResponse := ProductBatchesResponse{}
+	if err := result.Scan(
+		&productBatchesResponse.SectionId,
+		&productBatchesResponse.SectionNumber,
+		&productBatchesResponse.ProductsCount); err != nil {
 		return ProductBatchesResponse{}, messageErr
 	}
-	if result.Next() {
-		productBatchesResponse := ProductBatchesResponse{}
-		if err := result.Scan(
-			&productBatchesResponse.SectionId,
-			&productBatchesResponse.SectionNumber,
-			&productBatchesResponse.ProductsCount); err != nil {
-			return ProductBatchesResponse{}, messageErr
-		}
-		return productBatchesResponse, nil
-	}
-	return ProductBatchesResponse{}, messageErr
-}
-
-func (repo *repositoryProductBatches) SearchSectionId(id int64) error {
-	repoSection := section.NewRepository(repo.db)
-	_, err := repoSection.ListarSectionOne(id)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (repo *repositoryProductBatches) SearchProductById(id int) error {
-	dbProducts := store.New(store.FileType, "./internal/repositories/products.json")
-	repoProduct := products.NewRepositoryProducts(dbProducts)
-
-	if _, err := repoProduct.GetId(id); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (repo *repositoryProductBatches) GetByBatcheNumber(batch_number string) (bool, error) {
-	rows, err := repo.db.Query(sqlBatcheNumber, batch_number)
-	if err != nil {
-		return false, err
-	}
-	var objPB ProductBatches
-	if err := rows.Scan(&objPB.BatchNumber); err != nil {
-		return false, err
-	}
-	return true, nil
+	return productBatchesResponse, nil
 }

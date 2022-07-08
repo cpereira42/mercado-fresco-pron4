@@ -51,9 +51,11 @@ func main() {
 
 	repoPB := productbatch.NewRepositoryProductBatches(conn)
 	servicePB := productbatch.NewServiceProductBatches(repoPB)
+	productBatchesController := handler.NewProductBatChesController(servicePB)
+
 	repSection := section.NewRepository(conn)
 	serviceSection := section.NewService(repSection)
-	sectionController := handler.NewSectionController(serviceSection, servicePB)
+	sectionController := handler.NewSectionController(serviceSection)
 
 	dbSeller := store.New(store.FileType, "../mercado-fresco-pron4/internal/repositories/sellers.json")
 	repoSeller := seller.NewRepositorySeller(dbSeller)
@@ -96,8 +98,10 @@ func main() {
 	section.POST("/", sectionController.CreateSection())
 	section.PATCH("/:id", sectionController.UpdateSection())
 	section.DELETE("/:id", sectionController.DeleteSection())
-	section.GET("/reportProducts", sectionController.ReadPB())     // new
-	r.POST("/api/v1/productBatches", sectionController.CreatePB()) // new
+	section.GET("/reportProducts", productBatchesController.ReadPB()) // new
+
+	productBatches := r.Group("/api/v1/productBatches")          // new
+	productBatches.POST("", productBatchesController.CreatePB()) // new
 
 	wr := r.Group("api/v1/warehouse")
 	wr.GET("/", w.GetAll)

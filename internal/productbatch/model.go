@@ -13,16 +13,16 @@ package productbatch
 // • section_id: ID da seção
 type ProductBatches struct {
 	Id                 int     `json:"id,omitempty"`
-	BatchNumber        string  `json:"batch_number" binding:"required,numeric"`
-	CurrentQuantity    int     `json:"current_quantity" binding:"required,numeric"`
+	BatchNumber        string  `json:"batch_number" binding:"numeric,required"`
+	CurrentQuantity    int     `json:"current_quantity" binding:"numeric,required"`
 	CurrentTemperature float64 `json:"current_temperature" binding:"required"`
-	DueDate            string  `json:"due_date" binding:"required"`
-	InitialQuantity    int     `json:"initial_quantity" binding:"required,numeric"`
-	ManufacturingDate  string  `json:"manufacturing_date" binding:"required"`
-	ManufacturingHour  string  `json:"manufacturing_hour" binding:"required"`
-	MinimumTemperature float64 `json:"minimum_temperature" binding:"required,numeric"`
-	ProductId          int     `json:"product_id" binding:"required,numeric"`
-	SectionId          int     `json:"section_id" binding:"required,numeric"`
+	DueDate            string  `json:"due_date" validate:"datetime,required"`
+	InitialQuantity    int     `json:"initial_quantity" binding:"numeric,required"`
+	ManufacturingDate  string  `json:"manufacturing_date" validate:"datetime,required"`
+	ManufacturingHour  string  `json:"manufacturing_hour" validate:"datetime,required"`
+	MinimumTemperature float64 `json:"minimum_temperature" binding:"numeric,required"`
+	ProductId          int     `json:"product_id" binding:"numeric,required"`
+	SectionId          int     `json:"section_id" binding:"numeric,required"`
 }
 
 type ProductBatchesResponse struct {
@@ -33,15 +33,12 @@ type ProductBatchesResponse struct {
 
 type RepositoryProductBatches interface {
 	CreatePB(productBatches ProductBatches) (ProductBatches, error)
-	ReadPBSectionTodo() ([]ProductBatchesResponse, error)
-	ReadPBSectionId(id int64) (ProductBatchesResponse, error)
-	GetByBatcheNumber(batch_number string) (bool, error)
-	SearchProductById(id int) error
-	SearchSectionId(id int64) error 
+	GetAll() ([]ProductBatchesResponse, error)
+	GetId(id int64) (ProductBatchesResponse, error)
 }
 
 type ServicePB interface {
 	CreatePB(productBatches ProductBatches) (ProductBatches, error)
-	ReadPBSectionTodo() ([]ProductBatchesResponse, error)
-	ReadPBSectionId(id int64) (ProductBatchesResponse, error)
+	GetAll() ([]ProductBatchesResponse, error)
+	GetId(id int64) (ProductBatchesResponse, error)
 }
