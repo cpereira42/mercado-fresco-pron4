@@ -1,17 +1,16 @@
 package handler_test
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/cpereira42/mercado-fresco-pron4/cmd/server/handler"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/seller"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/seller/mocks"
+	"github.com/cpereira42/mercado-fresco-pron4/pkg/util"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	tmock "github.com/stretchr/testify/mock"
@@ -23,16 +22,10 @@ var sListSuccess []seller.Seller = []seller.Seller{
 	seller1,
 }
 
-func CreateRequestTestSeller(method string, url string, body string) (*http.Request, *httptest.ResponseRecorder) {
-	req := httptest.NewRequest(method, url, bytes.NewBuffer([]byte(body)))
-	req.Header.Add("Content-Type", "application/json")
-	return req, httptest.NewRecorder()
-}
-
 func TestControllerGetAllSeller(t *testing.T) {
 	t.Run(
 		"Test GetAll - OK", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodGet, "/api/v1/sellers/", "")
+			req, rr := util.CreateRequestTest(http.MethodGet, "/api/v1/sellers/", "")
 			serviceMock := new(mocks.Service)
 			s := handler.NewSeller(serviceMock)
 			r := gin.Default()
@@ -51,7 +44,7 @@ func TestControllerGetAllSeller(t *testing.T) {
 		})
 	t.Run(
 		"Test GetAll - Error - Could not read file", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodGet, "/api/v1/sellers/", "")
+			req, rr := util.CreateRequestTest(http.MethodGet, "/api/v1/sellers/", "")
 			serviceMock := new(mocks.Service)
 			s := handler.NewSeller(serviceMock)
 			r := gin.Default()
@@ -71,7 +64,7 @@ func TestControllerGetAllSeller(t *testing.T) {
 		})
 	t.Run(
 		"Test GetAll - Error - Sellers length == 0", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodGet, "/api/v1/sellers/", "")
+			req, rr := util.CreateRequestTest(http.MethodGet, "/api/v1/sellers/", "")
 			serviceMock := new(mocks.Service)
 			s := handler.NewSeller(serviceMock)
 			r := gin.Default()
@@ -96,7 +89,7 @@ func TestControllerGetAllSeller(t *testing.T) {
 func TestControllerDeleteSeller(t *testing.T) {
 	t.Run(
 		"Test Delete - OK", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodDelete, "/api/v1/sellers/1", "")
+			req, rr := util.CreateRequestTest(http.MethodDelete, "/api/v1/sellers/1", "")
 			serviceMock := new(mocks.Service)
 			s := handler.NewSeller(serviceMock)
 			r := gin.Default()
@@ -108,7 +101,7 @@ func TestControllerDeleteSeller(t *testing.T) {
 		})
 	t.Run(
 		"Test Delete - Error - Invalid ID", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodDelete, "/api/v1/sellers/a", "")
+			req, rr := util.CreateRequestTest(http.MethodDelete, "/api/v1/sellers/a", "")
 			serviceMock := new(mocks.Service)
 			s := handler.NewSeller(serviceMock)
 			r := gin.Default()
@@ -126,7 +119,7 @@ func TestControllerDeleteSeller(t *testing.T) {
 		})
 	t.Run(
 		"Test Delete - Error - ID not found", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodDelete, "/api/v1/sellers/2", "")
+			req, rr := util.CreateRequestTest(http.MethodDelete, "/api/v1/sellers/2", "")
 			serviceMock := new(mocks.Service)
 			serviceMock.On("Delete", 2).Return(fmt.Errorf("Seller 2 not found"))
 			s := handler.NewSeller(serviceMock)
@@ -148,7 +141,7 @@ func TestControllerDeleteSeller(t *testing.T) {
 func TestControllerGetIdSeller(t *testing.T) {
 	t.Run(
 		"Test GetId - OK", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodGet, "/api/v1/sellers/1", "")
+			req, rr := util.CreateRequestTest(http.MethodGet, "/api/v1/sellers/1", "")
 			serviceMock := new(mocks.Service)
 			s := handler.NewSeller(serviceMock)
 			r := gin.Default()
@@ -167,7 +160,7 @@ func TestControllerGetIdSeller(t *testing.T) {
 		})
 	t.Run(
 		"Test GetId - Error - Invalid ID", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodGet, "/api/v1/sellers/a", "")
+			req, rr := util.CreateRequestTest(http.MethodGet, "/api/v1/sellers/a", "")
 			serviceMock := new(mocks.Service)
 			s := handler.NewSeller(serviceMock)
 			r := gin.Default()
@@ -185,7 +178,7 @@ func TestControllerGetIdSeller(t *testing.T) {
 		})
 	t.Run(
 		"Test GetId - Error - ID not found", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodGet, "/api/v1/sellers/2", "")
+			req, rr := util.CreateRequestTest(http.MethodGet, "/api/v1/sellers/2", "")
 			serviceMock := new(mocks.Service)
 			serviceMock.On("GetId", 2).Return(seller.Seller{}, fmt.Errorf("Seller 2 not found"))
 			s := handler.NewSeller(serviceMock)
@@ -209,7 +202,7 @@ func TestControllerGetIdSeller(t *testing.T) {
 func TestControllerCreateSeller(t *testing.T) {
 	t.Run(
 		"Test Create - OK", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodPost, "/api/v1/sellers/",
+			req, rr := util.CreateRequestTest(http.MethodPost, "/api/v1/sellers/",
 				`{
 				"cid": "200", 
 				"company_name": "MELI", 
@@ -241,7 +234,7 @@ func TestControllerCreateSeller(t *testing.T) {
 		})
 	t.Run(
 		"Test Create - Requisition Body error - without Telephone", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodPost, "/api/v1/sellers/",
+			req, rr := util.CreateRequestTest(http.MethodPost, "/api/v1/sellers/",
 				`{
 					"cid": "200", 
 					"company_name": "MELI", 
@@ -268,7 +261,7 @@ func TestControllerCreateSeller(t *testing.T) {
 		})
 	t.Run(
 		"Test Create - CID already registered", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodPost, "/api/v1/sellers/",
+			req, rr := util.CreateRequestTest(http.MethodPost, "/api/v1/sellers/",
 				`{
 						"cid": "200", 
 						"company_name": "MELI", 
@@ -304,7 +297,7 @@ func TestControllerCreateSeller(t *testing.T) {
 func TestControllerUpdateSeller(t *testing.T) {
 	t.Run(
 		"Test Update - OK", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodPatch, "/api/v1/sellers/1",
+			req, rr := util.CreateRequestTest(http.MethodPatch, "/api/v1/sellers/1",
 				`{
 				"cid": "200", 
 				"company_name": "MELI", 
@@ -338,7 +331,7 @@ func TestControllerUpdateSeller(t *testing.T) {
 		})
 	t.Run(
 		"Test Update - Invalid ID", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodPatch, "/api/v1/sellers/a",
+			req, rr := util.CreateRequestTest(http.MethodPatch, "/api/v1/sellers/a",
 				`{
 					"cid": "200", 
 					"company_name": "MELI", 
@@ -363,7 +356,7 @@ func TestControllerUpdateSeller(t *testing.T) {
 		})
 	t.Run(
 		"Test Update - Invalid JSON body", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodPatch, "/api/v1/sellers/1",
+			req, rr := util.CreateRequestTest(http.MethodPatch, "/api/v1/sellers/1",
 				`{
 				"cid": 200, 
 				"company_name": "MELI" 
@@ -387,7 +380,7 @@ func TestControllerUpdateSeller(t *testing.T) {
 		})
 	t.Run(
 		"Test Update - ID not found", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodPatch, "/api/v1/sellers/2",
+			req, rr := util.CreateRequestTest(http.MethodPatch, "/api/v1/sellers/2",
 				`{
 					"cid": "200", 
 					"company_name": "MELI", 

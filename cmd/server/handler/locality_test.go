@@ -1,17 +1,16 @@
 package handler_test
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/cpereira42/mercado-fresco-pron4/cmd/server/handler"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/locality"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/locality/mocks"
+	"github.com/cpereira42/mercado-fresco-pron4/pkg/util"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	tmock "github.com/stretchr/testify/mock"
@@ -22,16 +21,10 @@ var report1 = locality.LocalityReport{1, "Itabaiana", 2}
 var report2 = locality.LocalityReport{2, "Aracaju", 4}
 var reportList = []locality.LocalityReport{report1, report2}
 
-func CreateRequestTestLocality(method string, url string, body string) (*http.Request, *httptest.ResponseRecorder) {
-	req := httptest.NewRequest(method, url, bytes.NewBuffer([]byte(body)))
-	req.Header.Add("Content-Type", "application/json")
-	return req, httptest.NewRecorder()
-}
-
 func TestControllerCreateLocality(t *testing.T) {
 	t.Run(
 		"Test Create - OK", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodPost, "/api/v1/localities/",
+			req, rr := util.CreateRequestTest(http.MethodPost, "/api/v1/localities/",
 				`{
 					"id": 1000,
 			"locality_name": "Itabaiana",
@@ -61,7 +54,7 @@ func TestControllerCreateLocality(t *testing.T) {
 		})
 	t.Run(
 		"Test Create - Fail - Invalid Arguments", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodPost, "/api/v1/localities/",
+			req, rr := util.CreateRequestTest(http.MethodPost, "/api/v1/localities/",
 				`{
 				"locality_name": "Itabaiana",
 				"province_name": "Sergipe",
@@ -88,7 +81,7 @@ func TestControllerCreateLocality(t *testing.T) {
 		})
 	t.Run(
 		"Test Create - ID already registered", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodPost, "/api/v1/localities/",
+			req, rr := util.CreateRequestTest(http.MethodPost, "/api/v1/localities/",
 				`{
 				"id": 1000,
 				"locality_name": "Itabaiana",
@@ -123,7 +116,7 @@ func TestControllerCreateLocality(t *testing.T) {
 func TestControllerGenerateReportAll(t *testing.T) {
 	t.Run(
 		"Test GenerateReportAll - OK", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodGet, "/api/v1/localities/", "")
+			req, rr := util.CreateRequestTest(http.MethodGet, "/api/v1/localities/", "")
 			serviceMock := new(mocks.Service)
 			s := handler.NewLocality(serviceMock)
 			r := gin.Default()
@@ -142,7 +135,7 @@ func TestControllerGenerateReportAll(t *testing.T) {
 		})
 	t.Run(
 		"Test GenerateReportAll - DB Error", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodGet, "/api/v1/localities/", "")
+			req, rr := util.CreateRequestTest(http.MethodGet, "/api/v1/localities/", "")
 			serviceMock := new(mocks.Service)
 			s := handler.NewLocality(serviceMock)
 			r := gin.Default()
@@ -165,7 +158,7 @@ func TestControllerGenerateReportAll(t *testing.T) {
 func TestControllerGenerateReportById(t *testing.T) {
 	t.Run(
 		"Test GenerateReportById - OK", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodGet, "/api/v1/localities/1", "")
+			req, rr := util.CreateRequestTest(http.MethodGet, "/api/v1/localities/1", "")
 			serviceMock := new(mocks.Service)
 			s := handler.NewLocality(serviceMock)
 			r := gin.Default()
@@ -184,7 +177,7 @@ func TestControllerGenerateReportById(t *testing.T) {
 		})
 	t.Run(
 		"Test GenerateReportById - Invalid ID", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodGet, "/api/v1/localities/a", "")
+			req, rr := util.CreateRequestTest(http.MethodGet, "/api/v1/localities/a", "")
 			serviceMock := new(mocks.Service)
 			s := handler.NewLocality(serviceMock)
 			r := gin.Default()
@@ -204,7 +197,7 @@ func TestControllerGenerateReportById(t *testing.T) {
 		})
 	t.Run(
 		"Test GenerateReportById - ID not found", func(t *testing.T) {
-			req, rr := createRequestTest(http.MethodGet, "/api/v1/localities/4", "")
+			req, rr := util.CreateRequestTest(http.MethodGet, "/api/v1/localities/4", "")
 			serviceMock := new(mocks.Service)
 			s := handler.NewLocality(serviceMock)
 			r := gin.Default()
