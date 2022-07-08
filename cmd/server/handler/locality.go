@@ -26,7 +26,7 @@ func (l *Locality) Create() gin.HandlerFunc {
 			return
 		}
 
-		locality, err := l.service.Create(req.LocalityName, req.ProvinceName, req.CountryName)
+		locality, err := l.service.Create(req.Id, req.LocalityName, req.ProvinceName, req.CountryName)
 
 		if err != nil {
 			ctx.JSON(

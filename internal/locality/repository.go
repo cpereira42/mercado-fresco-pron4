@@ -3,10 +3,11 @@ package locality
 import (
 	"database/sql"
 	"fmt"
+	"log"
 )
 
 type RepositoryLocality interface {
-	Create(localityName, provinceName, countryName string) (Locality, error)
+	Create(id int, localityName, provinceName, countryName string) (Locality, error)
 	GenerateReportAll() ([]LocalityReport, error)
 	GenerateReportById(id int) (LocalityReport, error)
 	GetAll() ([]Locality, error)
@@ -22,12 +23,13 @@ func NewRepositoryLocality(db *sql.DB) *repositoryLocality {
 	}
 }
 
-func (r *repositoryLocality) Create(localityName, provinceName, countryName string) (Locality, error) {
+func (r *repositoryLocality) Create(id int, localityName, provinceName, countryName string) (Locality, error) {
 	stmt, err := r.db.Prepare(`INSERT INTO localities 
-	(locality_name,
+	(id,
+	locality_name,
 	province_name,
 	country_name) 
-   	VALUES(?,?,?)`)
+   	VALUES(?,?,?,?)`)
 
 	if err != nil {
 		return Locality{}, err
@@ -35,6 +37,7 @@ func (r *repositoryLocality) Create(localityName, provinceName, countryName stri
 	defer stmt.Close()
 
 	rows, err := stmt.Exec(
+		id,
 		localityName,
 		provinceName,
 		countryName,
@@ -42,11 +45,13 @@ func (r *repositoryLocality) Create(localityName, provinceName, countryName stri
 	if err != nil {
 		return Locality{}, fmt.Errorf("Locality already registered")
 	}
-	lastID, err := rows.LastInsertId()
-	if err != nil {
-		return Locality{}, err
-	}
-	newLocality := Locality{int(lastID), localityName, provinceName, countryName}
+
+	log.Println(rows.RowsAffected())
+	// lastID, err := rows.LastInsertId()
+	// if err != nil {
+	// 	return Locality{}, err
+	// }
+	newLocality := Locality{id, localityName, provinceName, countryName}
 	return newLocality, nil
 }
 

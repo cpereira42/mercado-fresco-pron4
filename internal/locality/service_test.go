@@ -12,18 +12,19 @@ import (
 
 func TestServiceCreate(t *testing.T) {
 	mockRespository := new(mocks.RepositoryLocality)
-	locality1 := locality.Locality{1, "Itabaiana", "Sergipe", "Brasil"}
+	locality1 := locality.Locality{1000, "Itabaiana", "Sergipe", "Brasil"}
 
 	t.Run(
 		"If all necessary fields are complete, a new locality is created",
 		func(t *testing.T) {
 			mockRespository.On("Create",
+				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string")).
 				Return(locality1, nil).Once()
 			service := locality.NewService(mockRespository)
-			newLocality, err := service.Create("Itabaiana", "Sergipe", "Brasil")
+			newLocality, err := service.Create(1000, "Itabaiana", "Sergipe", "Brasil")
 			assert.NoError(t, err)
 			assert.Equal(t, "Itabaiana", newLocality.LocalityName)
 			assert.Equal(t, "Sergipe", newLocality.ProvinceName)
@@ -36,6 +37,7 @@ func TestServiceCreate(t *testing.T) {
 		func(t *testing.T) {
 			msgError := fmt.Errorf("Locality already registered")
 			mockRespository.On("Create",
+				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string")).
@@ -43,7 +45,7 @@ func TestServiceCreate(t *testing.T) {
 
 			service := locality.NewService(mockRespository)
 
-			newLocality, err := service.Create("Itabaiana", "Sergipe", "Brasil")
+			newLocality, err := service.Create(1000, "Itabaiana", "Sergipe", "Brasil")
 
 			assert.Error(t, err)
 
@@ -60,13 +62,14 @@ func TestServiceCreate(t *testing.T) {
 			mockRespository := new(mocks.RepositoryLocality)
 			msgError := fmt.Errorf("Could not connect to database")
 			mockRespository.On("Create",
+				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string")).
 				Return(locality.Locality{}, msgError).Once()
 			service := locality.NewService(mockRespository)
 
-			newLocality, err := service.Create("Itabaiana", "Sergipe", "Brasil")
+			newLocality, err := service.Create(1000, "Itabaiana", "Sergipe", "Brasil")
 
 			assert.Error(t, err)
 

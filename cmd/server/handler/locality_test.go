@@ -33,6 +33,7 @@ func TestControllerCreateLocality(t *testing.T) {
 		"Test Create - OK", func(t *testing.T) {
 			req, rr := createRequestTest(http.MethodPost, "/api/v1/localities/",
 				`{
+					"id": 1000,
 			"locality_name": "Itabaiana",
 			"province_name": "Sergipe",
 			"country_name": "Brasil"
@@ -41,6 +42,7 @@ func TestControllerCreateLocality(t *testing.T) {
 			s := handler.NewLocality(serviceMock)
 			r := gin.Default()
 			serviceMock.On("Create",
+				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string")).
@@ -62,7 +64,8 @@ func TestControllerCreateLocality(t *testing.T) {
 			req, rr := createRequestTest(http.MethodPost, "/api/v1/localities/",
 				`{
 				"locality_name": "Itabaiana",
-				"province_name": "Sergipe"
+				"province_name": "Sergipe",
+				"country_name": "Brasil"
 			}`)
 			serviceMock := new(mocks.Service)
 			s := handler.NewLocality(serviceMock)
@@ -81,12 +84,13 @@ func TestControllerCreateLocality(t *testing.T) {
 			err := json.Unmarshal(rr.Body.Bytes(), &objResp)
 			assert.Nil(t, err)
 			assert.Equal(t, "This field is required", objResp.Data[0].Message)
-			assert.Equal(t, "country_name", objResp.Data[0].Field)
+			assert.Equal(t, "id", objResp.Data[0].Field)
 		})
 	t.Run(
-		"Test Create - locality name already registered", func(t *testing.T) {
+		"Test Create - ID already registered", func(t *testing.T) {
 			req, rr := createRequestTest(http.MethodPost, "/api/v1/localities/",
 				`{
+				"id": 1000,
 				"locality_name": "Itabaiana",
 				"province_name": "Sergipe",
 				"country_name": "Brasil"
@@ -96,6 +100,7 @@ func TestControllerCreateLocality(t *testing.T) {
 			r := gin.Default()
 			msgError := fmt.Errorf("Locality already registered")
 			serviceMock.On("Create",
+				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string")).

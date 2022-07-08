@@ -1,7 +1,7 @@
 package locality
 
 type Service interface {
-	Create(localityName, provinceName, countryName string) (Locality, error)
+	Create(id int, localityName, provinceName, countryName string) (Locality, error)
 	GenerateReportById(id int) (LocalityReport, error)
 	GenerateReportAll() ([]LocalityReport, error)
 }
@@ -16,8 +16,8 @@ func NewService(r RepositoryLocality) Service {
 	}
 }
 
-func (s *service) Create(localityName, provinceName, countryName string) (Locality, error) {
-	locality, err := s.repository.Create(localityName, provinceName, countryName)
+func (s *service) Create(id int, localityName, provinceName, countryName string) (Locality, error) {
+	locality, err := s.repository.Create(id, localityName, provinceName, countryName)
 
 	if err != nil {
 		return Locality{}, err

@@ -12,20 +12,20 @@ type RepositoryLocality struct {
 	mock.Mock
 }
 
-// Create provides a mock function with given fields: localityName, provinceName, countryName
-func (_m *RepositoryLocality) Create(localityName string, provinceName string, countryName string) (locality.Locality, error) {
-	ret := _m.Called(localityName, provinceName, countryName)
+// Create provides a mock function with given fields: id, localityName, provinceName, countryName
+func (_m *RepositoryLocality) Create(id int, localityName string, provinceName string, countryName string) (locality.Locality, error) {
+	ret := _m.Called(id, localityName, provinceName, countryName)
 
 	var r0 locality.Locality
-	if rf, ok := ret.Get(0).(func(string, string, string) locality.Locality); ok {
-		r0 = rf(localityName, provinceName, countryName)
+	if rf, ok := ret.Get(0).(func(int, string, string, string) locality.Locality); ok {
+		r0 = rf(id, localityName, provinceName, countryName)
 	} else {
 		r0 = ret.Get(0).(locality.Locality)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string, string, string) error); ok {
-		r1 = rf(localityName, provinceName, countryName)
+	if rf, ok := ret.Get(1).(func(int, string, string, string) error); ok {
+		r1 = rf(id, localityName, provinceName, countryName)
 	} else {
 		r1 = ret.Error(1)
 	}

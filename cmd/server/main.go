@@ -8,9 +8,6 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 
-	"github.com/cpereira42/mercado-fresco-pron4/internal/productbatch"
-	"github.com/cpereira42/mercado-fresco-pron4/internal/section"
-
 	"github.com/cpereira42/mercado-fresco-pron4/cmd/server/handler"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/buyer"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/employee"
@@ -50,12 +47,6 @@ func main() {
 	svcWarehouse := warehouse.NewService(repoWarehouse)
 	w := handler.NewWarehouse(svcWarehouse)
 
-	repoPB := productbatch.NewRepositoryProductBatches(conn)
-	servicePB := productbatch.NewServiceProductBatches(repoPB)
-	repSection := section.NewRepository(conn)
-	serviceSection := section.NewService(repSection)
-	sectionController := handler.NewSectionController(serviceSection, servicePB)
-
 	// dbSeller := store.New(store.FileType, "../mercado-fresco-pron4/internal/repositories/sellers.json")
 	repoSeller := seller.NewRepositorySeller(conn)
 	serviceSeller := seller.NewService(repoSeller)
@@ -94,15 +85,6 @@ func main() {
 	routesEmployees.POST("/", handlerEmployees.Create())
 	routesEmployees.PATCH("/:id", handlerEmployees.Update())
 	routesEmployees.DELETE("/:id", handlerEmployees.Delete())
-
-	section := r.Group("/api/v1/sections")
-	section.GET("/", sectionController.ListarSectionAll())
-	section.GET("/:id", sectionController.ListarSectionOne())
-	section.POST("/", sectionController.CreateSection())
-	section.PATCH("/:id", sectionController.UpdateSection())
-	section.DELETE("/:id", sectionController.DeleteSection())
-	section.GET("/reportProducts", sectionController.ReadPB())     // new
-	r.POST("/api/v1/productBatches", sectionController.CreatePB()) // new
 
 	wr := r.Group("api/v1/warehouse")
 	wr.GET("/", w.GetAll)
