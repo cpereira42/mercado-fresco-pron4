@@ -10,7 +10,7 @@ type RepositoryLocality interface {
 	Create(id int, localityName, provinceName, countryName string) (Locality, error)
 	GenerateReportAll() ([]LocalityReport, error)
 	GenerateReportById(id int) (LocalityReport, error)
-	GetAll() ([]Locality, error)
+	// GetAll() ([]Locality, error)
 }
 
 type repositoryLocality struct {
@@ -47,10 +47,6 @@ func (r *repositoryLocality) Create(id int, localityName, provinceName, countryN
 	}
 
 	log.Println(rows.RowsAffected())
-	// lastID, err := rows.LastInsertId()
-	// if err != nil {
-	// 	return Locality{}, err
-	// }
 	newLocality := Locality{id, localityName, provinceName, countryName}
 	return newLocality, nil
 }
@@ -109,28 +105,28 @@ func (r *repositoryLocality) GenerateReportById(id int) (LocalityReport, error) 
 	return locality, nil
 }
 
-func (r *repositoryLocality) GetAll() ([]Locality, error) {
-	var localityList []Locality
-	rows, err := r.db.Query("SELECT * FROM localities")
-	if err != nil {
-		return localityList, err
-	}
-	defer rows.Close()
+// func (r *repositoryLocality) GetAll() ([]Locality, error) {
+// 	var localityList []Locality
+// 	rows, err := r.db.Query("SELECT * FROM localities")
+// 	if err != nil {
+// 		return localityList, err
+// 	}
+// 	defer rows.Close()
 
-	for rows.Next() {
-		locality := Locality{}
+// 	for rows.Next() {
+// 		locality := Locality{}
 
-		err := rows.Scan(
-			&locality.Id,
-			&locality.LocalityName,
-			&locality.ProvinceName,
-			&locality.CountryName,
-		)
-		if err != nil {
-			return localityList, err
-		}
-		localityList = append(localityList, locality)
-	}
+// 		err := rows.Scan(
+// 			&locality.Id,
+// 			&locality.LocalityName,
+// 			&locality.ProvinceName,
+// 			&locality.CountryName,
+// 		)
+// 		if err != nil {
+// 			return localityList, err
+// 		}
+// 		localityList = append(localityList, locality)
+// 	}
 
-	return localityList, nil
-}
+// 	return localityList, nil
+// }

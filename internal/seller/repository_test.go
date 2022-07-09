@@ -16,10 +16,6 @@ import (
 var seller1 = seller.Seller{1, "cid1", "MELI", "Andromeda 860", "444-555", 1}
 var seller2 = seller.Seller{2, "cid2", "MELI", "Andromeda 970", "344-556", 1}
 
-// var seller3 = seller.Seller{3, "cid3", "MELI", "Bahia 555", "999-333", 2}
-// var seller4 = seller.Seller{4, "cid4", "MELI", "Bahia 555", "999-333", 3}
-// var seller5 = seller.Seller{4, "cid5", "MELI", "Bahia 555", "999-333", 2}
-
 func TestGetAll(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	assert.NoError(t, err)
@@ -311,17 +307,4 @@ func TestDelete(t *testing.T) {
 
 		assert.NotNil(t, err)
 	})
-	// t.Run("Delete - Seller Not found", func(t *testing.T) {
-
-	// 	db, mock, err := sqlmock.New()
-	// 	assert.NoError(t, err)
-	// 	defer db.Close()
-	// 	sellersRepo := seller.NewRepositorySeller(db)
-	// 	stmt := mock.ExpectPrepare(regexp.QuoteMeta(query))
-	// 	stmt.ExpectQuery().WithArgs(1).WillReturnError(fmt.Errorf("Seller 1 not found"))
-
-	// 	err = sellersRepo.Delete(1)
-	// 	assert.Equal(t, fmt.Errorf("Seller 1 not found"), err)
-
-	// })
 }
