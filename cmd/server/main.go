@@ -12,6 +12,7 @@ import (
 	"github.com/cpereira42/mercado-fresco-pron4/internal/buyer"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/employee"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/locality"
+	"github.com/cpereira42/mercado-fresco-pron4/internal/productbatch"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/products"
 
 	"github.com/cpereira42/mercado-fresco-pron4/internal/seller"
@@ -47,13 +48,20 @@ func main() {
 	svcWarehouse := warehouse.NewService(repoWarehouse)
 	w := handler.NewWarehouse(svcWarehouse)
 
-	// dbSeller := store.New(store.FileType, "../mercado-fresco-pron4/internal/repositories/sellers.json")
 	repoSeller := seller.NewRepositorySeller(conn)
 	serviceSeller := seller.NewService(repoSeller)
 
 	repoLocality := locality.NewRepositoryLocality(conn)
 	serviceLocality := locality.NewService(repoLocality)
 	l := handler.NewLocality(serviceLocality)
+
+	repoPB := productbatch.NewRepositoryProductBatches(conn)
+	servicePB := productbatch.NewServiceProductBatches(repoPB)
+	productBatchesController := handler.NewProductBatChesController(servicePB)
+
+	repSection := section.NewRepository(conn)
+	serviceSection := section.NewService(repSection)
+	sectionController := handler.NewSectionController(serviceSection)
 
 	repositoryEmployees := employee.NewRepository(conn)
 	serviceEmployees := employee.NewService(repositoryEmployees)
@@ -84,6 +92,17 @@ func main() {
 	routesEmployees.POST("/", handlerEmployees.Create())
 	routesEmployees.PATCH("/:id", handlerEmployees.Update())
 	routesEmployees.DELETE("/:id", handlerEmployees.Delete())
+
+	section := r.Group("/api/v1/sections")
+	section.GET("/", sectionController.ListarSectionAll())
+	section.GET("/:id", sectionController.ListarSectionOne())
+	section.POST("/", sectionController.CreateSection())
+	section.PATCH("/:id", sectionController.UpdateSection())
+	section.DELETE("/:id", sectionController.DeleteSection())
+	section.GET("/reportProducts", productBatchesController.ReadPB()) // new
+
+	productBatches := r.Group("/api/v1/productBatches")          // new
+	productBatches.POST("", productBatchesController.CreatePB()) // new
 
 	wr := r.Group("api/v1/warehouse")
 	wr.GET("/", w.GetAll)
