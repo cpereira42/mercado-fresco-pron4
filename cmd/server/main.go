@@ -8,12 +8,11 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 
-	"github.com/cpereira42/mercado-fresco-pron4/internal/productbatch"
-	"github.com/cpereira42/mercado-fresco-pron4/internal/section"
-
 	"github.com/cpereira42/mercado-fresco-pron4/cmd/server/handler"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/buyer"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/employee"
+	"github.com/cpereira42/mercado-fresco-pron4/internal/locality"
+	"github.com/cpereira42/mercado-fresco-pron4/internal/productbatch"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/products"
 
 	"github.com/cpereira42/mercado-fresco-pron4/internal/seller"
@@ -49,6 +48,13 @@ func main() {
 	svcWarehouse := warehouse.NewService(repoWarehouse)
 	w := handler.NewWarehouse(svcWarehouse)
 
+	repoSeller := seller.NewRepositorySeller(conn)
+	serviceSeller := seller.NewService(repoSeller)
+
+	repoLocality := locality.NewRepositoryLocality(conn)
+	serviceLocality := locality.NewService(repoLocality)
+	l := handler.NewLocality(serviceLocality)
+
 	repoPB := productbatch.NewRepositoryProductBatches(conn)
 	servicePB := productbatch.NewServiceProductBatches(repoPB)
 	productBatchesController := handler.NewProductBatChesController(servicePB)
@@ -56,10 +62,6 @@ func main() {
 	repSection := section.NewRepository(conn)
 	serviceSection := section.NewService(repSection)
 	sectionController := handler.NewSectionController(serviceSection)
-
-	dbSeller := store.New(store.FileType, "../mercado-fresco-pron4/internal/repositories/sellers.json")
-	repoSeller := seller.NewRepositorySeller(dbSeller)
-	serviceSeller := seller.NewService(repoSeller)
 
 	repositoryEmployees := employee.NewRepository(conn)
 	serviceEmployees := employee.NewService(repositoryEmployees)
@@ -115,6 +117,11 @@ func main() {
 	buyers.POST("/", hdBuyers.Create())
 	buyers.PATCH("/:id", hdBuyers.Update())
 	buyers.DELETE("/:id", hdBuyers.Delete())
+
+	localities := r.Group("/api/v1/localities")
+	localities.POST("/", l.Create())
+	localities.GET("/", l.GenerateReportAll())
+	localities.GET("/:id", l.GenerateReportById())
 
 	r.Run()
 }

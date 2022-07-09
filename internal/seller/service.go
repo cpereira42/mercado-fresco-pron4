@@ -1,13 +1,10 @@
 package seller
 
-import "errors"
-
 type Service interface {
 	GetAll() ([]Seller, error)
 	GetId(id int) (Seller, error)
-	Create(cid int, company, adress, telephone string) (Seller, error)
-	CheckCid(cid int) (bool, error)
-	Update(id, cid int, company, adress, telephone string) (Seller, error)
+	Create(cid, company, address, telephone string, localityId int) (Seller, error)
+	Update(id int, cid, company, address, telephone string, localityId int) (Seller, error)
 	Delete(id int) error
 }
 
@@ -21,43 +18,15 @@ func NewService(r RepositorySeller) Service {
 	}
 }
 
-func (s *service) Create(cid int, company, adress, telephone string) (Seller, error) {
-	checkCid, err1 := s.CheckCid(cid)
-	if err1 != nil {
-		return Seller{}, err1
-	}
-	if !checkCid {
-		return Seller{}, errors.New("Cid already registered")
-	}
-	lastID, err2 := s.repository.LastID()
+func (s *service) Create(cid, company, address, telephone string, localityId int) (Seller, error) {
+	seller, err := s.repository.Create(cid, company, address, telephone, localityId)
 
-	if err2 != nil {
-		return Seller{}, err2
-	}
-
-	lastID++
-
-	product, err3 := s.repository.Create(lastID, cid, company, adress, telephone)
-
-	if err3 != nil {
-		return Seller{}, err3
-	}
-
-	return product, nil
-
-}
-
-func (s service) CheckCid(cid int) (bool, error) {
-	sellers, err := s.repository.GetAll()
 	if err != nil {
-		return false, errors.New("Could not read file")
+		return Seller{}, err
 	}
-	for _, seller := range sellers {
-		if seller.Cid == cid {
-			return false, nil
-		}
-	}
-	return true, nil
+
+	return seller, nil
+
 }
 
 func (s *service) GetAll() ([]Seller, error) {
@@ -76,12 +45,42 @@ func (s *service) GetId(id int) (Seller, error) {
 	return ps, nil
 }
 
-func (s *service) Update(id, cid int, company, adress, telephone string) (Seller, error) {
-	seller, err := s.repository.Update(id, cid, company, adress, telephone)
+func (s *service) Update(id int, cid, company, address, telephone string, localityId int) (Seller, error) {
+	seller, err := s.repository.GetId(id)
 	if err != nil {
 		return Seller{}, err
 	}
-	return seller, err
+	sellerToUpdate := Seller{}
+	if cid == "" {
+		sellerToUpdate.Cid = seller.Cid
+	} else {
+		sellerToUpdate.Cid = cid
+	}
+	if company == "" {
+		sellerToUpdate.CompanyName = seller.CompanyName
+	} else {
+		sellerToUpdate.CompanyName = company
+	}
+	if address == "" {
+		sellerToUpdate.Address = seller.Address
+	} else {
+		sellerToUpdate.Address = address
+	}
+	if telephone == "" {
+		sellerToUpdate.Telephone = seller.Telephone
+	} else {
+		sellerToUpdate.Telephone = telephone
+	}
+	if localityId == 0 {
+		sellerToUpdate.LocalityId = seller.LocalityId
+	} else {
+		sellerToUpdate.LocalityId = localityId
+	}
+	updatedSeller, err := s.repository.Update(id, sellerToUpdate.Cid, sellerToUpdate.CompanyName, sellerToUpdate.Address, sellerToUpdate.Telephone, sellerToUpdate.LocalityId)
+	if err != nil {
+		return Seller{}, err
+	}
+	return updatedSeller, nil
 }
 
 func (s *service) Delete(id int) error {
