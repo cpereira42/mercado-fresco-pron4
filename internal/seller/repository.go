@@ -135,13 +135,9 @@ func (r *repositorySeller) Update(id int, cid, company, address, telephone strin
 		return updatedSeller, handledError
 	}
 
-	totLines, err := rows.RowsAffected()
+	_, err = rows.RowsAffected()
 	if err != nil {
 		return Seller{}, err
-	}
-
-	if totLines == 0 {
-		return updatedSeller, err
 	}
 	return updatedSeller, nil
 }
@@ -164,13 +160,3 @@ func (r *repositorySeller) Delete(id int) error {
 	}
 	return nil
 }
-
-// func handleSQLError(sqlError error) error {
-// 	switch {
-// 	case strings.Contains(sqlError.Error(), "Cannot add or update a child row"):
-// 		return fmt.Errorf("Locality id not found")
-// 	case strings.Contains(sqlError.Error(), "Duplicate entry"):
-// 		return fmt.Errorf("Cid already registered")
-// 	}
-// 	return nil
-// }
