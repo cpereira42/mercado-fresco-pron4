@@ -12,41 +12,20 @@ type Service struct {
 	mock.Mock
 }
 
-// CheckCid provides a mock function with given fields: cid
-func (_m *Service) CheckCid(cid int) (bool, error) {
-	ret := _m.Called(cid)
-
-	var r0 bool
-	if rf, ok := ret.Get(0).(func(int) bool); ok {
-		r0 = rf(cid)
-	} else {
-		r0 = ret.Get(0).(bool)
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(int) error); ok {
-		r1 = rf(cid)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// Create provides a mock function with given fields: cid, company, adress, telephone
-func (_m *Service) Create(cid int, company string, adress string, telephone string) (seller.Seller, error) {
-	ret := _m.Called(cid, company, adress, telephone)
+// Create provides a mock function with given fields: cid, company, address, telephone, localityId
+func (_m *Service) Create(cid string, company string, address string, telephone string, localityId int) (seller.Seller, error) {
+	ret := _m.Called(cid, company, address, telephone, localityId)
 
 	var r0 seller.Seller
-	if rf, ok := ret.Get(0).(func(int, string, string, string) seller.Seller); ok {
-		r0 = rf(cid, company, adress, telephone)
+	if rf, ok := ret.Get(0).(func(string, string, string, string, int) seller.Seller); ok {
+		r0 = rf(cid, company, address, telephone, localityId)
 	} else {
 		r0 = ret.Get(0).(seller.Seller)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(int, string, string, string) error); ok {
-		r1 = rf(cid, company, adress, telephone)
+	if rf, ok := ret.Get(1).(func(string, string, string, string, int) error); ok {
+		r1 = rf(cid, company, address, telephone, localityId)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -112,20 +91,20 @@ func (_m *Service) GetId(id int) (seller.Seller, error) {
 	return r0, r1
 }
 
-// Update provides a mock function with given fields: id, cid, company, adress, telephone
-func (_m *Service) Update(id int, cid int, company string, adress string, telephone string) (seller.Seller, error) {
-	ret := _m.Called(id, cid, company, adress, telephone)
+// Update provides a mock function with given fields: id, cid, company, address, telephone, localityId
+func (_m *Service) Update(id int, cid string, company string, address string, telephone string, localityId int) (seller.Seller, error) {
+	ret := _m.Called(id, cid, company, address, telephone, localityId)
 
 	var r0 seller.Seller
-	if rf, ok := ret.Get(0).(func(int, int, string, string, string) seller.Seller); ok {
-		r0 = rf(id, cid, company, adress, telephone)
+	if rf, ok := ret.Get(0).(func(int, string, string, string, string, int) seller.Seller); ok {
+		r0 = rf(id, cid, company, address, telephone, localityId)
 	} else {
 		r0 = ret.Get(0).(seller.Seller)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(int, int, string, string, string) error); ok {
-		r1 = rf(id, cid, company, adress, telephone)
+	if rf, ok := ret.Get(1).(func(int, string, string, string, string, int) error); ok {
+		r1 = rf(id, cid, company, address, telephone, localityId)
 	} else {
 		r1 = ret.Error(1)
 	}
