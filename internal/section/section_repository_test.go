@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -147,7 +148,7 @@ func TestRepositoryCreateSection(t *testing.T) {
 		newSection, err := sectionRepo.CreateSection(*mockSection)
 
 		assert.Error(t, err)
-		// assert.Equal(t, expectError, err)
+		assert.True(t, strings.Contains(err.Error(), "expected 7, but got 8 arguments"))
 
 		sectionNumberfield := 0
 		assert.Equal(t, sectionNumberfield, newSection.SectionNumber)
@@ -378,8 +379,7 @@ func TestRepositoryListarSectionOne(t *testing.T) {
 
 		rows := sqlmock.NewRows([]string{
 			"Id", "SectionNumber", "CurrentCapacity", "CurrentTemperature", "MaximumCapacity", "MinimumCapacity", "MinimumTemperature", "ProductTypeId", "WarehouseId",
-		})
-		// .AddRow(sectionOne.Id, sectionOne.SectionNumber, sectionOne.CurrentCapacity, sectionOne.CurrentTemperature, sectionOne.MaximumCapacity, sectionOne.MinimumCapacity, sectionOne.MinimumTemperature, sectionOne.ProductTypeId, sectionOne.WarehouseId)
+		}).AddRow("", "", "", "", "", "", "", "", "")
 
 		mock.ExpectQuery(SqlSelectByID).WithArgs(10).WillReturnRows(rows)
 

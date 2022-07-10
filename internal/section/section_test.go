@@ -196,7 +196,6 @@ func TestServiceUpdateSection(t *testing.T) {
 			Return(sectionIntanceError, expectError).
 			Once()
 		service := section.NewService(mockRepository)
-
 		sectionId := int64(2)
 		sectionResult, err := service.UpdateSection(sectionId, sectionIntanceUpdate)
 		assert.Error(t, err)
@@ -213,7 +212,6 @@ func TestServiceUpdateSection(t *testing.T) {
 			Return(sectionIntanceError, expectError).
 			Once()
 		service := section.NewService(mockRepository)
-
 		sectionId := int64(2)
 		sectionResult, err := service.UpdateSection(sectionId, sectionIntanceUpdate)
 		assert.Error(t, err)
@@ -230,7 +228,6 @@ func TestServiceUpdateSection(t *testing.T) {
 			Return(sectionIntanceError, expectError).
 			Once()
 		service := section.NewService(mockRepository)
-
 		sectionId := int64(2)
 		sectionResult, err := service.UpdateSection(sectionId, sectionIntanceUpdate)
 		assert.Error(t, err)

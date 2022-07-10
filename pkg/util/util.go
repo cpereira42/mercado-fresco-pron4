@@ -1,8 +1,12 @@
 package util
 
 import (
+	"bytes"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"strings"
+	"time"
 )
 
 func CheckError(sqlError error) error {
@@ -19,4 +23,24 @@ func CheckError(sqlError error) error {
 		return fmt.Errorf(msg)
 	}
 	return sqlError
+}
+
+
+func GetCurrentDateTime() string {
+	currentTime := time.Now()
+	return time.Date(currentTime.Year(),
+		currentTime.Month(),
+		currentTime.Day(),
+		currentTime.Hour(),
+		currentTime.Minute(),
+		currentTime.Second(),
+		100,
+		time.Local).Format("2006-01-02 15:04:05")
+}
+
+
+func CreateRequestTest(method string, url string, body string) (*http.Request, *httptest.ResponseRecorder) {
+	req := httptest.NewRequest(method, url, bytes.NewBuffer([]byte(body)))
+	req.Header.Add("Content-Type", "application/json")
+	return req, httptest.NewRecorder()
 }
