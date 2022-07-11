@@ -12,12 +12,10 @@ import (
 
 var carryOne = carries.Carries{"cid1", "companyname1", "rua 1", "11112222", 1}
 
-// var carry2 = carries.Carries{"cid2", "companyname2", "rua 2", "11112222", 1}
-
 var localityOne = carries.Localities{1, "São Paulo", 1}
 var localityTwo = carries.Localities{2, "Nova York", 2}
 
-var carriesGetReports = []carries.Localities{locality1, locality2}
+var carriesGetReports = []carries.Localities{localityOne, localityTwo}
 
 func TestServiceCreate(t *testing.T) {
 
