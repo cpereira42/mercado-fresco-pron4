@@ -24,14 +24,8 @@ import (
  * @param body string
  */
 func CreateServerSection(serv *mocks.Service, method, url, body string) *httptest.ResponseRecorder {
-	sectionController := NewSectionController(serv)
 	router := gin.Default()
-	gp := router.Group("/api/v1/sections")
-	gp.GET("/", sectionController.ListarSectionAll())
-	gp.GET("/:id", sectionController.ListarSectionOne())
-	gp.POST("/", sectionController.CreateSection())
-	gp.PATCH("/:id", sectionController.UpdateSection())
-	gp.DELETE("/:id", sectionController.DeleteSection())
+	NewSectionController(router, serv)
 	req, rr := util.CreateRequestTest(method, url, body)
 	router.ServeHTTP(rr, req)
 	return rr
@@ -248,7 +242,7 @@ func TestListarSectionOne(t *testing.T) {
 	t.Run("lista section, error(not found 404)", func(t *testing.T) {
 		var mockService *mocks.Service = &mocks.Service{}
 		var searchSection section.Section = section.Section{}
-		var errSection error = errors.New("strconv.ParseInt: parsing \"2s\": invalid syntax")
+		var errSection error = errors.New("Section is not registered")
 		mockService.On("ListarSectionOne",
 			mock.AnythingOfType("int64")).
 			Return(searchSection, errSection).
@@ -261,14 +255,13 @@ func TestListarSectionOne(t *testing.T) {
 		)
 		getData(rr.Body.Bytes(), &ObjetoResponse)
 		assert.Equal(t, errSection.Error(), ObjetoResponse.Error)
-		assert.Equal(t, http.StatusInternalServerError, rr.Code)
+		assert.Equal(t, ObjetoResponse.Code, rr.Code)
 	})
 }
 
 func TestUpdateSection(t *testing.T) {
 	var sectionListResponse []section.Section = []section.Section{}
 	var mockService *mocks.Service = &mocks.Service{}
-
 	t.Run("update section, sucesso (ok 200)", func(t *testing.T) {
 		updateSection := section.SectionRequestUpdate{
 			SectionNumber:      1,
@@ -335,9 +328,8 @@ func TestUpdateSection(t *testing.T) {
 			"/api/v1/sections/1s",
 			string(updateSectionByte),
 		)
-		assert.Equal(t, 500, rr.Code)
 		_ = getData(rr.Body.Bytes(), &ObjetoResponse)
-		assert.Equal(t, ObjetoResponse.Code, rr.Code)
+		assert.Equal(t, 404, rr.Code)
 	})
 	t.Run("update section, error (not found 404)", func(t *testing.T) {
 		updateSection := section.SectionRequestUpdate{
@@ -409,7 +401,6 @@ func TestUpdateSection(t *testing.T) {
 
 func TestSectionDelete(t *testing.T) {
 	var mockService *mocks.Service = &mocks.Service{}
-
 	t.Run("delete sucesso, (not content 204)", func(t *testing.T) {
 		mockService.On("ListarSectionAll").Return(sectionList, nil).Once()
 		mockService.On("DeleteSection", mock.AnythingOfType("int64")).
@@ -433,6 +424,6 @@ func TestSectionDelete(t *testing.T) {
 			Return(nil).
 			Once()
 		rr := CreateServerSection(mockService, http.MethodDelete, "/api/v1/sections/6s", "")
-		assert.Equal(t, http.StatusInternalServerError, rr.Code)
+		assert.Equal(t, http.StatusNotFound, rr.Code)
 	})
 }

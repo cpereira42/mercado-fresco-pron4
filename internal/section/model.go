@@ -70,9 +70,13 @@ type Service interface {
  * -- DATABASE QUERIES
  */
 const (
-	SqlSelect        = `SELECT id,section_number,current_capacity,current_temperature,maximum_capacity,minimum_capacity,minimum_temperature,product_type_id,warehouse_id FROM mercadofresco.sections`
-	SqlSelectByID    = `SELECT id,section_number,current_capacity,current_temperature,maximum_capacity,minimum_capacity,minimum_temperature,product_type_id,warehouse_id FROM mercadofresco.sections WHERE id=?`
-	SqlCreateSection = `INSERT INTO mercadofresco.sections (section_number,current_capacity,current_temperature,maximum_capacity,minimum_capacity,minimum_temperature,product_type_id,warehouse_id) VALUES (?,?,?,?,?,?,?,?)`
-	SqlUpdateSection = `UPDATE mercadofresco.sections SET section_number=?,current_capacity=?,current_temperature=?,maximum_capacity=?,minimum_capacity=?,minimum_temperature=?,product_type_id=?, warehouse_id=? WHERE id=?`
+	SqlSelect = `SELECT id,section_number,current_capacity,current_temperature,maximum_capacity,minimum_capacity,
+	minimum_temperature,product_type_id,warehouse_id FROM mercadofresco.sections`
+	SqlSelectByID = `SELECT id,section_number,current_capacity,current_temperature,maximum_capacity,minimum_capacity,
+	minimum_temperature,product_type_id,warehouse_id FROM mercadofresco.sections WHERE id=?`
+	SqlCreateSection = `INSERT INTO mercadofresco.sections (section_number,current_capacity,current_temperature,
+	maximum_capacity,minimum_capacity,minimum_temperature,product_type_id,warehouse_id) VALUES (?,?,?,?,?,?,?,?)`
+	SqlUpdateSection = `UPDATE mercadofresco.sections SET section_number=?,current_capacity=?,current_temperature=?,
+	maximum_capacity=?,minimum_capacity=?,minimum_temperature=?,product_type_id=?, warehouse_id=? WHERE id=?`
 	SqlDeleteSection = `DELETE FROM mercadofresco.sections WHERE id=?`
 )

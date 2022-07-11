@@ -56,14 +56,6 @@ func main() {
 	serviceLocality := locality.NewService(repoLocality)
 	l := handler.NewLocality(serviceLocality)
 
-	repoPB := productbatch.NewRepositoryProductBatches(conn)
-	servicePB := productbatch.NewServiceProductBatches(repoPB)
-	productBatchesController := handler.NewProductBatChesController(servicePB)
-
-	repSection := section.NewRepository(conn)
-	serviceSection := section.NewService(repSection)
-	sectionController := handler.NewSectionController(serviceSection)
-
 	repositoryInboundOrders := inboundOrders.NewRepository(conn)
 	serviceInboundOrders := inboundOrders.NewService(repositoryInboundOrders)
 
@@ -92,16 +84,13 @@ func main() {
 	handler.NewInboundOrders(r, serviceInboundOrders)
 	handler.NewEmployee(r, serviceEmployees)
 
-	section := r.Group("/api/v1/sections")
-	section.GET("/", sectionController.ListarSectionAll())
-	section.GET("/:id", sectionController.ListarSectionOne())
-	section.POST("/", sectionController.CreateSection())
-	section.PATCH("/:id", sectionController.UpdateSection())
-	section.DELETE("/:id", sectionController.DeleteSection())
-	section.GET("/reportProducts", productBatchesController.ReadPB()) // new
+	repSection := section.NewRepository(conn)        // new
+	serviceSection := section.NewService(repSection) // new
+	handler.NewSectionController(r, serviceSection)  // new
 
-	productBatches := r.Group("/api/v1/productBatches")          // new
-	productBatches.POST("", productBatchesController.CreatePB()) // new
+	repoPB := productbatch.NewRepositoryProductBatches(conn)   // new
+	servicePB := productbatch.NewServiceProductBatches(repoPB) // new
+	handler.NewProductBatChesController(r, servicePB)          // new
 
 	wr := r.Group("api/v1/warehouse")
 	wr.GET("/", w.GetAll)
