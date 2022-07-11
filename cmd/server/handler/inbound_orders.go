@@ -3,21 +3,12 @@ package handler
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 
 	inboundOrders "github.com/cpereira42/mercado-fresco-pron4/internal/inbound_orders"
+	"github.com/cpereira42/mercado-fresco-pron4/pkg/util"
 	"github.com/cpereira42/mercado-fresco-pron4/pkg/web"
 	"github.com/gin-gonic/gin"
 )
-
-func idChecker(ctx *gin.Context) (int, error) {
-	id, err := strconv.Atoi(ctx.Query("id"))
-	if err != nil {
-		ctx.JSON(http.StatusNotFound, web.NewResponse(http.StatusNotFound, nil, "invalid ID"))
-		return id, err
-	}
-	return id, nil
-}
 
 type InboundOrdersController struct {
 	service inboundOrders.Service
@@ -37,7 +28,7 @@ func (c *InboundOrdersController) ReportInboundOrders() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		employeeID := ctx.Query("id")
 		if employeeID != "" {
-			id, err := idChecker(ctx)
+			id, err := util.IDChecker(ctx)
 			if err != nil {
 				return
 			}

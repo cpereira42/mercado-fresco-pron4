@@ -3,30 +3,26 @@ package handler
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/cpereira42/mercado-fresco-pron4/internal/employee"
+	"github.com/cpereira42/mercado-fresco-pron4/pkg/util"
 	"github.com/cpereira42/mercado-fresco-pron4/pkg/web"
 	"github.com/gin-gonic/gin"
 )
-
-func checkID(ctx *gin.Context) (int, error) {
-	id, err := strconv.Atoi(ctx.Param("id"))
-	if err != nil {
-		ctx.JSON(http.StatusNotFound, web.NewResponse(http.StatusNotFound, nil, "invalid ID"))
-		return id, err
-	}
-	return id, nil
-}
 
 type EmployeeController struct {
 	service employee.Service
 }
 
-func NewEmployee(employee employee.Service) *EmployeeController {
-	return &EmployeeController{
-		service: employee,
-	}
+func NewEmployee(ctx *gin.Engine, service employee.Service) {
+	ec := &EmployeeController{service: service}
+
+	re := ctx.Group("/api/v1/employees")
+	re.GET("/", ec.GetAll())
+	re.GET("/:id", ec.GetByID())
+	re.POST("/", ec.Create())
+	re.PATCH("/:id", ec.Update())
+	re.DELETE("/:id", ec.Delete())
 }
 
 func (c *EmployeeController) GetAll() gin.HandlerFunc {
@@ -42,7 +38,7 @@ func (c *EmployeeController) GetAll() gin.HandlerFunc {
 
 func (c *EmployeeController) GetByID() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		id, err := checkID(ctx)
+		id, err := util.IDChecker(ctx)
 		if err != nil {
 			return
 		}
@@ -82,7 +78,7 @@ func (c *EmployeeController) Create() gin.HandlerFunc {
 
 func (c *EmployeeController) Update() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		id, err := checkID(ctx)
+		id, err := util.IDChecker(ctx)
 		if err != nil {
 			return
 		}
@@ -110,7 +106,7 @@ func (c *EmployeeController) Update() gin.HandlerFunc {
 
 func (c *EmployeeController) Delete() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		id, err := checkID(ctx)
+		id, err := util.IDChecker(ctx)
 		if err != nil {
 			return
 		}

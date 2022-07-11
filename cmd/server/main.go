@@ -65,7 +65,6 @@ func main() {
 
 	repositoryEmployees := employee.NewRepository(conn)
 	serviceEmployees := employee.NewService(repositoryEmployees)
-	handlerEmployees := handler.NewEmployee(serviceEmployees)
 
 	s := handler.NewSeller(serviceSeller)
 	p := handler.NewProduct(serviceProd)
@@ -87,13 +86,7 @@ func main() {
 	sellers.DELETE("/:id", s.Delete())
 
 	handler.NewInboundOrders(r, serviceInboundOrders)
-
-	routesEmployees := r.Group("/api/v1/employees")
-	routesEmployees.GET("/", handlerEmployees.GetAll())
-	routesEmployees.GET("/:id", handlerEmployees.GetByID())
-	routesEmployees.POST("/", handlerEmployees.Create())
-	routesEmployees.PATCH("/:id", handlerEmployees.Update())
-	routesEmployees.DELETE("/:id", handlerEmployees.Delete())
+	handler.NewEmployee(r, serviceEmployees)
 
 	section := r.Group("/api/v1/sections")
 	section.GET("/", sectionController.ListarSectionAll())
