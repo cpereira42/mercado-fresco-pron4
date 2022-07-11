@@ -1,7 +1,6 @@
 package handler_test
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -11,6 +10,7 @@ import (
 	"github.com/cpereira42/mercado-fresco-pron4/cmd/server/handler"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/employee"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/employee/mocks"
+	"github.com/cpereira42/mercado-fresco-pron4/pkg/util"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	tmock "github.com/stretchr/testify/mock"
@@ -48,22 +48,10 @@ var employeeFieldsResponseJson = struct {
 	}
 }{}
 
-func createRequestTestEmployee(method string, url string, body string) (*http.Request, *httptest.ResponseRecorder) {
-	req := httptest.NewRequest(method, url, bytes.NewBuffer([]byte(body)))
-	req.Header.Add("Content-Type", "application/json")
-	return req, httptest.NewRecorder()
-}
-
 func createServerEmployee(serverMock *mocks.Service, method string, url string, body string) *httptest.ResponseRecorder {
-	e := handler.NewEmployee(serverMock)
 	r := gin.Default()
-	employeesGroup := r.Group("/api/v1/employees")
-	employeesGroup.GET("/", e.GetAll())
-	employeesGroup.GET("/:id", e.GetByID())
-	employeesGroup.DELETE("/:id", e.Delete())
-	employeesGroup.POST("/", e.Create())
-	employeesGroup.PATCH("/:id", e.Update())
-	req, rr := createRequestTestEmployee(method, url, body)
+	handler.NewEmployee(r, serverMock)
+	req, rr := util.CreateRequestTest(method, url, body)
 	r.ServeHTTP(rr, req)
 	return rr
 }

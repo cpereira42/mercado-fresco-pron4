@@ -5,8 +5,12 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"time"
+
+	"github.com/cpereira42/mercado-fresco-pron4/pkg/web"
+	"github.com/gin-gonic/gin"
 )
 
 func CheckError(sqlError error) error {
@@ -41,4 +45,22 @@ func CreateRequestTest(method string, url string, body string) (*http.Request, *
 	req := httptest.NewRequest(method, url, bytes.NewBuffer([]byte(body)))
 	req.Header.Add("Content-Type", "application/json")
 	return req, httptest.NewRecorder()
+}
+
+func IDChecker(ctx *gin.Context) (int, error) {
+	var (
+		id  int
+		err error
+	)
+	switch {
+	case ctx.Query("id") != "":
+		id, err = strconv.Atoi(ctx.Query("id"))
+	case ctx.Param("id") != "":
+		id, err = strconv.Atoi(ctx.Param("id"))
+	}
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, web.NewResponse(http.StatusNotFound, nil, "invalid ID"))
+		return id, err
+	}
+	return id, nil
 }
