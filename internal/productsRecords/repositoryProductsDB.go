@@ -83,7 +83,7 @@ func (r *repository) Create(p ProductRecords) (ProductRecords, error) {
 		p.SalePrice,
 		p.ProductId)
 	if err != nil {
-		return ProductRecords{}, util.CheckError(err) //fmt.Errorf("Product not exist")
+		return ProductRecords{}, fmt.Errorf("Query Fail")
 	}
 
 	RowsAffected, _ := res.RowsAffected()
