@@ -30,7 +30,7 @@ func (repoSection *repository) ListarSectionAll() ([]Section, error) {
 			&sectionObj.MaximumCapacity, &sectionObj.MinimumCapacity, &sectionObj.MinimumTemperature,
 			&sectionObj.ProductTypeId, &sectionObj.WarehouseId,
 		); err != nil {
-			return []Section{}, ErrorFalhaInserializerFields
+			return []Section{}, ErrorFalhaInListAll
 		}
 		sectionList = append(sectionList, sectionObj)
 	}
