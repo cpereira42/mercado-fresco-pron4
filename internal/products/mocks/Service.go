@@ -12,20 +12,6 @@ type Service struct {
 	mock.Mock
 }
 
-// CheckCode provides a mock function with given fields: id, code
-func (_m *Service) CheckCode(id int, code string) bool {
-	ret := _m.Called(id, code)
-
-	var r0 bool
-	if rf, ok := ret.Get(0).(func(int, string) bool); ok {
-		r0 = rf(id, code)
-	} else {
-		r0 = ret.Get(0).(bool)
-	}
-
-	return r0
-}
-
 // Create provides a mock function with given fields: p
 func (_m *Service) Create(p products.RequestProductsCreate) (products.Product, error) {
 	ret := _m.Called(p)

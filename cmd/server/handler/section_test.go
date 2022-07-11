@@ -5,126 +5,131 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 
-	"github.com/cpereira42/mercado-fresco-pron4/internal/section/entites"
-	mocks "github.com/cpereira42/mercado-fresco-pron4/internal/section/mock"
+	"github.com/cpereira42/mercado-fresco-pron4/internal/section"
+	mocks "github.com/cpereira42/mercado-fresco-pron4/internal/section/mocks"
+	"github.com/cpereira42/mercado-fresco-pron4/pkg/util"
+	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
+
+/*
+ * cria um server
+ * @param mock mocks.SectionService
+ * @param method string
+ * @param url string
+ * @param body string
+ */
+func CreateServerSection(serv *mocks.Service, method, url, body string) *httptest.ResponseRecorder {
+	sectionController := NewSectionController(serv)
+	router := gin.Default()
+	gp := router.Group("/api/v1/sections")
+	gp.GET("/", sectionController.ListarSectionAll())
+	gp.GET("/:id", sectionController.ListarSectionOne())
+	gp.POST("/", sectionController.CreateSection())
+	gp.PATCH("/:id", sectionController.UpdateSection())
+	gp.DELETE("/:id", sectionController.DeleteSection())
+	req, rr := util.CreateRequestTest(method, url, body)
+	router.ServeHTTP(rr, req)
+	return rr
+}
+
+var ObjetoResponse struct {
+	Code  int         `json:"code"`
+	Data  interface{} `json:"data,omitempty"`
+	Error string      `json:"error,omitempty"`
+}
 
 func getData(data []byte, v any) error {
 	return json.Unmarshal(data, v)
 }
 
+var sectionList []section.Section = []section.Section{
+	{
+		Id:                 1,
+		SectionNumber:      1,
+		CurrentTemperature: 1,
+		MinimumTemperature: 1,
+		CurrentCapacity:    1,
+		MinimumCapacity:    1,
+		MaximumCapacity:    1,
+		WarehouseId:        1,
+		ProductTypeId:      1,
+	},
+	{
+		Id:                 2,
+		SectionNumber:      3,
+		CurrentTemperature: 79845,
+		MinimumTemperature: 4,
+		CurrentCapacity:    135,
+		MinimumCapacity:    23,
+		MaximumCapacity:    456,
+		WarehouseId:        78,
+		ProductTypeId:      456,
+	},
+}
+
+var newSectionCreate = section.SectionRequestCreate{
+	SectionNumber:      1,
+	CurrentTemperature: 1,
+	MinimumTemperature: 1,
+	CurrentCapacity:    1,
+	MinimumCapacity:    1,
+	MaximumCapacity:    1,
+	WarehouseId:        1,
+	ProductTypeId:      1,
+}
+
+var newSectionRes = section.SectionRequestCreate{
+	SectionNumber:      1,
+	CurrentTemperature: 1,
+	MinimumTemperature: 1,
+	CurrentCapacity:    1,
+	MinimumCapacity:    1,
+	MaximumCapacity:    1,
+	WarehouseId:        1,
+	ProductTypeId:      1,
+}
+
 func TestCreateSection(t *testing.T) {
 	t.Run("criar section, sucesso (ok 201)", func(t *testing.T) {
-		mockService := &mocks.SectionService{}
-		newSectionCreate := entites.SectionRequestCreate{
-			SectionNumber:      1,
-			CurrentTemperature: 1,
-			MinimumTemperature: 1,
-			CurrentCapacity:    1,
-			MinimumCapacity:    1,
-			MaximumCapacity:    1,
-			WarehouseId:        1,
-			ProductTypeId:      1,
-		}
-		newSectionRes := entites.Section{
-			Id:                 1,
-			SectionNumber:      1,
-			CurrentTemperature: 1,
-			MinimumTemperature: 1,
-			CurrentCapacity:    1,
-			MinimumCapacity:    1,
-			MaximumCapacity:    1,
-			WarehouseId:        1,
-			ProductTypeId:      1,
-		}
-		var sectionList []entites.Section = []entites.Section{
-			{
-				Id:                 1,
-				SectionNumber:      3,
-				CurrentTemperature: 79845,
-				MinimumTemperature: 4,
-				CurrentCapacity:    135,
-				MinimumCapacity:    23,
-				MaximumCapacity:    456,
-				WarehouseId:        78,
-				ProductTypeId:      456,
-			},
-		}
-		mockService.On("ListarSectionAll").Return(sectionList, nil).Once()
+		mockService := &mocks.Service{}
 		mockService.On("CreateSection",
-			mock.AnythingOfType("entites.SectionRequestCreate"),
+			mock.AnythingOfType("section.SectionRequestCreate"),
 		).Return(newSectionRes, nil).Once()
 		newSectionCreateByte, _ := json.Marshal(newSectionCreate)
-		rr := CreateServerSection(mockService,
-			http.MethodPost, "/api/v1/sections/", string(newSectionCreateByte))
+		rr := CreateServerSection(
+			mockService,
+			http.MethodPost,
+			"/api/v1/sections/",
+			string(newSectionCreateByte),
+		)
 		getData(rr.Body.Bytes(), &ObjetoResponse)
+
+		dtByte, _ := json.Marshal(ObjetoResponse.Data)
+		object := section.SectionRequestCreate{}
+		getData(dtByte, &object)
+
 		assert.Equal(t, ObjetoResponse.Code, rr.Code)
+		assert.Equal(t, newSectionRes.SectionNumber, object.SectionNumber)
+		assert.Equal(t, newSectionRes.CurrentCapacity, object.CurrentCapacity)
+		assert.Equal(t, newSectionRes.CurrentTemperature, object.CurrentTemperature)
+		assert.Equal(t, newSectionRes.MaximumCapacity, object.MaximumCapacity)
+		assert.Equal(t, newSectionRes.MinimumCapacity, object.MinimumCapacity)
+		assert.Equal(t, newSectionRes.MinimumTemperature, object.MinimumTemperature)
+		assert.Equal(t, newSectionRes.WarehouseId, object.WarehouseId)
+		assert.Equal(t, newSectionRes.ProductTypeId, object.ProductTypeId)
 		assert.ObjectsAreEqual(newSectionRes, ObjetoResponse.Data)
 	})
 	t.Run("criar section, error (conflic 409)", func(t *testing.T) {
-		mockService := &mocks.SectionService{}
-		newSectionCreate := entites.SectionRequestCreate{
-			SectionNumber:      3,
-			CurrentTemperature: 1,
-			MinimumTemperature: 1,
-			CurrentCapacity:    1,
-			MinimumCapacity:    1,
-			MaximumCapacity:    1,
-			WarehouseId:        1,
-			ProductTypeId:      1,
-		}
-		newSectionRes := entites.Section{}
+		mockService := &mocks.Service{}
 		errNewSection := errors.New("section invalid, section_number field must be unique")
-		var sectionList []entites.Section = []entites.Section{
-			{
-				Id:                 1,
-				SectionNumber:      3,
-				CurrentTemperature: 79845,
-				MinimumTemperature: 4,
-				CurrentCapacity:    135,
-				MinimumCapacity:    23,
-				MaximumCapacity:    456,
-				WarehouseId:        78,
-				ProductTypeId:      456,
-			}, {
-				Id:                 2,
-				SectionNumber:      313,
-				CurrentTemperature: 745,
-				MinimumTemperature: 344,
-				CurrentCapacity:    1345,
-				MinimumCapacity:    243,
-				MaximumCapacity:    43456,
-				WarehouseId:        784,
-				ProductTypeId:      43456,
-			}, {
-				Id:                 3,
-				SectionNumber:      490,
-				CurrentTemperature: 795,
-				MinimumTemperature: 3,
-				CurrentCapacity:    15,
-				MinimumCapacity:    23,
-				MaximumCapacity:    3,
-				WarehouseId:        78,
-				ProductTypeId:      456,
-			}, {
-				Id:                 4,
-				SectionNumber:      495,
-				CurrentTemperature: 795,
-				MinimumTemperature: 3,
-				CurrentCapacity:    15,
-				MinimumCapacity:    23,
-				MaximumCapacity:    456,
-				WarehouseId:        78,
-				ProductTypeId:      456,
-			},
-		}
-		mockService.On("ListarSectionAll").Return(sectionList, nil).Once()
+
 		mockService.On("CreateSection",
-			mock.AnythingOfType("entites.SectionRequestCreate")).
+			mock.AnythingOfType("section.SectionRequestCreate")).
 			Return(newSectionRes, errNewSection).
 			Once()
 		newSectionCreateByte, _ := json.Marshal(newSectionCreate)
@@ -139,30 +144,16 @@ func TestCreateSection(t *testing.T) {
 		assert.ObjectsAreEqual(newSectionRes, ObjetoResponse.Data)
 	})
 	t.Run("criar section, error (unprocessableEntity 422)", func(t *testing.T) {
-		mockService := &mocks.SectionService{}
-		newSectionCreate := entites.SectionRequestCreate{
+		mockService := &mocks.Service{}
+		newSectionCreate := section.SectionRequestCreate{
 			SectionNumber:      3,
 			CurrentTemperature: 1,
 			MaximumCapacity:    1,
 		}
-		newSectionRes := entites.Section{}
+		newSectionRes := section.Section{}
 		errNewSection := errors.New("This field is required")
-		var sectionList []entites.Section = []entites.Section{
-			{
-				Id:                 4,
-				SectionNumber:      495,
-				CurrentTemperature: 795,
-				MinimumTemperature: 3,
-				CurrentCapacity:    15,
-				MinimumCapacity:    23,
-				MaximumCapacity:    456,
-				WarehouseId:        78,
-				ProductTypeId:      456,
-			},
-		}
-		mockService.On("ListarSectionAll").Return(sectionList, nil).Once()
 		mockService.On("CreateSection",
-			mock.AnythingOfType("entites.SectionRequestCreate")).
+			mock.AnythingOfType("section.SectionRequestCreate")).
 			Return(newSectionRes, errNewSection).
 			Once()
 		newSectionCreateByte, _ := json.Marshal(newSectionCreate)
@@ -177,62 +168,50 @@ func TestCreateSection(t *testing.T) {
 		assert.ObjectsAreEqual(newSectionRes, ObjetoResponse.Data)
 	})
 }
+
 func TestListarSectionAll(t *testing.T) {
-	mockService := &mocks.SectionService{}
 	t.Run("lista todos section, sucesso (ok 200)", func(t *testing.T) {
-		var ObjetoResponse struct {
-			Code  int               `json:"code"`
-			Data  []entites.Section `json:"data"`
-			Error error             `json:"error"`
-		}
-		sectionList := []entites.Section{
-			{
-				Id:                 1,
-				SectionNumber:      1,
-				CurrentTemperature: 1,
-				MinimumTemperature: 1,
-				CurrentCapacity:    1,
-				MinimumCapacity:    1,
-				MaximumCapacity:    1,
-				WarehouseId:        1,
-				ProductTypeId:      1,
-			},
-		}
+		mockService := &mocks.Service{}
 		mockService.On("ListarSectionAll").
 			Return(sectionList, nil).
 			Once()
-		rr := CreateServerSection(mockService, http.MethodGet, "/api/v1/sections/", "")
+		rr := CreateServerSection(
+			mockService,
+			http.MethodGet,
+			"/api/v1/sections/",
+			"")
 		assert.Equal(t, 200, rr.Code)
 		errListResponse := getData(rr.Body.Bytes(), &ObjetoResponse)
-		assert.True(t, len(ObjetoResponse.Data) != 0)
-		assert.Equal(t, sectionList, ObjetoResponse.Data)
+
+		var sList []section.Section
+
+		objData, _ := json.Marshal(ObjetoResponse.Data)
+		getData(objData, &sList)
+
+		assert.True(t, len(sList) > 0)
+		assert.Equal(t, sectionList, sList)
 		assert.Equal(t, 200, ObjetoResponse.Code)
-		assert.Nil(t, errListResponse)
+		assert.NoError(t, errListResponse)
 	})
-	t.Run("lista todos section, error (bad request 400)", func(t *testing.T) {
-		var ObjetoResponse struct {
-			Code  int               `json:"code"`
-			Data  []entites.Section `json:"data"`
-			Error error             `json:"error"`
-		}
-		sectionListNil := []entites.Section{}
+	t.Run("lista todos section, error (500)", func(t *testing.T) {
+		mockService := &mocks.Service{}
 		errListNil := errors.New("não há sections registrados")
 		mockService.On("ListarSectionAll").
-			Return(sectionListNil, errListNil).
+			Return([]section.Section{}, errListNil).
 			Once()
 		rr := CreateServerSection(mockService, http.MethodGet, "/api/v1/sections/", "")
-		assert.Equal(t, 400, rr.Code)
 
-		errListResponse := json.Unmarshal(rr.Body.Bytes(), &ObjetoResponse.Data)
-		assert.True(t, len(ObjetoResponse.Data) == 0)
-		assert.Error(t, errListResponse)
+		errListResponse := json.Unmarshal(rr.Body.Bytes(), &ObjetoResponse)
+		assert.NoError(t, errListResponse)
+		assert.Equal(t, rr.Code, ObjetoResponse.Code)
+		assert.Equal(t, errListNil.Error(), ObjetoResponse.Error)
 	})
 }
 
 func TestListarSectionOne(t *testing.T) {
 	t.Run("lista section, sucesso(ok 200)", func(t *testing.T) {
-		var mockService *mocks.SectionService = &mocks.SectionService{}
-		newSectionRes := entites.Section{
+		var mockService *mocks.Service = &mocks.Service{}
+		newSectionRes := section.Section{
 			Id:                 1,
 			SectionNumber:      1,
 			CurrentTemperature: 1,
@@ -243,7 +222,7 @@ func TestListarSectionOne(t *testing.T) {
 			WarehouseId:        1,
 			ProductTypeId:      1,
 		}
-		mockService.On("ListarSectionOne", mock.AnythingOfType("int")).
+		mockService.On("ListarSectionOne", mock.AnythingOfType("int64")).
 			Return(newSectionRes, nil).
 			Once()
 		rr := CreateServerSection(
@@ -255,20 +234,23 @@ func TestListarSectionOne(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rr.Code)
 	})
 	t.Run("lista section, error(not found 404)", func(t *testing.T) {
-		var mockService *mocks.SectionService = &mocks.SectionService{}
-		var sectionNil entites.Section = entites.Section{}
+		var mockService *mocks.Service = &mocks.Service{}
+		var sectionNil section.Section = section.Section{}
+		expectErr := errors.New("Section is not registered")
 		mockService.On("ListarSectionOne", mock.Anything).
-			Return(sectionNil, errors.New("Section is not registered")).
+			Return(sectionNil, expectErr).
 			Once()
 		rr := CreateServerSection(mockService, http.MethodGet, "/api/v1/sections/3", "")
 		assert.Equal(t, http.StatusNotFound, rr.Code)
+		getData(rr.Body.Bytes(), &ObjetoResponse)
+		assert.Equal(t, expectErr.Error(), ObjetoResponse.Error)
 	})
 	t.Run("lista section, error(not found 404)", func(t *testing.T) {
-		var mockService *mocks.SectionService = &mocks.SectionService{}
-		var searchSection entites.Section = entites.Section{}
-		var errSection error = errors.New("Sectin is not registered")
+		var mockService *mocks.Service = &mocks.Service{}
+		var searchSection section.Section = section.Section{}
+		var errSection error = errors.New("strconv.ParseInt: parsing \"2s\": invalid syntax")
 		mockService.On("ListarSectionOne",
-			mock.AnythingOfType("int")).
+			mock.AnythingOfType("int64")).
 			Return(searchSection, errSection).
 			Once()
 		rr := CreateServerSection(
@@ -277,16 +259,18 @@ func TestListarSectionOne(t *testing.T) {
 			"/api/v1/sections/2s",
 			"",
 		)
-		assert.Equal(t, http.StatusNotFound, rr.Code)
+		getData(rr.Body.Bytes(), &ObjetoResponse)
+		assert.Equal(t, errSection.Error(), ObjetoResponse.Error)
+		assert.Equal(t, http.StatusInternalServerError, rr.Code)
 	})
 }
 
 func TestUpdateSection(t *testing.T) {
-	var sectionListResponse []entites.Section = []entites.Section{}
-	var mockService *mocks.SectionService = &mocks.SectionService{}
+	var sectionListResponse []section.Section = []section.Section{}
+	var mockService *mocks.Service = &mocks.Service{}
 
 	t.Run("update section, sucesso (ok 200)", func(t *testing.T) {
-		updateSection := entites.SectionRequestUpdate{
+		updateSection := section.SectionRequestUpdate{
 			SectionNumber:      1,
 			CurrentTemperature: 23,
 			MinimumTemperature: 23,
@@ -296,7 +280,7 @@ func TestUpdateSection(t *testing.T) {
 			WarehouseId:        23,
 			ProductTypeId:      23,
 		}
-		updateSectionRes := entites.Section{
+		updateSectionRes := section.Section{
 			Id:                 1,
 			SectionNumber:      1,
 			CurrentTemperature: 23,
@@ -309,8 +293,8 @@ func TestUpdateSection(t *testing.T) {
 		}
 		mockService.On("ListarSectionAll").Return(sectionListResponse, nil).Once()
 		mockService.On("UpdateSection",
-			mock.AnythingOfType("int"),
-			mock.AnythingOfType("entites.SectionRequestUpdate"),
+			mock.AnythingOfType("int64"),
+			mock.AnythingOfType("section.SectionRequestUpdate"),
 		).Return(updateSectionRes, nil).Once()
 		updateSectionByte, _ := json.Marshal(updateSection)
 		rr := CreateServerSection(
@@ -325,8 +309,8 @@ func TestUpdateSection(t *testing.T) {
 		assert.Equal(t, ObjetoResponse.Code, rr.Code)
 		assert.ObjectsAreEqual(updateSectionRes, ObjetoResponse.Data)
 	})
-	t.Run("update section, error (not found 404)", func(t *testing.T) {
-		updateSection := entites.SectionRequestUpdate{
+	t.Run("update section, error (500)", func(t *testing.T) {
+		updateSection := section.SectionRequestUpdate{
 			SectionNumber:      1,
 			CurrentTemperature: 23,
 			MinimumTemperature: 23,
@@ -340,9 +324,9 @@ func TestUpdateSection(t *testing.T) {
 			Return(sectionListResponse, nil).
 			Once()
 		mockService.On("UpdateSection",
-			mock.AnythingOfType("int"),
-			mock.AnythingOfType("entites.SectionRequestUpdate")).
-			Return(entites.Section{}, errors.New("o tipo do parâmentro está invalido")).
+			mock.AnythingOfType("int64"),
+			mock.AnythingOfType("section.SectionRequestUpdate")).
+			Return(section.Section{}, errors.New("o tipo do parâmentro está invalido")).
 			Once()
 		updateSectionByte, _ := json.Marshal(updateSection)
 		rr := CreateServerSection(
@@ -351,12 +335,12 @@ func TestUpdateSection(t *testing.T) {
 			"/api/v1/sections/1s",
 			string(updateSectionByte),
 		)
-		assert.Equal(t, 404, rr.Code)
+		assert.Equal(t, 500, rr.Code)
 		_ = getData(rr.Body.Bytes(), &ObjetoResponse)
 		assert.Equal(t, ObjetoResponse.Code, rr.Code)
 	})
 	t.Run("update section, error (not found 404)", func(t *testing.T) {
-		updateSection := entites.SectionRequestUpdate{
+		updateSection := section.SectionRequestUpdate{
 			SectionNumber:      1,
 			CurrentTemperature: 23,
 			MinimumTemperature: 23,
@@ -365,12 +349,12 @@ func TestUpdateSection(t *testing.T) {
 			ProductTypeId:      23,
 		}
 		mockService.On("ListarSectionAll").
-			Return([]entites.Section{}, fmt.Errorf("não há sections registrados")).
+			Return([]section.Section{}, fmt.Errorf("não há sections registrados")).
 			Once()
 		mockService.On("UpdateSection",
-			mock.AnythingOfType("int"),
-			mock.AnythingOfType("entites.SectionRequestUpdate")).
-			Return(entites.Section{}, errors.New("section is not found")).
+			mock.AnythingOfType("int64"),
+			mock.AnythingOfType("section.SectionRequestUpdate")).
+			Return(section.Section{}, errors.New("section is not found")).
 			Once()
 		updateSectionByte, _ := json.Marshal(updateSection)
 		rr := CreateServerSection(
@@ -382,7 +366,7 @@ func TestUpdateSection(t *testing.T) {
 		assert.Equal(t, 404, rr.Code)
 	})
 	t.Run("update section, error (unprocessableEntity 422)", func(t *testing.T) {
-		sectionListRes := []entites.Section{
+		sectionListRes := []section.Section{
 			{
 				Id:                 1,
 				SectionNumber:      1,
@@ -399,9 +383,9 @@ func TestUpdateSection(t *testing.T) {
 			Return(sectionListRes, nil).
 			Once()
 		mockService.On("UpdateSection",
-			mock.AnythingOfType("int"),
-			mock.AnythingOfType("entites.SectionRequestUpdate")).
-			Return(entites.Section{}, errors.New("This field is required")).
+			mock.AnythingOfType("int64"),
+			mock.AnythingOfType("section.SectionRequestUpdate")).
+			Return(section.Section{}, errors.New("This field is required")).
 			Once()
 		updateSectionByte := `{
 			"section_number":1,
@@ -424,23 +408,11 @@ func TestUpdateSection(t *testing.T) {
 }
 
 func TestSectionDelete(t *testing.T) {
-	var mockService *mocks.SectionService = &mocks.SectionService{}
-	sectionListRes := []entites.Section{
-		{
-			Id:                 1,
-			SectionNumber:      1,
-			CurrentTemperature: 2,
-			MinimumTemperature: 2,
-			CurrentCapacity:    2,
-			MinimumCapacity:    2,
-			MaximumCapacity:    2,
-			WarehouseId:        2,
-			ProductTypeId:      2,
-		},
-	}
+	var mockService *mocks.Service = &mocks.Service{}
+
 	t.Run("delete sucesso, (not content 204)", func(t *testing.T) {
-		mockService.On("ListarSectionAll").Return(sectionListRes, nil).Once()
-		mockService.On("DeleteSection", mock.AnythingOfType("int")).
+		mockService.On("ListarSectionAll").Return(sectionList, nil).Once()
+		mockService.On("DeleteSection", mock.AnythingOfType("int64")).
 			Return(nil).
 			Once()
 		rr := CreateServerSection(mockService, http.MethodDelete, "/api/v1/sections/1", "")
@@ -448,19 +420,19 @@ func TestSectionDelete(t *testing.T) {
 	})
 	t.Run("delete error, (not found 404)", func(t *testing.T) {
 		errNotFound := errors.New("section not found")
-		mockService.On("ListarSectionAll").Return(sectionListRes, nil).Once()
-		mockService.On("DeleteSection", mock.AnythingOfType("int")).
+		mockService.On("ListarSectionAll").Return(sectionList, nil).Once()
+		mockService.On("DeleteSection", mock.AnythingOfType("int64")).
 			Return(errNotFound).
 			Once()
-		rr := CreateServerSection(mockService, http.MethodDelete, "/api/v1/sections/1", "")
+		rr := CreateServerSection(mockService, http.MethodDelete, "/api/v1/sections/6", "")
 		assert.Equal(t, http.StatusNotFound, rr.Code)
 	})
-	t.Run("delete error, (not found 404)", func(t *testing.T) {
-		mockService.On("ListarSectionAll").Return(sectionListRes, nil).Once()
-		mockService.On("DeleteSection", mock.AnythingOfType("int")).
+	t.Run("delete error, (not found 500)", func(t *testing.T) {
+		mockService.On("ListarSectionAll").Return(sectionList, nil).Once()
+		mockService.On("DeleteSection", mock.AnythingOfType("int64")).
 			Return(nil).
 			Once()
-		rr := CreateServerSection(mockService, http.MethodDelete, "/api/v1/sections/1s", "")
-		assert.Equal(t, http.StatusNotFound, rr.Code)
+		rr := CreateServerSection(mockService, http.MethodDelete, "/api/v1/sections/6s", "")
+		assert.Equal(t, http.StatusInternalServerError, rr.Code)
 	})
 }

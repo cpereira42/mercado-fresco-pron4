@@ -102,7 +102,7 @@ func TestGetReport(t *testing.T) {
 		serviceMock := new(mocks.Service)
 		serviceMock.On("GetAllReport").Return(carriesGetReports, nil)
 
-		rr := createServerCarries(serviceMock, http.MethodGet, "/api/v1/localities/", "")
+		rr := createServerCarries(serviceMock, http.MethodGet, "/api/v1/localities/reportCarries", "")
 
 		objResp := struct {
 			Code int
@@ -119,7 +119,7 @@ func TestGetReport(t *testing.T) {
 		serviceMock := new(mocks.Service)
 		serviceMock.On("GetByIDReport", tmock.AnythingOfType("int")).Return(localityOne, nil)
 
-		rr := createServerCarries(serviceMock, http.MethodGet, "/api/v1/localities/?id=1", "")
+		rr := createServerCarries(serviceMock, http.MethodGet, "/api/v1/localities/reportCarries?id=1", "")
 
 		objResp := struct {
 			Code int
@@ -137,7 +137,7 @@ func TestGetReport(t *testing.T) {
 		errorMsg := fmt.Errorf("Invalid ID")
 		serviceMock.On("GetByIDReport", tmock.AnythingOfType("int")).Return(carries.Localities{}, errorMsg)
 
-		rr := createServerCarries(serviceMock, http.MethodGet, "/api/v1/localities/?id=1", "")
+		rr := createServerCarries(serviceMock, http.MethodGet, "/api/v1/localities/reportCarries?id=1", "")
 
 		objResp := struct {
 			Code  int
@@ -156,7 +156,7 @@ func TestGetReport(t *testing.T) {
 		errorMsg := fmt.Errorf("Fail to read database")
 		serviceMock.On("GetAllReport").Return([]carries.Localities{}, errorMsg)
 
-		rr := createServerCarries(serviceMock, http.MethodGet, "/api/v1/localities/", "")
+		rr := createServerCarries(serviceMock, http.MethodGet, "/api/v1/localities/reportCarries", "")
 
 		objResp := struct {
 			Code  int

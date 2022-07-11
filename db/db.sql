@@ -60,8 +60,8 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`carries` (
   CONSTRAINT `fk_carries_localities1`
     FOREIGN KEY (`locality_id`)
     REFERENCES `mercadofresco`.`localities` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 
@@ -84,8 +84,8 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`warehouse` (
   CONSTRAINT `fk_warehouse_localities1`
     FOREIGN KEY (`locality_id`)
     REFERENCES `mercadofresco`.`localities` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 
@@ -106,8 +106,8 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`employees` (
   CONSTRAINT `fk_employees_warehouse1`
     FOREIGN KEY (`warehouse_id`)
     REFERENCES `mercadofresco`.`warehouse` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 
@@ -139,8 +139,8 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`sellers` (
   CONSTRAINT `fk_sellers_localities1`
     FOREIGN KEY (`locality_id`)
     REFERENCES `mercadofresco`.`localities` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 
@@ -162,18 +162,19 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`products` (
   `product_type_id` INT(11) NOT NULL,
   `seller_id` INT(11) NOT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE INDEX `product_code` (`product_code` ASC) VISIBLE,
   INDEX `fk_product_sellers1_idx` (`seller_id` ASC) VISIBLE,
   INDEX `fk_product_products_types1_idx` (`product_type_id` ASC) VISIBLE,
   CONSTRAINT `fk_product_products_types1`
     FOREIGN KEY (`product_type_id`)
     REFERENCES `mercadofresco`.`products_types` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
   CONSTRAINT `fk_product_sellers1`
     FOREIGN KEY (`seller_id`)
     REFERENCES `mercadofresco`.`sellers` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
 
@@ -226,6 +227,7 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`products_batches` (
   PRIMARY KEY (`id`),
   INDEX `fk_products_batches_product1_idx` (`product_id` ASC) VISIBLE,
   INDEX `fk_products_batches_section1_idx` (`section_id` ASC) VISIBLE,
+  UNIQUE INDEX `batch_number_UNIQUE`(`batch_number` ASC) VISIBLE,
   CONSTRAINT `fk_products_batches_product1`
     FOREIGN KEY (`product_id`)
     REFERENCES `mercadofresco`.`products` (`id`)
@@ -257,18 +259,18 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`inbound_orders` (
   CONSTRAINT `fk_inbound_details_employees1`
     FOREIGN KEY (`employe_id`)
     REFERENCES `mercadofresco`.`employees` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
   CONSTRAINT `fk_inbound_details_products_batches1`
     FOREIGN KEY (`product_batch_id`)
     REFERENCES `mercadofresco`.`products_batches` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
   CONSTRAINT `fk_inbound_details_warehouse1`
     FOREIGN KEY (`warehouse_id`)
     REFERENCES `mercadofresco`.`warehouse` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 
@@ -287,8 +289,8 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`product_records` (
   CONSTRAINT `fk_product_records_product1`
     FOREIGN KEY (`product_id`)
     REFERENCES `mercadofresco`.`products` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 
@@ -324,23 +326,23 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`purchase_orders` (
   CONSTRAINT `fk_purchase_orders_buyer1`
     FOREIGN KEY (`buyer_id`)
     REFERENCES `mercadofresco`.`buyer` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
   CONSTRAINT `fk_purchase_orders_carries1`
     FOREIGN KEY (`carrier_id`)
     REFERENCES `mercadofresco`.`carries` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
   CONSTRAINT `fk_purchase_orders_order_status1`
     FOREIGN KEY (`order_status_id`)
     REFERENCES `mercadofresco`.`order_status` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
   CONSTRAINT `fk_purchase_orders_warehouse1`
     FOREIGN KEY (`warehouse_id`)
     REFERENCES `mercadofresco`.`warehouse` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 
@@ -362,13 +364,13 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`order_details` (
   CONSTRAINT `fk_order_details_product_records1`
     FOREIGN KEY (`product_record_id`)
     REFERENCES `mercadofresco`.`product_records` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
   CONSTRAINT `fk_order_details_purchase_orders1`
     FOREIGN KEY (`purchase_order_id`)
     REFERENCES `mercadofresco`.`purchase_orders` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 
@@ -408,13 +410,13 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`user_rol` (
   CONSTRAINT `fk_user_rol_rol1`
     FOREIGN KEY (`rol_id`)
     REFERENCES `mercadofresco`.`rol` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
   CONSTRAINT `fk_user_rol_users1`
     FOREIGN KEY (`user_id`)
     REFERENCES `mercadofresco`.`users` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 

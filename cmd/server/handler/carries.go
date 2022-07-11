@@ -18,7 +18,7 @@ func NewCarry(ctx *gin.Engine, carry carries.Service) {
 	carries := ctx.Group("/api/v1/carries")
 	carries.POST("/", c.Create)
 	localities := ctx.Group("/api/v1/localities")
-	localities.GET("/", c.GetReport)
+	localities.GET("/reportCarries", c.GetReport)
 }
 
 func (c *Carries) GetReport(ctx *gin.Context) {
