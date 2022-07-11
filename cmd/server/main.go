@@ -59,9 +59,9 @@ func main() {
 	servicePB := productbatch.NewServiceProductBatches(repoPB)
 	productBatchesController := handler.NewProductBatChesController(servicePB)
 
-	repSection := section.NewRepository(conn)
-	serviceSection := section.NewService(repSection)
-	sectionController := handler.NewSectionController(serviceSection)
+	// repSection := section.NewRepository(conn)
+	// serviceSection := section.NewService(repSection)
+	// sectionController := handler.NewSectionController(serviceSection)
 
 	repositoryEmployees := employee.NewRepository(conn)
 	serviceEmployees := employee.NewService(repositoryEmployees)
@@ -94,11 +94,11 @@ func main() {
 	routesEmployees.DELETE("/:id", handlerEmployees.Delete())
 
 	section := r.Group("/api/v1/sections")
-	section.GET("/", sectionController.ListarSectionAll())
-	section.GET("/:id", sectionController.ListarSectionOne())
-	section.POST("/", sectionController.CreateSection())
-	section.PATCH("/:id", sectionController.UpdateSection())
-	section.DELETE("/:id", sectionController.DeleteSection())
+	// section.GET("/", sectionController.ListarSectionAll())
+	// section.GET("/:id", sectionController.ListarSectionOne())
+	// section.POST("/", sectionController.CreateSection())
+	// section.PATCH("/:id", sectionController.UpdateSection())
+	// section.DELETE("/:id", sectionController.DeleteSection())
 	section.GET("/reportProducts", productBatchesController.ReadPB()) // new
 
 	productBatches := r.Group("/api/v1/productBatches")          // new
