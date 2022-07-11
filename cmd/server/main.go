@@ -50,6 +50,7 @@ func main() {
 
 	repoProd := products.NewRepositoryProductsDB(conn)
 	serviceProd := products.NewService(repoProd)
+
 	repoProdRecord := productsRecords.NewRepositoryProductsRecordsDB(conn)
 	serviceProdRecord := productsRecords.NewService(repoProdRecord)
 
@@ -71,21 +72,10 @@ func main() {
 	handlerEmployees := handler.NewEmployee(serviceEmployees)
 
 	s := handler.NewSeller(serviceSeller)
-	p := handler.NewProduct(serviceProd)
-	pRecord := handler.NewProductRecords(serviceProdRecord)
+
 	r := gin.Default()
-
-	pr := r.Group("/api/v1/products")
-	pr.GET("/", p.GetAll())
-	pr.GET("/:id", p.GetId())
-	pr.DELETE("/:id", p.Delete())
-	pr.POST("/", p.Create())
-	pr.PUT("/:id", p.Update())
-	pr.PATCH("/:id", p.Update())
-	pr.GET("/reportRecords/", pRecord.GetId())
-
-	prec := r.Group("/api/v1/productsRecords")
-	prec.POST("/", pRecord.Create())
+	handler.NewProduct(r, serviceProd)
+	handler.NewProductRecords(r, serviceProdRecord)
 
 	sellers := r.Group("/api/v1/sellers")
 	sellers.GET("/", s.GetAll())

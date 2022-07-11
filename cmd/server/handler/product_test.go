@@ -85,7 +85,13 @@ var prodNew = products.RequestProductsCreate{
 }
 
 func createServer(serv *mocks.Service, method string, url string, body string) *httptest.ResponseRecorder {
-	p := handler.NewProduct(serv)
+
+	r := gin.Default()
+	handler.NewProduct(r, serv)
+	req, rr := util.CreateRequestTest(method, url, body)
+	r.ServeHTTP(rr, req)
+
+	/*p := handler.NewProduct(serv)
 	r := gin.Default()
 	pr := r.Group("/api/v1/products")
 	pr.GET("/", p.GetAll())
@@ -95,7 +101,7 @@ func createServer(serv *mocks.Service, method string, url string, body string) *
 	pr.PUT("/:id", p.Update())
 	pr.PATCH("/:id", p.Update())
 	req, rr := util.CreateRequestTest(method, url, body)
-	r.ServeHTTP(rr, req)
+	r.ServeHTTP(rr, req)*/
 	return rr
 }
 
@@ -182,7 +188,7 @@ func Test_RepositoryDelete(t *testing.T) {
 		err := json.Unmarshal(rr.Body.Bytes(), &objProduct)
 		assert.Nil(t, err)
 		assert.NotNil(t, objProduct.Error)
-		assert.Equal(t, "Invalid ID", objProduct.Error)
+		assert.Equal(t, "invalid ID", objProduct.Error)
 		serv.AssertExpectations(t)
 	})
 
@@ -331,7 +337,7 @@ func Test_RepositoryUpdate(t *testing.T) {
 		assert.Equal(t, http.StatusNotFound, rr.Code)
 		err := json.Unmarshal(rr.Body.Bytes(), &objProduct)
 		assert.Nil(t, err)
-		assert.Equal(t, "Invali ID", objProduct.Error)
+		assert.Equal(t, "invalid ID", objProduct.Error)
 		serv.AssertExpectations(t)
 	})
 

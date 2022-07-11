@@ -3,9 +3,9 @@ package handler
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/cpereira42/mercado-fresco-pron4/internal/products"
+	"github.com/cpereira42/mercado-fresco-pron4/pkg/util"
 	"github.com/cpereira42/mercado-fresco-pron4/pkg/web"
 	"github.com/gin-gonic/gin"
 )
@@ -14,8 +14,16 @@ type Product struct {
 	service products.Service
 }
 
-func NewProduct(p products.Service) *Product {
-	return &Product{service: p}
+func NewProduct(ctx *gin.Engine, p products.Service) /* *Product*/ {
+	ep := &Product{service: p}
+	pr := ctx.Group("/api/v1/products")
+	pr.GET("/", ep.GetAll())
+	pr.GET("/:id", ep.GetId())
+	pr.DELETE("/:id", ep.Delete())
+	pr.POST("/", ep.Create())
+	pr.PUT("/:id", ep.Update())
+	pr.PATCH("/:id", ep.Update())
+
 }
 
 func (c *Product) GetAll() gin.HandlerFunc {
@@ -31,9 +39,8 @@ func (c *Product) GetAll() gin.HandlerFunc {
 
 func (c *Product) GetId() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
+		id, err := util.IDChecker(ctx)
 		if err != nil {
-			ctx.JSON(http.StatusNotFound, web.NewResponse(http.StatusNotFound, nil, "Invalid ID"))
 			return
 		}
 		p, err := c.service.GetId(int(id))
@@ -47,9 +54,8 @@ func (c *Product) GetId() gin.HandlerFunc {
 
 func (c *Product) Delete() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
+		id, err := util.IDChecker(ctx)
 		if err != nil {
-			ctx.JSON(http.StatusNotFound, web.NewResponse(http.StatusNotFound, nil, "Invalid ID"))
 			return
 		}
 
@@ -85,9 +91,8 @@ func (c *Product) Create() gin.HandlerFunc {
 
 func (c *Product) Update() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
+		id, err := util.IDChecker(ctx)
 		if err != nil {
-			ctx.JSON(http.StatusNotFound, web.NewResponse(http.StatusNotFound, nil, "Invali ID"))
 			return
 		}
 

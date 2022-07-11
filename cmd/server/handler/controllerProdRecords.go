@@ -13,8 +13,10 @@ type ProductRecords struct {
 	service productsRecords.Service
 }
 
-func NewProductRecords(p productsRecords.Service) *ProductRecords {
-	return &ProductRecords{service: p}
+func NewProductRecords(ctx *gin.Engine, p productsRecords.Service) /* *ProductRecords */ {
+	prc := &ProductRecords{service: p}
+	ctx.GET("/api/v1/products/reportRecords/", prc.GetId())
+	ctx.POST("/api/v1/productsRecords/", prc.Create())
 }
 
 func (c *ProductRecords) GetId() gin.HandlerFunc {
