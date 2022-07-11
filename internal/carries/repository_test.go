@@ -76,25 +76,65 @@ func TestGetByIDReport(t *testing.T) {
 	repository := carries.NewRepository(db)
 
 	rows := sqlmock.NewRows([]string{"LocalityID", "LocalityName", "Count"}).
+		AddRow(locality1.LocalityID, locality1.LocalityName, locality1.Count)
+
+	t.Run("Generate Report of Localites by ID", func(t *testing.T) {
+		mock.ExpectQuery(regexp.QuoteMeta(carries.GetByIDReport)).WillReturnRows(rows)
+
+		result, err := repository.GetByIDReport(1)
+		assert.NoError(t, err)
+		assert.ObjectsAreEqual(locality1, result)
+
+	})
+	t.Run("Generate Report and ID not Found", func(t *testing.T) {
+		mock.ExpectQuery(regexp.QuoteMeta(carries.GetByIDReport)).WithArgs(1).WillReturnRows(rows)
+
+		_, err := repository.GetByIDReport(1)
+
+		assert.Equal(t, fmt.Errorf(carries.FailedIdNotFound), err)
+
+	})
+
+}
+func TestGetAllReport(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	assert.NoError(t, err)
+
+	repository := carries.NewRepository(db)
+
+	rows := sqlmock.NewRows([]string{"LocalityID", "LocalityName", "Count"}).
 		AddRow(carriesReports[0].LocalityID, carriesReports[0].LocalityName, carriesReports[0].Count).
 		AddRow(carriesReports[1].LocalityID, carriesReports[1].LocalityName, carriesReports[1].Count)
 
-	t.Run("Generate Report of All Localities", func(t *testing.T) {
+	t.Run("Generate Report of All Localities - Should be OK", func(t *testing.T) {
 		mock.ExpectQuery(regexp.QuoteMeta(carries.GetAllReport)).WillReturnRows(rows)
+		assert.NoError(t, err)
 
 		result, err := repository.GetAllReport()
 		assert.NoError(t, err)
 		assert.ObjectsAreEqual(carriesReports[0], result[0])
-		assert.ObjectsAreEqual(carriesReports[0], result[1])
+		assert.ObjectsAreEqual(carriesReports[1], result[1])
 
 	})
-	// t.Run("Generate Report and ID not Found", func(t *testing.T) {
-	// 	mock.ExpectQuery(regexp.QuoteMeta(carries.GetByIDReport)).WithArgs(1).WillReturnRows(rows)
 
-	// 	_, err := repository.GetByIDReport(1)
+	t.Run("Generate Report of All Localities - Should be Fail", func(t *testing.T) {
+		rows := sqlmock.NewRows([]string{
+			"LocalityId",
+			"LocalityName",
+			"SellersCount",
+		}).AddRow("", "", "")
+		mock.ExpectQuery(regexp.QuoteMeta(carries.GetAllReport)).WillReturnRows(rows)
 
-	// 	assert.Equal(t, fmt.Errorf(carries.FailedIdNotFound), err)
+		_, err := repository.GetAllReport()
+		assert.Error(t, err)
 
-	// })
+	})
+
+	t.Run("Generate Report of All Localities - Should be Fail to Read", func(t *testing.T) {
+		mock.ExpectQuery(regexp.QuoteMeta(carries.GetAllReport)).WillReturnError(err)
+		_, err := repository.GetAllReport()
+		assert.Error(t, err)
+
+	})
 
 }
