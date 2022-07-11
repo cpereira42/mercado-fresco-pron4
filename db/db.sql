@@ -32,48 +32,15 @@ DEFAULT CHARACTER SET = utf8mb3;
 
 
 -- -----------------------------------------------------
--- Table `mercadofresco`.`countries`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `mercadofresco`.`countries` (
-  `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `country_name` VARCHAR(255) NOT NULL,
-  PRIMARY KEY (`id`))
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8mb3;
-
-
--- -----------------------------------------------------
--- Table `mercadofresco`.`provinces`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `mercadofresco`.`provinces` (
-  `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `province_name` VARCHAR(255) NOT NULL,
-  `id_contry_fk` INT(11) NOT NULL,
-  PRIMARY KEY (`id`),
-  INDEX `fk_provinces_contries1_idx` (`id_contry_fk` ASC) VISIBLE,
-  CONSTRAINT `fk_provinces_contries1`
-    FOREIGN KEY (`id_contry_fk`)
-    REFERENCES `mercadofresco`.`countries` (`id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE)
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8mb3;
-
-
--- -----------------------------------------------------
 -- Table `mercadofresco`.`localities`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mercadofresco`.`localities` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `locality_name` VARCHAR(255) NOT NULL,
-  `province_id` INT(11) NOT NULL,
+  `province_name` VARCHAR(255) NOT NULL,
+  `country_name` VARCHAR(255) NOT NULL,
   PRIMARY KEY (`id`),
-  INDEX `fk_localities_provinces1_idx` (`province_id` ASC) VISIBLE,
-  CONSTRAINT `fk_localities_provinces1`
-    FOREIGN KEY (`province_id`)
-    REFERENCES `mercadofresco`.`provinces` (`id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE)
+  CONSTRAINT `locality_name_unique` UNIQUE (`locality_name`))
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 
@@ -216,12 +183,12 @@ DEFAULT CHARACTER SET = utf8;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mercadofresco`.`sections` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `section_number` VARCHAR(255) NOT NULL,
+  `section_number` INT(11) NOT NULL,
   `current_capacity` INT(11) NOT NULL,
-  `current_temperature` DECIMAL(19,2) NOT NULL,
+  `current_temperature` INT(11) NOT NULL,
   `maximum_capacity` INT(11) NOT NULL,
   `minimum_capacity` INT(11) NOT NULL,
-  `minimum_temperature` DECIMAL(19,2) NOT NULL,
+  `minimum_temperature` INT(11) NOT NULL,
   `product_type_id` INT(11) NOT NULL,
   `warehouse_id` INT(10) UNSIGNED NOT NULL,
   PRIMARY KEY (`id`),
@@ -260,6 +227,7 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`products_batches` (
   PRIMARY KEY (`id`),
   INDEX `fk_products_batches_product1_idx` (`product_id` ASC) VISIBLE,
   INDEX `fk_products_batches_section1_idx` (`section_id` ASC) VISIBLE,
+  UNIQUE INDEX `batch_number_UNIQUE`(`batch_number` ASC) VISIBLE,
   CONSTRAINT `fk_products_batches_product1`
     FOREIGN KEY (`product_id`)
     REFERENCES `mercadofresco`.`products` (`id`)
@@ -457,14 +425,11 @@ SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 
-INSERT INTO `countries` VALUES
-(1,'Brazil');
 
-INSERT INTO `provinces` VALUES
-(1,'Sao Paulo',1);
-
-INSERT INTO `localities` VALUES
-(1,'São Paulo',1);
+INSERT INTO `localities` (id, locality_name, province_name, country_name) VALUES
+(1,'São Paulo','SP','Brazil'),
+(2,'Rio de Janeiro','RJ','Brazil'),
+(3,'Nova York','NY','EUA');
 
 INSERT INTO `sellers` VALUES
 (1,'cid1','Mercado','rua 1','111',1);
@@ -484,7 +449,7 @@ INSERT INTO `warehouse` VALUES
 (1,'rua 1','11','1',1,1,2.00);
 
 INSERT INTO `sections` VALUES
-(1,'sec1',1,1.00,1,1,1.00,1,1);
+(1,1,1,1,1,1,1,1,1);
 
 INSERT INTO `products_batches` VALUES
 (1,'1',1,1.00,'2008-11-11 13:23:44',1,'2008-11-11 13:23:44','2008-11-11 13:23:44',1.00,1,1);

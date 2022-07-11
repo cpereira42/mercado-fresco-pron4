@@ -12,20 +12,20 @@ type Repository struct {
 	mock.Mock
 }
 
-// Create provides a mock function with given fields: id, cardNumberID, firstName, lastName, warehouseID
-func (_m *Repository) Create(id int, cardNumberID string, firstName string, lastName string, warehouseID int) (employee.Employee, error) {
-	ret := _m.Called(id, cardNumberID, firstName, lastName, warehouseID)
+// Create provides a mock function with given fields: cardNumberID, firstName, lastName, warehouseID
+func (_m *Repository) Create(cardNumberID string, firstName string, lastName string, warehouseID int) (employee.Employee, error) {
+	ret := _m.Called(cardNumberID, firstName, lastName, warehouseID)
 
 	var r0 employee.Employee
-	if rf, ok := ret.Get(0).(func(int, string, string, string, int) employee.Employee); ok {
-		r0 = rf(id, cardNumberID, firstName, lastName, warehouseID)
+	if rf, ok := ret.Get(0).(func(string, string, string, int) employee.Employee); ok {
+		r0 = rf(cardNumberID, firstName, lastName, warehouseID)
 	} else {
 		r0 = ret.Get(0).(employee.Employee)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(int, string, string, string, int) error); ok {
-		r1 = rf(id, cardNumberID, firstName, lastName, warehouseID)
+	if rf, ok := ret.Get(1).(func(string, string, string, int) error); ok {
+		r1 = rf(cardNumberID, firstName, lastName, warehouseID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -84,27 +84,6 @@ func (_m *Repository) GetByID(id int) (employee.Employee, error) {
 	var r1 error
 	if rf, ok := ret.Get(1).(func(int) error); ok {
 		r1 = rf(id)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// LastID provides a mock function with given fields:
-func (_m *Repository) LastID() (int, error) {
-	ret := _m.Called()
-
-	var r0 int
-	if rf, ok := ret.Get(0).(func() int); ok {
-		r0 = rf()
-	} else {
-		r0 = ret.Get(0).(int)
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func() error); ok {
-		r1 = rf()
 	} else {
 		r1 = ret.Error(1)
 	}

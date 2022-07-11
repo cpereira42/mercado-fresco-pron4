@@ -1,5 +1,4 @@
 version: "3.9"
-
 services:
   mariadb:
     image: mariadb:10.8.3

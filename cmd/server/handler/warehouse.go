@@ -36,7 +36,7 @@ func (c *Warehouse) Create(ctx *gin.Context) {
 		return
 	}
 
-	w, err := c.service.Create(r.Address, r.Telephone, r.Warehouse_code, r.Minimum_capacity, r.Minimum_temperature)
+	w, err := c.service.Create(r.Address, r.Telephone, r.Warehouse_code, r.Minimum_capacity, r.Minimum_temperature, r.Locality_id)
 	if err != nil {
 		if err.Error() == "Warehouse already exists" {
 			ctx.JSON(409, web.NewResponse(409, nil, err.Error()))
@@ -63,7 +63,7 @@ func (c *Warehouse) Update(ctx *gin.Context) {
 	// 	ctx.JSON(http.StatusBadRequest, web.NewResponse(http.StatusBadRequest, nil, "Error reading request body"))
 	// }
 
-	w, err := c.service.Update(id, r.Address, r.Telephone, r.Warehouse_code, r.Minimum_capacity, r.Minimum_temperature)
+	w, err := c.service.Update(id, r.Address, r.Telephone, r.Warehouse_code, r.Minimum_capacity, r.Minimum_temperature, r.Locality_id)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, web.NewResponse(http.StatusNotFound, nil, err.Error()))
 		return
