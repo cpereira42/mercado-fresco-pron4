@@ -4,9 +4,11 @@
 *.dll
 *.so
 *.dylib
-*.DS_Store
+.DS_Store
 *.vscode
  
+# Pre-commit-config
+.pre-commit-config.yaml
 
 # Test binary, built with `go test -c`
 *.test
@@ -21,3 +23,5 @@
 
 # .vscode
 .vscode
+
+.pre-commit-config.yaml

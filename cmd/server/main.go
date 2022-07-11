@@ -8,11 +8,15 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 
+	inboundOrders "github.com/cpereira42/mercado-fresco-pron4/internal/inbound_orders"
+	"github.com/cpereira42/mercado-fresco-pron4/internal/productbatch"
+	"github.com/cpereira42/mercado-fresco-pron4/internal/section"
+
 	"github.com/cpereira42/mercado-fresco-pron4/cmd/server/handler"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/buyer"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/employee"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/locality"
-	"github.com/cpereira42/mercado-fresco-pron4/internal/productbatch"
+
 	"github.com/cpereira42/mercado-fresco-pron4/internal/products"
 
 	"github.com/cpereira42/mercado-fresco-pron4/internal/seller"
@@ -41,9 +45,6 @@ func main() {
 	repoProd := products.NewRepositoryProducts(dbProd)
 	serviceProd := products.NewService(repoProd)
 
-	// dbWarehouse := store.New(store.FileType, "./internal/repositories/warehouse.json")
-	// repoWarehouse := warehouse.NewRepository(dbWarehouse)
-
 	repoWarehouse := warehouse.NewRepository(conn)
 	svcWarehouse := warehouse.NewService(repoWarehouse)
 	w := handler.NewWarehouse(svcWarehouse)
@@ -63,9 +64,11 @@ func main() {
 	serviceSection := section.NewService(repSection)
 	sectionController := handler.NewSectionController(serviceSection)
 
+	repositoryInboundOrders := inboundOrders.NewRepository(conn)
+	serviceInboundOrders := inboundOrders.NewService(repositoryInboundOrders)
+
 	repositoryEmployees := employee.NewRepository(conn)
 	serviceEmployees := employee.NewService(repositoryEmployees)
-	handlerEmployees := handler.NewEmployee(serviceEmployees)
 
 	s := handler.NewSeller(serviceSeller)
 	p := handler.NewProduct(serviceProd)
@@ -86,12 +89,8 @@ func main() {
 	sellers.PATCH("/:id", s.Update())
 	sellers.DELETE("/:id", s.Delete())
 
-	routesEmployees := r.Group("/api/v1/employees")
-	routesEmployees.GET("/", handlerEmployees.GetAll())
-	routesEmployees.GET("/:id", handlerEmployees.GetByID())
-	routesEmployees.POST("/", handlerEmployees.Create())
-	routesEmployees.PATCH("/:id", handlerEmployees.Update())
-	routesEmployees.DELETE("/:id", handlerEmployees.Delete())
+	handler.NewInboundOrders(r, serviceInboundOrders)
+	handler.NewEmployee(r, serviceEmployees)
 
 	section := r.Group("/api/v1/sections")
 	section.GET("/", sectionController.ListarSectionAll())
@@ -132,8 +131,8 @@ func connection() (*sql.DB, error) {
 	port := os.Getenv("PORT_DB")
 	host := os.Getenv("HOST_DB")
 	database := os.Getenv("DATABASE")
-	dataSource := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", user, pass, host, port, database)
-	log.Println("conection Success")
+	dataSource := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", user, pass, host, port, database)
+	log.Println("connection successful")
 	conn, err := sql.Open("mysql", dataSource)
 	if err != nil {
 		log.Fatal(err)
