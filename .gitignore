@@ -23,5 +23,9 @@
 
 # .vscode
 .vscode
+<<<<<<< HEAD
+coverage.out
+=======
 
 .pre-commit-config.yaml
+>>>>>>> sprint_3

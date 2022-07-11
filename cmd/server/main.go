@@ -10,6 +10,7 @@ import (
 
 	inboundOrders "github.com/cpereira42/mercado-fresco-pron4/internal/inbound_orders"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/productbatch"
+	"github.com/cpereira42/mercado-fresco-pron4/internal/productsRecords"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/section"
 
 	"github.com/cpereira42/mercado-fresco-pron4/cmd/server/handler"
@@ -41,8 +42,7 @@ func main() {
 	serviceBuyers := buyer.NewService(repositoryBuyers)
 	hdBuyers := handler.NewBuyer(serviceBuyers)
 
-	dbProd := store.New(store.FileType, "./internal/repositories/products.json")
-	repoProd := products.NewRepositoryProducts(dbProd)
+	repoProd := products.NewRepositoryProductsDB(conn)
 	serviceProd := products.NewService(repoProd)
 
 	repoWarehouse := warehouse.NewRepository(conn)
@@ -70,17 +70,16 @@ func main() {
 	repositoryEmployees := employee.NewRepository(conn)
 	serviceEmployees := employee.NewService(repositoryEmployees)
 
-	s := handler.NewSeller(serviceSeller)
-	p := handler.NewProduct(serviceProd)
-	r := gin.Default()
+	repoProdRecord := productsRecords.NewRepositoryProductsRecordsDB(conn)
+	serviceProdRecord := productsRecords.NewService(repoProdRecord)
 
-	pr := r.Group("/api/v1/products")
-	pr.GET("/", p.GetAll())
-	pr.GET("/:id", p.GetId())
-	pr.DELETE("/:id", p.Delete())
-	pr.POST("/", p.Create())
-	pr.PUT("/:id", p.Update())
-	pr.PATCH("/:id", p.Update())
+	s := handler.NewSeller(serviceSeller)
+
+	r := gin.Default()
+	handler.NewProduct(r, serviceProd)
+	handler.NewProductRecords(r, serviceProdRecord)
+	handler.NewInboundOrders(r, serviceInboundOrders)
+	handler.NewEmployee(r, serviceEmployees)
 
 	sellers := r.Group("/api/v1/sellers")
 	sellers.GET("/", s.GetAll())
@@ -88,9 +87,6 @@ func main() {
 	sellers.POST("/", s.Create())
 	sellers.PATCH("/:id", s.Update())
 	sellers.DELETE("/:id", s.Delete())
-
-	handler.NewInboundOrders(r, serviceInboundOrders)
-	handler.NewEmployee(r, serviceEmployees)
 
 	section := r.Group("/api/v1/sections")
 	section.GET("/", sectionController.ListarSectionAll())
