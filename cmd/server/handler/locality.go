@@ -1,10 +1,11 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/cpereira42/mercado-fresco-pron4/internal/locality"
+	"github.com/cpereira42/mercado-fresco-pron4/pkg/util"
 	"github.com/cpereira42/mercado-fresco-pron4/pkg/web"
 	"github.com/gin-gonic/gin"
 )
@@ -43,29 +44,28 @@ func (l *Locality) Create() gin.HandlerFunc {
 	}
 }
 
-func (l *Locality) GenerateReportAll() gin.HandlerFunc {
+func (c *Locality) ReportLocality() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		report, err := l.service.GenerateReportAll()
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, web.NewResponse(http.StatusBadRequest, nil, err.Error()))
-			return
-		}
-		ctx.JSON(http.StatusOK, web.NewResponse(http.StatusOK, report, ""))
-	}
-}
+		localityID := ctx.Query("id")
+		if localityID != "" {
+			id, err := util.IDChecker(ctx)
+			if err != nil {
+				return
+			}
+			reportLocality, err := c.service.GenerateReportById(id)
 
-func (l *Locality) GenerateReportById() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		id, err := strconv.Atoi(ctx.Param("id"))
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, web.NewResponse(http.StatusBadRequest, nil, "Invalid ID"))
-			return
+			if err != nil {
+				ctx.JSON(http.StatusNotFound, web.NewResponse(http.StatusNotFound, nil, fmt.Sprintf("%v", err)))
+				return
+			}
+			ctx.JSON(http.StatusOK, web.NewResponse(http.StatusOK, reportLocality, ""))
+		} else {
+			reportLocalities, err := c.service.GenerateReportAll()
+			if err != nil {
+				ctx.JSON(http.StatusNotFound, web.NewResponse(http.StatusNotFound, nil, fmt.Sprintf("%v", err)))
+				return
+			}
+			ctx.JSON(http.StatusOK, web.NewResponse(http.StatusOK, reportLocalities, ""))
 		}
-		report, err := l.service.GenerateReportById(int(id))
-		if err != nil {
-			ctx.JSON(http.StatusNotFound, web.NewResponse(http.StatusNotFound, nil, err.Error()))
-			return
-		}
-		ctx.JSON(http.StatusOK, web.NewResponse(http.StatusOK, report, ""))
 	}
 }

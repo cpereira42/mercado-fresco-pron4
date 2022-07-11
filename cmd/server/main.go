@@ -119,9 +119,7 @@ func main() {
 
 	localities := r.Group("/api/v1/localities")
 	localities.POST("/", l.Create())
-	localities.GET("/", l.GenerateReportAll())
-	localities.GET("/:id", l.GenerateReportById())
-
+	localities.GET("/", l.ReportLocality())
 	r.Run()
 }
 
