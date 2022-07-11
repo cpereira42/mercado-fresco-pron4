@@ -113,7 +113,7 @@ func TestControllerCreateLocality(t *testing.T) {
 		})
 }
 
-func TestControllerGenerateReportAll(t *testing.T) {
+func TestControllerReportLocality(t *testing.T) {
 	t.Run(
 		"Test GenerateReportAll - OK", func(t *testing.T) {
 			req, rr := util.CreateRequestTest(http.MethodGet, "/api/v1/localities/", "")
@@ -122,7 +122,7 @@ func TestControllerGenerateReportAll(t *testing.T) {
 			r := gin.Default()
 			serviceMock.On("GenerateReportAll").Return(reportList, nil)
 			localities := r.Group("/api/v1/localities")
-			localities.GET("/", s.GenerateReportAll())
+			localities.GET("/", s.ReportLocality())
 			r.ServeHTTP(rr, req)
 			assert.Equal(t, 200, rr.Code)
 			objResp := struct {
@@ -142,9 +142,9 @@ func TestControllerGenerateReportAll(t *testing.T) {
 			msgError := fmt.Errorf("DB Connection Failed")
 			serviceMock.On("GenerateReportAll").Return([]locality.LocalityReport{}, msgError)
 			localities := r.Group("/api/v1/localities")
-			localities.GET("/", s.GenerateReportAll())
+			localities.GET("/", s.ReportLocality())
 			r.ServeHTTP(rr, req)
-			assert.Equal(t, 400, rr.Code)
+			assert.Equal(t, 404, rr.Code)
 			objResp := struct {
 				Code  int
 				Error string
@@ -153,18 +153,15 @@ func TestControllerGenerateReportAll(t *testing.T) {
 			assert.Nil(t, err)
 			assert.Equal(t, msgError.Error(), objResp.Error)
 		})
-}
-
-func TestControllerGenerateReportById(t *testing.T) {
 	t.Run(
 		"Test GenerateReportById - OK", func(t *testing.T) {
-			req, rr := util.CreateRequestTest(http.MethodGet, "/api/v1/localities/1", "")
+			req, rr := util.CreateRequestTest(http.MethodGet, "/api/v1/localities/?id=1", "")
 			serviceMock := new(mocks.Service)
 			s := handler.NewLocality(serviceMock)
 			r := gin.Default()
 			serviceMock.On("GenerateReportById", 1).Return(report1, nil)
 			localities := r.Group("/api/v1/localities")
-			localities.GET("/:id", s.GenerateReportById())
+			localities.GET("/", s.ReportLocality())
 			r.ServeHTTP(rr, req)
 			assert.Equal(t, 200, rr.Code)
 			objResp := struct {
@@ -177,16 +174,16 @@ func TestControllerGenerateReportById(t *testing.T) {
 		})
 	t.Run(
 		"Test GenerateReportById - Invalid ID", func(t *testing.T) {
-			req, rr := util.CreateRequestTest(http.MethodGet, "/api/v1/localities/a", "")
+			req, rr := util.CreateRequestTest(http.MethodGet, "/api/v1/localities/?id=a", "")
 			serviceMock := new(mocks.Service)
 			s := handler.NewLocality(serviceMock)
 			r := gin.Default()
-			msgError := fmt.Errorf("Invalid ID")
-			serviceMock.On("GenerateReportById", "a").Return(locality.LocalityReport{}, msgError)
+			msgError := fmt.Errorf("invalid ID")
+			serviceMock.On("GenerateReportById").Return(locality.LocalityReport{}, msgError)
 			localities := r.Group("/api/v1/localities")
-			localities.GET("/:id", s.GenerateReportById())
+			localities.GET("/", s.ReportLocality())
 			r.ServeHTTP(rr, req)
-			assert.Equal(t, 400, rr.Code)
+			assert.Equal(t, 404, rr.Code)
 			objResp := struct {
 				Code  int
 				Error string
@@ -197,14 +194,14 @@ func TestControllerGenerateReportById(t *testing.T) {
 		})
 	t.Run(
 		"Test GenerateReportById - ID not found", func(t *testing.T) {
-			req, rr := util.CreateRequestTest(http.MethodGet, "/api/v1/localities/4", "")
+			req, rr := util.CreateRequestTest(http.MethodGet, "/api/v1/localities/?id=4", "")
 			serviceMock := new(mocks.Service)
 			s := handler.NewLocality(serviceMock)
 			r := gin.Default()
 			msgError := fmt.Errorf("Locality 4 not found")
 			serviceMock.On("GenerateReportById", 4).Return(locality.LocalityReport{}, msgError)
 			localities := r.Group("/api/v1/localities")
-			localities.GET("/:id", s.GenerateReportById())
+			localities.GET("/", s.ReportLocality())
 			r.ServeHTTP(rr, req)
 			assert.Equal(t, 404, rr.Code)
 			objResp := struct {

@@ -10,6 +10,7 @@ import (
 
 	inboundOrders "github.com/cpereira42/mercado-fresco-pron4/internal/inbound_orders"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/productbatch"
+	"github.com/cpereira42/mercado-fresco-pron4/internal/section"
 
 	"github.com/cpereira42/mercado-fresco-pron4/cmd/server/handler"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/buyer"
@@ -59,9 +60,9 @@ func main() {
 	servicePB := productbatch.NewServiceProductBatches(repoPB)
 	productBatchesController := handler.NewProductBatChesController(servicePB)
 
-	// repSection := section.NewRepository(conn)
-	// serviceSection := section.NewService(repSection)
-	// sectionController := handler.NewSectionController(serviceSection)
+	repSection := section.NewRepository(conn)
+	serviceSection := section.NewService(repSection)
+	sectionController := handler.NewSectionController(serviceSection)
 
 	repositoryInboundOrders := inboundOrders.NewRepository(conn)
 	serviceInboundOrders := inboundOrders.NewService(repositoryInboundOrders)
@@ -118,9 +119,7 @@ func main() {
 
 	localities := r.Group("/api/v1/localities")
 	localities.POST("/", l.Create())
-	localities.GET("/", l.GenerateReportAll())
-	localities.GET("/:id", l.GenerateReportById())
-
+	localities.GET("/", l.ReportLocality())
 	r.Run()
 }
 
