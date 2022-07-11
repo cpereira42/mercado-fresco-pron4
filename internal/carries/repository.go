@@ -2,7 +2,6 @@ package carries
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 
 	"github.com/cpereira42/mercado-fresco-pron4/pkg/util"
@@ -48,11 +47,8 @@ func (r *repository) GetByIDReport(id int) (Localities, error) {
 
 	err := row.Scan(&locality.LocalityID, &locality.LocalityName, &locality.Count)
 
-	if errors.Is(err, sql.ErrNoRows) {
-		return locality, fmt.Errorf(failedIdNotFound)
-	}
 	if err != nil {
-		return locality, util.CheckError(err)
+		return Localities{}, fmt.Errorf(FailedIdNotFound)
 	}
 	return locality, nil
 
@@ -67,7 +63,7 @@ func (r *repository) Create(cid, company_name, address, telephone string, locali
 
 	rowsAffected, _ := result.RowsAffected()
 	if rowsAffected == 0 {
-		return Carries{}, fmt.Errorf("failed to create carry")
+		return Carries{}, fmt.Errorf(FailedToCreateCarry)
 	}
 
 	return newCarry, nil
