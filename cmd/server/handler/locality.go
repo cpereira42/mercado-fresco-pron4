@@ -14,8 +14,11 @@ type Locality struct {
 	service locality.Service
 }
 
-func NewLocality(l locality.Service) *Locality {
-	return &Locality{service: l}
+func NewLocality(ctx *gin.Engine, service locality.Service) {
+	l := &Locality{service: service}
+	localities := ctx.Group("/api/v1/localities")
+	localities.POST("/", l.Create())
+	localities.GET("/", l.ReportLocality())
 }
 
 func (l *Locality) Create() gin.HandlerFunc {

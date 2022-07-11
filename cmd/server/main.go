@@ -54,7 +54,6 @@ func main() {
 
 	repoLocality := locality.NewRepositoryLocality(conn)
 	serviceLocality := locality.NewService(repoLocality)
-	l := handler.NewLocality(serviceLocality)
 
 	repoPB := productbatch.NewRepositoryProductBatches(conn)
 	servicePB := productbatch.NewServiceProductBatches(repoPB)
@@ -73,20 +72,13 @@ func main() {
 	repoProdRecord := productsRecords.NewRepositoryProductsRecordsDB(conn)
 	serviceProdRecord := productsRecords.NewService(repoProdRecord)
 
-	s := handler.NewSeller(serviceSeller)
-
 	r := gin.Default()
 	handler.NewProduct(r, serviceProd)
 	handler.NewProductRecords(r, serviceProdRecord)
 	handler.NewInboundOrders(r, serviceInboundOrders)
 	handler.NewEmployee(r, serviceEmployees)
-
-	sellers := r.Group("/api/v1/sellers")
-	sellers.GET("/", s.GetAll())
-	sellers.GET("/:id", s.GetId())
-	sellers.POST("/", s.Create())
-	sellers.PATCH("/:id", s.Update())
-	sellers.DELETE("/:id", s.Delete())
+	handler.NewSeller(r, serviceSeller)
+	handler.NewLocality(r, serviceLocality)
 
 	section := r.Group("/api/v1/sections")
 	section.GET("/", sectionController.ListarSectionAll())
@@ -112,10 +104,6 @@ func main() {
 	buyers.POST("/", hdBuyers.Create())
 	buyers.PATCH("/:id", hdBuyers.Update())
 	buyers.DELETE("/:id", hdBuyers.Delete())
-
-	localities := r.Group("/api/v1/localities")
-	localities.POST("/", l.Create())
-	localities.GET("/", l.ReportLocality())
 	r.Run()
 }
 
