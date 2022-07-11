@@ -4,11 +4,14 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+
+	"github.com/cpereira42/mercado-fresco-pron4/pkg/util"
 )
 
 type Repository interface {
 	GetByIDReport(id int) (Localities, error)
 	Create(cid, companyName, address, telephone string, localityID int) (Carries, error)
+	GetAllReport() ([]Localities, error)
 }
 
 type repository struct {
@@ -21,42 +24,35 @@ func NewRepository(db *sql.DB) Repository {
 	}
 }
 
-const (
-	CreateCarrie  = `INSERT INTO carries (cid, company_name, address, telephone, locality_id) VALUES (?, ?, ?, ?, ?)`
-	GetByID       = `SELECT id, locality_id, cid, company_name, address, telephone FROM carries WHERE id=?`
-	GetByIDReport = `SELECT locality_id, locality_name, COUNT(carries.locality_id)
-	FROM localities
-	INNER JOIN carries ON localities.id = carries.locality_id
-	WHERE localities.id = ?`
-)
+func (r *repository) GetAllReport() ([]Localities, error) {
+	var localities []Localities
+	rows, err := r.db.Query(GetAllReport)
+	if err != nil {
+		return localities, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var locality Localities
+		err := rows.Scan(&locality.LocalityID, &locality.LocalityName, &locality.Count)
+		if err != nil {
+			return localities, err
+		}
+		localities = append(localities, locality)
+	}
+	return localities, nil
 
-// func (r *repository) GetByID(id int) (Carries, error) {
-// 	row := r.db.QueryRow("SELECT * from carries WHERE id = ?", id)
-
-// 	var carry Carries
-
-// 	err := row.Scan(&carry.ID, &carry.Cid, &carry.CompanyName, &carry.Address, &carry.Telephone, &carry.LocalityID)
-
-// 	if errors.Is(err, sql.ErrNoRows) {
-// 		return carry, fmt.Errorf("id %d not found", id)
-// 	}
-// 	if err != nil {
-// 		return carry, err
-// 	}
-// 	return carry, nil
-// }
+}
 func (r *repository) GetByIDReport(id int) (Localities, error) {
-	row := r.db.QueryRow(GetByIDReport, id)
-
 	var locality Localities
+	row := r.db.QueryRow(GetByIDReport, id)
 
 	err := row.Scan(&locality.LocalityID, &locality.LocalityName, &locality.Count)
 
 	if errors.Is(err, sql.ErrNoRows) {
-		return locality, fmt.Errorf("id %d not found", id)
+		return locality, fmt.Errorf(failedIdNotFound)
 	}
 	if err != nil {
-		return locality, err
+		return locality, util.CheckError(err)
 	}
 	return locality, nil
 
@@ -64,23 +60,15 @@ func (r *repository) GetByIDReport(id int) (Localities, error) {
 func (r *repository) Create(cid, company_name, address, telephone string, localityID int) (Carries, error) {
 	newCarry := Carries{Cid: cid, CompanyName: company_name, Address: address, Telephone: telephone, LocalityID: localityID}
 
-	result, err := r.db.Exec(CreateCarrie, &newCarry.Cid, &newCarry.CompanyName, &newCarry.Address, &newCarry.Telephone, &newCarry.LocalityID)
+	result, err := r.db.Exec(CreateCarry, &newCarry.Cid, &newCarry.CompanyName, &newCarry.Address, &newCarry.Telephone, &newCarry.LocalityID)
 	if err != nil {
-		return newCarry, err
+		return Carries{}, util.CheckError(err)
 	}
 
-	rowsAffected, err := result.RowsAffected()
+	rowsAffected, _ := result.RowsAffected()
 	if rowsAffected == 0 {
-		return newCarry, err
+		return Carries{}, fmt.Errorf("failed to create carry")
 	}
-	if err != nil {
-		return newCarry, err
-	}
-	lastID, err := result.LastInsertId()
-	if err != nil {
-		return newCarry, err
-	}
-	newCarry.ID = int(lastID)
 
 	return newCarry, nil
 }

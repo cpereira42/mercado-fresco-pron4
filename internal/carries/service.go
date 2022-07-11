@@ -3,6 +3,7 @@ package carries
 type Service interface {
 	GetByIDReport(id int) (Localities, error)
 	Create(cid, companyName, address, telephone string, localityID int) (Carries, error)
+	GetAllReport() ([]Localities, error)
 }
 
 type service struct {
@@ -15,13 +16,13 @@ func NewService(r Repository) Service {
 	}
 }
 
-// func (s *service) GetByID(id int) (Carries, error) {
-// 	carry, err := s.repository.GetByID(id)
-// 	if err != nil {
-// 		return Carries{}, err
-// 	}
-// 	return carry, nil
-// }
+func (s *service) GetAllReport() ([]Localities, error) {
+	locality, err := s.repository.GetAllReport()
+	if err != nil {
+		return []Localities{}, err
+	}
+	return locality, nil
+}
 
 func (s *service) GetByIDReport(id int) (Localities, error) {
 	locality, err := s.repository.GetByIDReport(id)

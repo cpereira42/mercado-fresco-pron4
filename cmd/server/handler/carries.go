@@ -18,22 +18,14 @@ func NewCarry(carry carries.Service) *Carries {
 		service: carry,
 	}
 }
-
-// func (c *Carries) GetByID(ctx *gin.Context) {
-// 	id, err := strconv.Atoi(ctx.Param("id"))
-// 	if err != nil {
-// 		ctx.JSON(http.StatusNotFound, web.NewResponse(http.StatusNotFound, nil, "Invalid ID"))
-// 		return
-// 	}
-
-// 	carry, err := c.service.GetByID(id)
-// 	if err != nil {
-// 		ctx.JSON(http.StatusNotFound, web.NewResponse(http.StatusNotFound, nil, err.Error()))
-// 		return
-// 	}
-// 	ctx.JSON(http.StatusOK, web.NewResponse(http.StatusOK, carry, ""))
-// }
-
+func (c *Carries) GetAllReport(ctx *gin.Context) {
+	carries, err := c.service.GetAllReport()
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, web.NewResponse(http.StatusNotFound, nil, err.Error()))
+		return
+	}
+	ctx.JSON(http.StatusOK, web.NewResponse(http.StatusOK, carries, ""))
+}
 func (c *Carries) GetByIDReport(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {

@@ -123,9 +123,10 @@ func main() {
 	buyers.DELETE("/:id", hdBuyers.Delete())
 
 	carry := r.Group("/api/v1/carries")
+	carry.POST("/", carriesController.Create)
 	localities := r.Group("/api/v1/localities")
 	localities.GET("/:id", carriesController.GetByIDReport)
-	carry.POST("/", carriesController.Create)
+	localities.GET("/", carriesController.GetAllReport)
 
 	r.Run()
 }

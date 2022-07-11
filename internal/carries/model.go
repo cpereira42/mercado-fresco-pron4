@@ -1,7 +1,6 @@
 package carries
 
 type Carries struct {
-	ID          int    `json:"id"`
 	Cid         string `json:"cid"`
 	CompanyName string `json:"company_name"`
 	Address     string `json:"address"`
@@ -17,7 +16,7 @@ type RequestCarriesCreate struct {
 }
 
 type Localities struct {
-	LocalityID   string `json:"locality_id"`
+	LocalityID   int    `json:"locality_id"`
 	LocalityName string `json:"locality_name"`
 	Count        int    `json:"carries_count"`
 }
