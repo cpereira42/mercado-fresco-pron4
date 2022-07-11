@@ -191,6 +191,25 @@ func TestCreate(t *testing.T) {
 		assert.NotNil(t, err)
 		assert.Equal(t, fmt.Errorf("Fail to save"), err)
 	})
+	t.Run("Create - if duplicated data is inserted", func(t *testing.T) {
+		query := `INSERT INTO sellers 
+		(cid,
+		company_name,
+		address,
+		telephone,
+		locality_id) 
+		VALUES(?,?,?,?,?)`
+		db, mock, err := sqlmock.New()
+		assert.NoError(t, err)
+		defer db.Close()
+
+		stmt := mock.ExpectPrepare(regexp.QuoteMeta(query))
+		stmt.ExpectExec().WithArgs(seller1.Cid, seller1.CompanyName, seller1.Address, seller1.Telephone, seller1.LocalityId).WillReturnError(fmt.Errorf("Duplicate entry 'cid1' for key 'cid_UNIQUE'"))
+		sellersRepo := seller.NewRepositorySeller(db)
+		_, err = sellersRepo.Create(seller1.Cid, seller1.CompanyName, seller1.Address, seller1.Telephone, seller1.LocalityId)
+		assert.NotNil(t, err)
+		assert.Equal(t, fmt.Errorf("cid_UNIQUE is unique, and cid1 already registered"), err)
+	})
 }
 
 func TestUpdate(t *testing.T) {
@@ -242,6 +261,24 @@ func TestUpdate(t *testing.T) {
 		_, err = sellersRepo.Update(seller1.Id, seller1.Cid, seller1.CompanyName, seller1.Address, seller1.Telephone, seller1.LocalityId)
 		assert.NotNil(t, err)
 		assert.Equal(t, fmt.Errorf("Fail to save"), err)
+	})
+	t.Run("Update - if duplicated data is inserted", func(t *testing.T) {
+		query := `UPDATE sellers SET 
+		cid=?,
+		company_name=?,
+		address=?,
+		telephone=?,
+		locality_id=? WHERE id=?`
+		db, mock, err := sqlmock.New()
+		assert.NoError(t, err)
+		defer db.Close()
+
+		stmt := mock.ExpectPrepare(regexp.QuoteMeta(query))
+		stmt.ExpectExec().WithArgs(seller1.Cid, seller1.CompanyName, seller1.Address, seller1.Telephone, seller1.LocalityId, seller1.Id).WillReturnError(fmt.Errorf("Duplicate entry 'cid1' for key 'cid_UNIQUE'"))
+		sellersRepo := seller.NewRepositorySeller(db)
+		_, err = sellersRepo.Update(seller1.Id, seller1.Cid, seller1.CompanyName, seller1.Address, seller1.Telephone, seller1.LocalityId)
+		assert.NotNil(t, err)
+		assert.Equal(t, fmt.Errorf("cid_UNIQUE is unique, and cid1 already registered"), err)
 	})
 }
 
