@@ -57,7 +57,6 @@ func main() {
 
 	repoCarries := carries.NewRepository(Conn)
 	svcCarries := carries.NewService(repoCarries)
-	carriesController := handler.NewCarry(svcCarries)
 
 	//dbSection := store.New(store.FileType, "./internal/repositories/sections.json")
 	//repSection := sectionRepository.NewRepository(dbSection)
@@ -121,12 +120,7 @@ func main() {
 	buyers.POST("/", hdBuyers.Create())
 	buyers.PATCH("/:id", hdBuyers.Update())
 	buyers.DELETE("/:id", hdBuyers.Delete())
-
-	carry := r.Group("/api/v1/carries")
-	carry.POST("/", carriesController.Create)
-	localities := r.Group("/api/v1/localities")
-	localities.GET("/:id", carriesController.GetByIDReport)
-	localities.GET("/", carriesController.GetAllReport)
+	handler.NewCarry(r, svcCarries)
 
 	r.Run()
 }
