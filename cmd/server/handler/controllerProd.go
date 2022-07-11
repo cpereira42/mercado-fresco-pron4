@@ -14,7 +14,7 @@ type Product struct {
 	service products.Service
 }
 
-func NewProduct(ctx *gin.Engine, p products.Service) /* *Product*/ {
+func NewProduct(ctx *gin.Engine, p products.Service) {
 	ep := &Product{service: p}
 	pr := ctx.Group("/api/v1/products")
 	pr.GET("/", ep.GetAll())

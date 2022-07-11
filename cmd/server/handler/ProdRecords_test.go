@@ -64,18 +64,6 @@ func createServerRecordsProducts(serv *mocks.Service, method string, url string,
 	handler.NewProductRecords(r, serv)
 	req, rr := util.CreateRequestTest(method, url, body)
 	r.ServeHTTP(rr, req)
-
-	/*pRecord := handler.NewProductRecords(serv)
-	r := gin.Default()
-	pr := r.Group("/api/v1/products")
-	pr.GET("/reportRecords/", pRecord.GetId())
-
-	prec := r.Group("/api/v1/productsRecords")
-	prec.POST("/", pRecord.Create())
-
-	req, rr := util.CreateRequestTest(method, url, body)
-	r.ServeHTTP(rr, req)*/
-
 	return rr
 }
 
