@@ -83,5 +83,32 @@ func TestServiceGetAllReport(t *testing.T) {
 		assert.Error(t, err)
 
 	})
+}
+
+func TestServiceGetByIDReport(t *testing.T) {
+	t.Run("Get a report of a locality by ID - OK", func(t *testing.T) {
+		mockRepository := new(mocks.Repository)
+		mockRepository.On("GetByIDReport", tmock.AnythingOfType("int")).Return(localityOne, nil)
+
+		service := carries.NewService(mockRepository)
+
+		locality, err := service.GetByIDReport(1)
+
+		assert.Nil(t, err)
+		assert.ObjectsAreEqualValues(localityOne, locality)
+	})
+	t.Run("Get a report of a locality by ID - Fail", func(t *testing.T) {
+		mockRepository := new(mocks.Repository)
+		errorMsg := "fail to get locality"
+
+		mockRepository.On("GetByIDReport", tmock.AnythingOfType("int")).Return(carries.Localities{}, errors.New(errorMsg))
+
+		service := carries.NewService(mockRepository)
+
+		_, err := service.GetByIDReport(1)
+
+		assert.Error(t, err)
+
+	})
 
 }
