@@ -9,6 +9,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/cpereira42/mercado-fresco-pron4/internal/productbatch"
+	"github.com/cpereira42/mercado-fresco-pron4/internal/purchaseorders"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/section"
 
 	"github.com/cpereira42/mercado-fresco-pron4/cmd/server/handler"
@@ -36,6 +37,10 @@ func main() {
 	repositoryBuyers := buyer.NewRepository(conn)
 	serviceBuyers := buyer.NewService(repositoryBuyers)
 	hdBuyers := handler.NewBuyer(serviceBuyers)
+
+	repositoryPurchase := purchaseorders.NewRepository(conn)
+	servicePurchase := purchaseorders.NewService(repositoryPurchase)
+	hdPurchase := handler.NewPurchase(servicePurchase)
 
 	dbProd := store.New(store.FileType, "./internal/repositories/products.json")
 	repoProd := products.NewRepositoryProducts(dbProd)
@@ -111,6 +116,10 @@ func main() {
 	buyers.POST("/", hdBuyers.Create())
 	buyers.PATCH("/:id", hdBuyers.Update())
 	buyers.DELETE("/:id", hdBuyers.Delete())
+
+	purchase := r.Group("/api/v1/purchase")
+	purchase.GET("/:id", hdPurchase.GetById())
+	purchase.POST("/", hdPurchase.Create())
 
 	r.Run()
 }

@@ -1,7 +1,6 @@
 package handler_test
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -23,7 +22,7 @@ var (
 	buyersList []buyer.Buyer = []buyer.Buyer{buyer1, buyer2, buyer3}
 )
 
-func createRequestTestBuyer(
+/*func createRequestTestBuyer(
 	method string,
 	url string,
 	body string,
@@ -32,7 +31,7 @@ func createRequestTestBuyer(
 	req.Header.Add("Content-Type", "application/json")
 
 	return req, httptest.NewRecorder()
-}
+}*/
 
 func createServerBuyer(serv *mocks.Service, method string, url string, body string) *httptest.ResponseRecorder {
 	p := handler.NewBuyer(serv)

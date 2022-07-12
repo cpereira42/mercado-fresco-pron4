@@ -62,7 +62,7 @@ func (r *repository) GetId(id int) (Buyer, error) {
 	)
 
 	if err != nil {
-		return Buyer{}, fmt.Errorf("Fail to get id")
+		return Buyer{}, fmt.Errorf("fail to get id")
 	}
 
 	return buyer, nil
@@ -79,7 +79,7 @@ func (r *repository) Create(card_number_ID, first_name, last_name string) (Buyer
 
 	rowsAffected, _ := stmt.RowsAffected()
 	if rowsAffected == 0 {
-		return Buyer{}, fmt.Errorf("Fail to create")
+		return Buyer{}, fmt.Errorf("fail to create")
 	}
 
 	lastId, _ := stmt.LastInsertId()
@@ -109,7 +109,7 @@ func (r *repository) Delete(id int) error {
 
 	rowsAffected, _ := stmt.RowsAffected()
 	if rowsAffected == 0 {
-		return fmt.Errorf("Buyer not found")
+		return fmt.Errorf("buyer not found")
 	}
 	return nil
 }
