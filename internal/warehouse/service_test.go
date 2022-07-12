@@ -1,7 +1,9 @@
 package warehouse_test
 
 import (
+	"errors"
 	"fmt"
+	"log"
 	"testing"
 
 	"github.com/cpereira42/mercado-fresco-pron4/internal/warehouse"
@@ -20,15 +22,13 @@ var (
 
 func TestServiceCreate(t *testing.T) {
 
-	warehouseListSucess := []warehouse.Warehouse{warehouse1, warehouse2}
-	warehouseListError := []warehouse.Warehouse{warehouse1}
+	//	warehouseListSucess := []warehouse.Warehouse{warehouse1, warehouse2}
+	//warehouseListError := []warehouse.Warehouse{warehouse1}
 
 	t.Run(
 		"If all fields are valid, should return a warehouse",
 		func(t *testing.T) {
 			repo := &mocks.Repository{}
-			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
-			repo.On("CheckLocality", tmock.Anything).Return(true, nil).Once()
 			repo.On("Create",
 				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("string"),
@@ -55,8 +55,6 @@ func TestServiceCreate(t *testing.T) {
 		func(t *testing.T) {
 			errorMsgWarehouseCodeAlreadyExists := "Warehouse already exists"
 			repo := &mocks.Repository{}
-			repo.On("GetAll").Return(warehouseListError, nil).Once()
-			repo.On("LastID").Return(1, nil).Once()
 			repo.On("Create",
 				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("string"),
@@ -65,96 +63,17 @@ func TestServiceCreate(t *testing.T) {
 				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("int")).
-				Return(warehouse.Warehouse{}, errorMsgWarehouseCodeAlreadyExists)
+				Return(warehouse.Warehouse{}, errors.New(errorMsgWarehouseCodeAlreadyExists))
 
 			service := warehouse.NewService(repo)
 
 			newWarehouse, err := service.Create(warehouse1.Address, warehouse1.Telephone, warehouse1.Warehouse_code, warehouse1.Minimum_capacity, warehouse1.Minimum_temperature, warehouse1.Locality_id)
-
+			log.Println(err)
 			assert.Error(t, err)
 			assert.EqualError(t, err, errorMsgWarehouseCodeAlreadyExists)
 			assert.ObjectsAreEqual(warehouse.Warehouse{}, newWarehouse)
 
 		})
-	t.Run(
-		"If create cannot save on DB, should return an error - GetAll",
-		func(t *testing.T) {
-			errorMsgCannotSaveOnDB := fmt.Errorf("Cannot save on DB")
-			repo := &mocks.Repository{}
-			repo.On("GetAll").Return([]warehouse.Warehouse{}, errorMsgCannotSaveOnDB).Once()
-			repo.On("LastID").Return(1, nil).Once()
-			repo.On("Create",
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int")).
-				Return(warehouse.Warehouse{}, nil)
-
-			service := warehouse.NewService(repo)
-
-			newWarehouse, err := service.Create(warehouse3.Address, warehouse3.Telephone, warehouse3.Warehouse_code, warehouse3.Minimum_capacity, warehouse3.Minimum_temperature, warehouse3.Locality_id)
-
-			assert.Error(t, err)
-			assert.EqualError(t, err, errorMsgCannotSaveOnDB.Error())
-			assert.ObjectsAreEqual([]warehouse.Warehouse{}, newWarehouse)
-
-		})
-	t.Run(
-		"If CheckLocality fail sould return an error",
-		func(t *testing.T) {
-			errorMsgCannotSaveOnDB := fmt.Errorf("locality not found")
-			repo := &mocks.Repository{}
-			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
-			repo.On("CheckLocality", tmock.Anything).Return(false, errorMsgCannotSaveOnDB).Once()
-			repo.On("Create",
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int")).
-				Return(warehouse.Warehouse{}, nil)
-
-			service := warehouse.NewService(repo)
-
-			newWarehouse, err := service.Create(warehouse3.Address, warehouse3.Telephone, warehouse3.Warehouse_code, warehouse3.Minimum_capacity, warehouse3.Minimum_temperature, warehouse3.Locality_id)
-
-			assert.Error(t, err)
-			assert.EqualError(t, err, errorMsgCannotSaveOnDB.Error())
-			assert.ObjectsAreEqual([]warehouse.Warehouse{}, newWarehouse)
-
-		})
-	t.Run(
-		"If create cannot save on DB, should return an error - Create",
-		func(t *testing.T) {
-			errorMsgCannotSaveOnDB := fmt.Errorf("Cannot save on DB")
-			repo := &mocks.Repository{}
-			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
-			repo.On("CheckLocality", tmock.Anything).Return(true, nil).Once()
-			repo.On("Create",
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int")).
-				Return(warehouse.Warehouse{}, errorMsgCannotSaveOnDB)
-
-			service := warehouse.NewService(repo)
-
-			newWarehouse, err := service.Create(warehouse3.Address, warehouse3.Telephone, warehouse3.Warehouse_code, warehouse3.Minimum_capacity, warehouse3.Minimum_temperature, warehouse3.Locality_id)
-
-			assert.Error(t, err)
-			assert.EqualError(t, err, errorMsgCannotSaveOnDB.Error())
-			assert.ObjectsAreEqual([]warehouse.Warehouse{}, newWarehouse)
-
-		})
-
 }
 
 func TestServiceGetAll(t *testing.T) {
@@ -206,25 +125,10 @@ func TestServiceGetById(t *testing.T) {
 			assert.Equal(t, warehouse1, warehouseById)
 		})
 	t.Run(
-		"If GetByID has an error use GetAll, should return an error",
-		func(t *testing.T) {
-			errorMsgCannotGetAll := fmt.Errorf("Cannot get all")
-			repo := &mocks.Repository{}
-			repo.On("GetAll").Return([]warehouse.Warehouse{}, errorMsgCannotGetAll).Once()
-			service := warehouse.NewService(repo)
-			_, err := service.GetByID(1)
-
-			assert.Error(t, err)
-			assert.EqualError(t, err, errorMsgCannotGetAll.Error())
-
-		})
-
-	t.Run(
 		"If GetById dont found a ID, should return an error",
 		func(t *testing.T) {
 			errorMsgCannotGetById := fmt.Errorf("Warehouse not found")
 			repo := &mocks.Repository{}
-			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
 			repo.On("GetByID", tmock.AnythingOfType("int")).Return(warehouse.Warehouse{}, errorMsgCannotGetById).Once()
 			service := warehouse.NewService(repo)
 			_, err := service.GetByID(4)
@@ -232,31 +136,15 @@ func TestServiceGetById(t *testing.T) {
 			assert.EqualError(t, err, errorMsgCannotGetById.Error())
 
 		})
-	t.Run(
-		"If GetById dont found a ID on DB, should return an error",
-		func(t *testing.T) {
-			errorMsgCannotGetById := fmt.Errorf("cannot get on bd")
-			repo := &mocks.Repository{}
-			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
-			repo.On("GetByID", tmock.AnythingOfType("int")).Return(warehouse.Warehouse{}, errorMsgCannotGetById).Once()
-			service := warehouse.NewService(repo)
-			_, err := service.GetByID(1)
-			assert.Error(t, err)
-			assert.EqualError(t, err, errorMsgCannotGetById.Error())
-
-		})
-
 }
 
 func TestServiceUpdate(t *testing.T) {
-	warehouseListSucess := []warehouse.Warehouse{warehouse1, warehouse2, warehouse3}
 
 	t.Run(
 		"If Update is success, should return an updated warehouse",
 		func(t *testing.T) {
 			repo := &mocks.Repository{}
-			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
-			repo.On("CheckLocality", tmock.Anything).Return(true, nil).Once()
+			repo.On("GetByID", tmock.AnythingOfType("int")).Return(warehouse1, nil).Once()
 			repo.On("Update",
 				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("string"),
@@ -276,206 +164,15 @@ func TestServiceUpdate(t *testing.T) {
 		})
 
 	t.Run(
-		"If GetAll inside Update has error, should return an error",
-		func(t *testing.T) {
-			errorMsgCannotGetAll := fmt.Errorf("Cannot get all")
-			repo := &mocks.Repository{}
-			repo.On("GetAll").Return([]warehouse.Warehouse{}, errorMsgCannotGetAll).Once()
-			service := warehouse.NewService(repo)
-			_, err := service.Update(1, warehouse1Updated.Address, warehouse1.Telephone, warehouse1.Warehouse_code, warehouse1.Minimum_capacity, warehouse1.Minimum_temperature, warehouse1.Locality_id)
-
-			assert.Error(t, err)
-			assert.EqualError(t, err, errorMsgCannotGetAll.Error())
-
-		})
-	t.Run(
 		"If ID is invalid, should return an error",
 		func(t *testing.T) {
 			repo := &mocks.Repository{}
 			errorMsgIdUpdate := fmt.Errorf("invalid id")
-			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
+			repo.On("GetByID", tmock.AnythingOfType("int")).Return(warehouse.Warehouse{}, errorMsgIdUpdate).Once()
 			service := warehouse.NewService(repo)
 			_, err := service.Update(5, warehouse1Updated.Address, warehouse1.Telephone, warehouse1.Warehouse_code, warehouse1.Minimum_capacity, warehouse1.Minimum_temperature, warehouse1.Locality_id)
 			assert.Error(t, err)
 			assert.EqualError(t, err, errorMsgIdUpdate.Error())
-
-		})
-	t.Run(
-		"If Warehouse_code exists in other Warehouse, should return an error",
-		func(t *testing.T) {
-			repo := &mocks.Repository{}
-			errorMsg := fmt.Errorf("Warehouse code already exists")
-			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
-			repo.On("Update",
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int")).
-				Return(warehouse.Warehouse{}, errorMsg.Error()).Once()
-
-			service := warehouse.NewService(repo)
-
-			updatedWarehouse, err := service.Update(1, "", "", warehouseUpdateSameCode, 0, 0, 0)
-
-			assert.Error(t, err)
-			assert.EqualError(t, err, errorMsg.Error())
-			assert.ObjectsAreEqual(warehouse.Warehouse{}, updatedWarehouse)
-
-		})
-	t.Run(
-		"If Address is empty, should return the same Address of the Warehouse",
-		func(t *testing.T) {
-			repo := &mocks.Repository{}
-			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
-			repo.On("CheckLocality", tmock.Anything).Return(true, nil).Once()
-			repo.On("Update",
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int")).
-				Return(warehouse1Updated, nil).Once()
-
-			service := warehouse.NewService(repo)
-			updatedWarehouse, err := service.Update(1, "", warehouse1.Telephone, warehouse1.Warehouse_code, warehouse1.Minimum_capacity, warehouse1.Minimum_temperature, warehouse1.Locality_id)
-			assert.NoError(t, err)
-			assert.Equal(t, warehouse1Updated.Address, updatedWarehouse.Address)
-		})
-	t.Run(
-		"If Telephone is empty, should return the same Telephone of the Warehouse",
-		func(t *testing.T) {
-			repo := &mocks.Repository{}
-			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
-			repo.On("CheckLocality", tmock.Anything).Return(true, nil).Once()
-			repo.On("Update",
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int")).
-				Return(warehouse1Updated, nil).Once()
-
-			service := warehouse.NewService(repo)
-			updatedWarehouse, err := service.Update(1, warehouse1.Address, "", warehouse1.Warehouse_code, warehouse1.Minimum_capacity, warehouse1.Minimum_temperature, warehouse1.Locality_id)
-			assert.NoError(t, err)
-			assert.Equal(t, warehouse1Updated.Telephone, updatedWarehouse.Telephone)
-		})
-	t.Run(
-		"If Warehouse_code is empty, should return the same Warehouse_code of the Warehouse",
-		func(t *testing.T) {
-			repo := &mocks.Repository{}
-			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
-			repo.On("CheckLocality", tmock.Anything).Return(true, nil).Once()
-			repo.On("Update",
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int")).
-				Return(warehouse1Updated, nil).Once()
-
-			service := warehouse.NewService(repo)
-			updatedWarehouse, err := service.Update(1, warehouse1.Address, warehouse1.Telephone, "", warehouse1.Minimum_capacity, warehouse1.Minimum_temperature, warehouse1.Locality_id)
-			assert.NoError(t, err)
-			assert.Equal(t, warehouse1Updated.Warehouse_code, updatedWarehouse.Warehouse_code)
-		})
-	t.Run(
-		"If Minimum_capacity is empty, should return the same Minimum_capacity of the Warehouse",
-		func(t *testing.T) {
-			repo := &mocks.Repository{}
-			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
-			repo.On("CheckLocality", tmock.Anything).Return(true, nil).Once()
-			repo.On("Update",
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int")).
-				Return(warehouse1Updated, nil).Once()
-
-			service := warehouse.NewService(repo)
-			updatedWarehouse, err := service.Update(1, warehouse1.Address, warehouse1.Telephone, warehouse1.Warehouse_code, 0, warehouse1.Minimum_temperature, warehouse1.Locality_id)
-			assert.NoError(t, err)
-			assert.Equal(t, warehouse1Updated.Minimum_capacity, updatedWarehouse.Minimum_capacity)
-		})
-	t.Run(
-		"If Minimum_temperature is empty, should return the same Minimum_temperature of the Warehouse",
-		func(t *testing.T) {
-			repo := &mocks.Repository{}
-			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
-			repo.On("CheckLocality", tmock.Anything).Return(true, nil).Once()
-			repo.On("Update",
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int")).
-				Return(warehouse1Updated, nil).Once()
-
-			service := warehouse.NewService(repo)
-			updatedWarehouse, err := service.Update(1, warehouse1.Address, warehouse1.Telephone, warehouse1.Warehouse_code, warehouse1.Minimum_capacity, 0, warehouse1.Locality_id)
-			assert.NoError(t, err)
-			assert.Equal(t, warehouse1Updated.Minimum_temperature, updatedWarehouse.Minimum_temperature)
-		})
-	t.Run(
-		"If Locality_id is empty, should return the same Locality_id of the Warehouse",
-		func(t *testing.T) {
-			repo := &mocks.Repository{}
-			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
-			repo.On("CheckLocality", tmock.Anything).Return(true, nil).Once()
-			repo.On("Update",
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int")).
-				Return(warehouse1Updated, nil).Once()
-
-			service := warehouse.NewService(repo)
-			updatedWarehouse, err := service.Update(1, warehouse1.Address, warehouse1.Telephone, warehouse1.Warehouse_code, warehouse1.Minimum_capacity, warehouse1.Minimum_temperature, 0)
-			assert.NoError(t, err)
-			assert.Equal(t, warehouse1Updated.Locality_id, updatedWarehouse.Locality_id)
-		})
-
-	t.Run(
-		"If CheckLocality fail sould return an error",
-		func(t *testing.T) {
-			errorMsgCannotSaveOnDB := fmt.Errorf("locality not found")
-			repo := &mocks.Repository{}
-			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
-			repo.On("CheckLocality", tmock.Anything).Return(false, errorMsgCannotSaveOnDB).Once()
-			repo.On("Update",
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("string"),
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int"),
-				tmock.AnythingOfType("int")).
-				Return(warehouse.Warehouse{}, nil)
-
-			service := warehouse.NewService(repo)
-
-			newWarehouse, err := service.Update(3, warehouse3.Address, warehouse3.Telephone, warehouse3.Warehouse_code, warehouse3.Minimum_capacity, warehouse3.Minimum_temperature, warehouse3.Locality_id)
-
-			assert.Error(t, err)
-			assert.EqualError(t, err, errorMsgCannotSaveOnDB.Error())
-			assert.ObjectsAreEqual([]warehouse.Warehouse{}, newWarehouse)
 
 		})
 
@@ -484,8 +181,7 @@ func TestServiceUpdate(t *testing.T) {
 		func(t *testing.T) {
 			errorMsgCannotSaveOnDB := fmt.Errorf("Cannot save on DB")
 			repo := &mocks.Repository{}
-			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
-			repo.On("CheckLocality", tmock.Anything).Return(true, nil).Once()
+			repo.On("GetByID", tmock.AnythingOfType("int")).Return(warehouse1, nil).Once()
 			repo.On("Update",
 				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("string"),
@@ -508,14 +204,11 @@ func TestServiceUpdate(t *testing.T) {
 }
 
 func TestService_Delete(t *testing.T) {
-	warehouseListSucess := []warehouse.Warehouse{warehouse1, warehouse2, warehouse3}
-	//warehouseListAfterDelete := []warehouse.Warehouse{warehouse2, warehouse3}
 
 	t.Run(
 		"Sucess deleting a Warehouse",
 		func(t *testing.T) {
 			repo := &mocks.Repository{}
-			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
 			repo.On("Delete", tmock.AnythingOfType("int")).Return(nil)
 			service := warehouse.NewService(repo)
 			err := service.Delete(1)
@@ -523,38 +216,10 @@ func TestService_Delete(t *testing.T) {
 			assert.Nil(t, err)
 		})
 	t.Run(
-		"If GetAll inside Update fail, should return an error",
-		func(t *testing.T) {
-			errorMsgCannotGetAll := fmt.Errorf("Cannot get all")
-			repo := &mocks.Repository{}
-			repo.On("GetAll").Return([]warehouse.Warehouse{}, errorMsgCannotGetAll).Once()
-			service := warehouse.NewService(repo)
-			err := service.Delete(1)
-
-			assert.Error(t, err)
-			assert.EqualError(t, err, errorMsgCannotGetAll.Error())
-
-		})
-
-	t.Run(
-		"If not found an ID, should return an error",
-		func(t *testing.T) {
-			errorMsgCannotGetByID := fmt.Errorf("Warehouse not found")
-			repo := &mocks.Repository{}
-			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
-			repo.On("Delete", tmock.AnythingOfType("int")).Return(errorMsgCannotGetByID).Once()
-			service := warehouse.NewService(repo)
-			err := service.Delete(4)
-			assert.Error(t, err)
-			assert.EqualError(t, err, errorMsgCannotGetByID.Error())
-
-		})
-	t.Run(
 		"If Delete dont found a Warehouse on DB, should return an error",
 		func(t *testing.T) {
 			errorMsgCannotGetById := fmt.Errorf("cannot get on bd")
 			repo := &mocks.Repository{}
-			repo.On("GetAll").Return(warehouseListSucess, nil).Once()
 			repo.On("Delete", tmock.AnythingOfType("int")).Return(errorMsgCannotGetById).Once()
 			service := warehouse.NewService(repo)
 			err := service.Delete(1)

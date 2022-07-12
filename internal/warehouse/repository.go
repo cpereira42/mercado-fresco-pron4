@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/cpereira42/mercado-fresco-pron4/pkg/util"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -24,7 +25,7 @@ const (
 	//LastID          = "SELECT MAX(id) FROM warehouse"
 	CreateWarehouse = `INSERT INTO warehouse (address, telephone, warehouse_code, minimum_capacity, minimum_temperature, locality_id) VALUES (?, ?, ?, ?, ?, ?)`
 	UpdateWarehouse = `UPDATE warehouse SET address=?, telephone=?, warehouse_code=?, minimum_capacity=?, minimum_temperature=?, locality_id=? WHERE id=?`
-	GetId           = `SELECT id, address, telephone, warehouse_code, minimum_capacity, minimum_temperature FROM warehouse WHERE id=?`
+	GetId           = `SELECT id, address, telephone, warehouse_code, minimum_capacity, minimum_temperature, locality_id FROM warehouse WHERE id=?`
 	DeleteWarehouse = `DELETE FROM warehouse WHERE id=?`
 )
 
@@ -61,17 +62,6 @@ func (r *repository) GetAll() ([]Warehouse, error) {
 
 	return wr, nil
 }
-
-// func (r *repository) LastID() (int, error) {
-// 	var maxCount int
-
-// 	row := r.db.QueryRow(LastID)
-// 	err := row.Scan(&maxCount)
-// 	if err != nil {
-// 		return 0, err
-// 	}
-// 	return maxCount, nil
-// }
 
 func (r *repository) Create(id int, address, telephone, warehouse_code string, minimum_capacity, minimum_temperature, locality_id int) (Warehouse, error) {
 
@@ -117,22 +107,25 @@ func (r *repository) Update(id int, address, telephone, warehouse_code string, m
 
 func (r *repository) GetByID(id int) (Warehouse, error) {
 
+	var w Warehouse
 	stmt, err := r.db.Prepare(GetId)
 	if err != nil {
 		return Warehouse{}, err
 	}
 	defer stmt.Close()
-	res, err := r.db.Query(GetId, id)
+
+	err = stmt.QueryRow(id).Scan(
+		&w.ID,
+		&w.Address,
+		&w.Telephone,
+		&w.Warehouse_code,
+		&w.Minimum_capacity,
+		&w.Minimum_temperature,
+		&w.Locality_id,
+	)
 
 	if err != nil {
-		return Warehouse{}, err
-	}
-	defer stmt.Close()
-
-	for res.Next() {
-		if err := res.Scan(&w.ID, &w.Address, &w.Telephone, &w.Warehouse_code, &w.Minimum_capacity, &w.Minimum_temperature); err != nil {
-			return Warehouse{}, err
-		}
+		return Warehouse{}, fmt.Errorf("Warehouse %d not found", id)
 	}
 	return w, nil
 
@@ -148,14 +141,15 @@ func (r *repository) Delete(id int) error {
 
 	res, err := r.db.Exec(DeleteWarehouse, id)
 	if err != nil {
-		return err
+		fmt.Println(err)
+		return util.CheckError(err)
 	}
 	rowsAffected, err := res.RowsAffected()
 	if err != nil {
 		return err
 	}
 	if rowsAffected == 0 {
-		return errors.New("no rows affected")
+		return errors.New("ID not Found")
 	}
 
 	return nil
