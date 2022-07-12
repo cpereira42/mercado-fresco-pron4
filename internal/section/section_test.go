@@ -10,7 +10,7 @@ import (
 	tmock "github.com/stretchr/testify/mock"
 )
 
-var sectionList []section.Section = []section.Section{
+var SectionList []section.Section = []section.Section{
 	{
 		Id:                 1,
 		SectionNumber:      3,
@@ -72,13 +72,13 @@ var sectionIntanceError section.Section = section.Section{}
 func TestServiceListarSectionAll(t *testing.T) {
 	t.Run("test de integração de repository e service, metodo ListarSectionAll, caso de sucesso", func(t *testing.T) {
 		mockRepository := new(mocksSection.Repository)
-		mockRepository.On("ListarSectionAll").Return(sectionList, nil).Once()
+		mockRepository.On("ListarSectionAll").Return(SectionList, nil).Once()
 		service := section.NewService(mockRepository)
 		objSectionList, err := service.ListarSectionAll()
 		assert.Nil(t, err)
 		assert.True(t, len(objSectionList) > 0)
 		sectionNumberField := 313
-		assert.Equal(t, sectionNumberField, sectionList[1].SectionNumber)
+		assert.Equal(t, sectionNumberField, SectionList[1].SectionNumber)
 	})
 	t.Run("test de integração de repository e service, metodo ListarSectionAll, caso de error", func(t *testing.T) {
 		mockRepository := new(mocksSection.Repository)
@@ -172,12 +172,12 @@ func TestServiceUpdateSection(t *testing.T) {
 	t.Run("test servoce no metodo UpdateSection, caso de sucesso", func(t *testing.T) {
 		mockRepository := new(mocksSection.Repository)
 		mockRepository.On("ListarSectionOne", tmock.AnythingOfType("int64")).
-			Return(sectionList[1], nil).
+			Return(SectionList[1], nil).
 			Once()
 		mockRepository.On("UpdateSection",
 			tmock.AnythingOfType("section.Section"),
 		).
-			Return(sectionList[1], nil).
+			Return(SectionList[1], nil).
 			Once()
 		service := section.NewService(mockRepository)
 

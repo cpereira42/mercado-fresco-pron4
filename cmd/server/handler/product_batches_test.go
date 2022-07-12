@@ -23,10 +23,8 @@ import (
  * @param body string
  */
 func CreateServerPB(serv *mocks.ServicePB, method, url, body string) *httptest.ResponseRecorder {
-	sectionController := NewProductBatChesController(serv)
 	router := gin.Default()
-	router.GET("/api/v1/sections/reportProducts", sectionController.ReadPB())
-	router.POST("/api/v1/productBatches", sectionController.CreatePB())
+	NewProductBatChesController(router, serv)
 	req, rr := util.CreateRequestTest(method, url, body)
 	router.ServeHTTP(rr, req)
 	return rr
@@ -212,7 +210,7 @@ func TestServiceReadPBGetId(t *testing.T) {
 	t.Run("Método GetId (paraId incorrento)", func(t *testing.T) {
 		// retorno do GetId = productbatch.ProductBatchesResponse, error
 		productBatResponse := productbatch.ProductBatchesResponse{}
-		messageErr := errors.New("strconv.ParseInt: parsing \"5s\": invalid syntax")
+		messageErr := errors.New("section_id not found")
 		mockServicePB := &mocks.ServicePB{}
 		mockServicePB.On("GetId", mock.AnythingOfType("int64")).
 			Return(productBatResponse, messageErr).
@@ -223,7 +221,7 @@ func TestServiceReadPBGetId(t *testing.T) {
 			"/api/v1/sections/reportProducts?id=5s",
 			"")
 		getData(rr.Body.Bytes(), &ObjetoResponse)
-		assert.Equal(t, 500, rr.Code)
+		assert.Equal(t, ObjetoResponse.Code, rr.Code)
 		assert.ObjectsAreEqual(productBatchesRes, ObjetoResponse.Data)
 		assert.Equal(t, messageErr.Error(), ObjetoResponse.Error)
 	})
