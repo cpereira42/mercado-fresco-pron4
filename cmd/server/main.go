@@ -33,8 +33,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	dbBuyers := store.New(store.FileType, "./internal/repositories/buyer.json")
-	repositoryBuyers := buyer.NewRepository(dbBuyers)
+	repositoryBuyers := buyer.NewRepository(conn)
 	serviceBuyers := buyer.NewService(repositoryBuyers)
 	hdBuyers := handler.NewBuyer(serviceBuyers)
 
