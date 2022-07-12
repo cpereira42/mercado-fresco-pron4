@@ -481,20 +481,3 @@ INSERT INTO `order_details` VALUES
 (1,'teste',15,15.00,1,1);
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

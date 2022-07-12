@@ -25,7 +25,10 @@ func CheckError(sqlError error) error {
 		err := strings.Split(sqlError.Error(), "`")
 		msg := fmt.Sprint(err[7], " is not registered on ", err[9])
 		return fmt.Errorf(msg)
+	case strings.Contains(sqlError.Error(), "sql: Scan error on column index 0, name \"locality_id\": converting NULL to string is unsupported"):
+		return fmt.Errorf("")
 	}
+
 	return sqlError
 }
 

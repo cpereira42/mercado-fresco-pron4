@@ -2,12 +2,16 @@ package main
 
 import (
 	"database/sql"
+
+	_ "github.com/go-sql-driver/mysql"
+
 	"fmt"
 	"log"
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
 
+	"github.com/cpereira42/mercado-fresco-pron4/internal/carries"
 	inboundOrders "github.com/cpereira42/mercado-fresco-pron4/internal/inbound_orders"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/productbatch"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/productsRecords"
@@ -48,6 +52,9 @@ func main() {
 	repoWarehouse := warehouse.NewRepository(conn)
 	svcWarehouse := warehouse.NewService(repoWarehouse)
 	w := handler.NewWarehouse(svcWarehouse)
+
+	repoCarries := carries.NewRepository(conn)
+	svcCarries := carries.NewService(repoCarries)
 
 	repoSeller := seller.NewRepositorySeller(conn)
 	serviceSeller := seller.NewService(repoSeller)
@@ -104,6 +111,8 @@ func main() {
 	buyers.POST("/", hdBuyers.Create())
 	buyers.PATCH("/:id", hdBuyers.Update())
 	buyers.DELETE("/:id", hdBuyers.Delete())
+	handler.NewCarry(r, svcCarries)
+
 	r.Run()
 }
 
