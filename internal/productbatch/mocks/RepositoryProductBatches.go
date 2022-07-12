@@ -33,50 +33,8 @@ func (_m *RepositoryProductBatches) CreatePB(productBatches productbatch.Product
 	return r0, r1
 }
 
-// GetByBatcheNumber provides a mock function with given fields: batch_number
-func (_m *RepositoryProductBatches) GetByBatcheNumber(batch_number string) (bool, error) {
-	ret := _m.Called(batch_number)
-
-	var r0 bool
-	if rf, ok := ret.Get(0).(func(string) bool); ok {
-		r0 = rf(batch_number)
-	} else {
-		r0 = ret.Get(0).(bool)
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(batch_number)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// ReadPBSectionId provides a mock function with given fields: id
-func (_m *RepositoryProductBatches) ReadPBSectionId(id int64) (productbatch.ProductBatchesResponse, error) {
-	ret := _m.Called(id)
-
-	var r0 productbatch.ProductBatchesResponse
-	if rf, ok := ret.Get(0).(func(int64) productbatch.ProductBatchesResponse); ok {
-		r0 = rf(id)
-	} else {
-		r0 = ret.Get(0).(productbatch.ProductBatchesResponse)
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(int64) error); ok {
-		r1 = rf(id)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// ReadPBSectionTodo provides a mock function with given fields:
-func (_m *RepositoryProductBatches) ReadPBSectionTodo() ([]productbatch.ProductBatchesResponse, error) {
+// GetAll provides a mock function with given fields:
+func (_m *RepositoryProductBatches) GetAll() ([]productbatch.ProductBatchesResponse, error) {
 	ret := _m.Called()
 
 	var r0 []productbatch.ProductBatchesResponse
@@ -98,32 +56,25 @@ func (_m *RepositoryProductBatches) ReadPBSectionTodo() ([]productbatch.ProductB
 	return r0, r1
 }
 
-// SearchProductById provides a mock function with given fields: id
-func (_m *RepositoryProductBatches) SearchProductById(id int) error {
+// GetId provides a mock function with given fields: id
+func (_m *RepositoryProductBatches) GetId(id int64) (productbatch.ProductBatchesResponse, error) {
 	ret := _m.Called(id)
 
-	var r0 error
-	if rf, ok := ret.Get(0).(func(int) error); ok {
+	var r0 productbatch.ProductBatchesResponse
+	if rf, ok := ret.Get(0).(func(int64) productbatch.ProductBatchesResponse); ok {
 		r0 = rf(id)
 	} else {
-		r0 = ret.Error(0)
+		r0 = ret.Get(0).(productbatch.ProductBatchesResponse)
 	}
 
-	return r0
-}
-
-// SearchSectionId provides a mock function with given fields: id
-func (_m *RepositoryProductBatches) SearchSectionId(id int64) error {
-	ret := _m.Called(id)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(int64) error); ok {
-		r0 = rf(id)
+	var r1 error
+	if rf, ok := ret.Get(1).(func(int64) error); ok {
+		r1 = rf(id)
 	} else {
-		r0 = ret.Error(0)
+		r1 = ret.Error(1)
 	}
 
-	return r0
+	return r0, r1
 }
 
 type mockConstructorTestingTNewRepositoryProductBatches interface {

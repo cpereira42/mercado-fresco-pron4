@@ -12,6 +12,7 @@ import (
 	"github.com/cpereira42/mercado-fresco-pron4/cmd/server/handler"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/purchaseorders"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/purchaseorders/mocks"
+	"github.com/cpereira42/mercado-fresco-pron4/pkg/util"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
@@ -55,7 +56,7 @@ func createServerPurchase(serv *mocks.Service, method string, url string, body s
 	pr := r.Group("/api/v1/purchase")
 	pr.GET("/:id", p.GetById())
 	pr.POST("/", p.Create())
-	req, rr := createRequestTest(method, url, body)
+	req, rr := util.CreateRequestTest(method, url, body)
 	r.ServeHTTP(rr, req)
 	return rr
 }

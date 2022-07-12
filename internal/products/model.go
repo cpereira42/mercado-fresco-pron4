@@ -42,3 +42,34 @@ type RequestProductsUpdate struct {
 	ProductTypeId                  int     `json:"product_type_id" binding:"omitempty,required"`
 	SellerId                       int     `json:"seller_id" binding:"omitempty,required"`
 }
+
+const (
+	QUERY_GETALL    = "SELECT * FROM products"
+	QUERY_GETID     = "SELECT * FROM products Where id = ?"
+	QUERY_CHECKCODE = "SELECT product_code FROM products Where id != ? and product_code = ?"
+	QUERY_DELETE    = "DELETE FROM products WHERE id = ?"
+	QUERY_INSERT    = `INSERT INTO products (
+		product_code, 
+		description, 
+		width, 
+		length,	
+		height,	
+		net_weight,	
+		expiration_rate, 
+		recommended_freezing_temperature, 
+		freezing_rate, 
+		product_type_id,
+		seller_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+	QUERY_UPDATE = `UPDATE products SET 
+		product_code=?,
+		description=?, 
+		width=? ,
+		length=?,	
+		height=?,	
+		net_weight=?,	
+		expiration_rate=?, 
+		recommended_freezing_temperature=? ,
+		freezing_rate=? ,
+		product_type_id=?,
+		seller_id=? WHERE id=?`
+)

@@ -10,6 +10,7 @@ import (
 	"github.com/cpereira42/mercado-fresco-pron4/cmd/server/handler"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/buyer"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/buyer/mocks"
+	"github.com/cpereira42/mercado-fresco-pron4/pkg/util"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
@@ -43,7 +44,7 @@ func createServerBuyer(serv *mocks.Service, method string, url string, body stri
 	pr.POST("/", p.Create())
 	pr.PUT("/:id", p.Update())
 	pr.PATCH("/:id", p.Update())
-	req, rr := createRequestTest(method, url, body)
+	req, rr := util.CreateRequestTest(method, url, body)
 	r.ServeHTTP(rr, req)
 	return rr
 }

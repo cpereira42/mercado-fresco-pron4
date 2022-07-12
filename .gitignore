@@ -4,9 +4,11 @@
 *.dll
 *.so
 *.dylib
-*.DS_Store
-*.vscode
+.DS_Store
+.vscode
  
+# Pre-commit-config
+.pre-commit-config.yaml
 
 # Test binary, built with `go test -c`
 *.test
@@ -14,10 +16,17 @@
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
+# .env
 .env
 
 # .data
 /db/.data 
 
+
+# .ideal diretorio especifico do Golang IDE
+.idea
+
+/MercadoFresco.session.sql
 # .vscode
 .vscode
+coverage.out

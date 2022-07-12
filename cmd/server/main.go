@@ -2,24 +2,29 @@ package main
 
 import (
 	"database/sql"
+
 	"fmt"
 	"log"
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
 
+	"github.com/cpereira42/mercado-fresco-pron4/internal/carries"
+	inboundOrders "github.com/cpereira42/mercado-fresco-pron4/internal/inbound_orders"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/productbatch"
+	"github.com/cpereira42/mercado-fresco-pron4/internal/productsRecords"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/purchaseorders"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/section"
 
 	"github.com/cpereira42/mercado-fresco-pron4/cmd/server/handler"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/buyer"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/employee"
+	"github.com/cpereira42/mercado-fresco-pron4/internal/locality"
+
 	"github.com/cpereira42/mercado-fresco-pron4/internal/products"
 
 	"github.com/cpereira42/mercado-fresco-pron4/internal/seller"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/warehouse"
-	"github.com/cpereira42/mercado-fresco-pron4/pkg/store"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -42,66 +47,46 @@ func main() {
 	servicePurchase := purchaseorders.NewService(repositoryPurchase)
 	hdPurchase := handler.NewPurchase(servicePurchase)
 
-	dbProd := store.New(store.FileType, "./internal/repositories/products.json")
-	repoProd := products.NewRepositoryProducts(dbProd)
+	repoProd := products.NewRepositoryProductsDB(conn)
 	serviceProd := products.NewService(repoProd)
-
-	// dbWarehouse := store.New(store.FileType, "./internal/repositories/warehouse.json")
-	// repoWarehouse := warehouse.NewRepository(dbWarehouse)
 
 	repoWarehouse := warehouse.NewRepository(conn)
 	svcWarehouse := warehouse.NewService(repoWarehouse)
 	w := handler.NewWarehouse(svcWarehouse)
 
-	repoPB := productbatch.NewRepositoryProductBatches(conn)
-	servicePB := productbatch.NewServiceProductBatches(repoPB)
-	repSection := section.NewRepository(conn)
-	serviceSection := section.NewService(repSection)
-	sectionController := handler.NewSectionController(serviceSection, servicePB)
+	repoCarries := carries.NewRepository(conn)
+	svcCarries := carries.NewService(repoCarries)
 
-	dbSeller := store.New(store.FileType, "../mercado-fresco-pron4/internal/repositories/sellers.json")
-	repoSeller := seller.NewRepositorySeller(dbSeller)
+	repoSeller := seller.NewRepositorySeller(conn)
 	serviceSeller := seller.NewService(repoSeller)
 
-	dbEmployees := store.New(store.FileType, "./internal/repositories/employees.json")
-	repositoryEmployees := employee.NewRepository(dbEmployees)
+	repoLocality := locality.NewRepositoryLocality(conn)
+	serviceLocality := locality.NewService(repoLocality)
+
+	repositoryInboundOrders := inboundOrders.NewRepository(conn)
+	serviceInboundOrders := inboundOrders.NewService(repositoryInboundOrders)
+
+	repositoryEmployees := employee.NewRepository(conn)
 	serviceEmployees := employee.NewService(repositoryEmployees)
-	handlerEmployees := handler.NewEmployee(serviceEmployees)
 
-	s := handler.NewSeller(serviceSeller)
-	p := handler.NewProduct(serviceProd)
+	repoProdRecord := productsRecords.NewRepositoryProductsRecordsDB(conn)
+	serviceProdRecord := productsRecords.NewService(repoProdRecord)
+
 	r := gin.Default()
+	handler.NewProduct(r, serviceProd)
+	handler.NewProductRecords(r, serviceProdRecord)
+	handler.NewInboundOrders(r, serviceInboundOrders)
+	handler.NewEmployee(r, serviceEmployees)
+	handler.NewSeller(r, serviceSeller)
+	handler.NewLocality(r, serviceLocality)
 
-	pr := r.Group("/api/v1/products")
-	pr.GET("/", p.GetAll())
-	pr.GET("/:id", p.GetId())
-	pr.DELETE("/:id", p.Delete())
-	pr.POST("/", p.Create())
-	pr.PUT("/:id", p.Update())
-	pr.PATCH("/:id", p.Update())
+	repSection := section.NewRepository(conn)        // new
+	serviceSection := section.NewService(repSection) // new
+	handler.NewSectionController(r, serviceSection)  // new
 
-	sellers := r.Group("/api/v1/sellers")
-	sellers.GET("/", s.GetAll())
-	sellers.GET("/:id", s.GetId())
-	sellers.POST("/", s.Create())
-	sellers.PATCH("/:id", s.Update())
-	sellers.DELETE("/:id", s.Delete())
-
-	routesEmployees := r.Group("/api/v1/employees")
-	routesEmployees.GET("/", handlerEmployees.GetAll())
-	routesEmployees.GET("/:id", handlerEmployees.GetByID())
-	routesEmployees.POST("/", handlerEmployees.Create())
-	routesEmployees.PATCH("/:id", handlerEmployees.Update())
-	routesEmployees.DELETE("/:id", handlerEmployees.Delete())
-
-	section := r.Group("/api/v1/sections")
-	section.GET("/", sectionController.ListarSectionAll())
-	section.GET("/:id", sectionController.ListarSectionOne())
-	section.POST("/", sectionController.CreateSection())
-	section.PATCH("/:id", sectionController.UpdateSection())
-	section.DELETE("/:id", sectionController.DeleteSection())
-	section.GET("/reportProducts", sectionController.ReadPB())     // new
-	r.POST("/api/v1/productBatches", sectionController.CreatePB()) // new
+	repoPB := productbatch.NewRepositoryProductBatches(conn)   // new
+	servicePB := productbatch.NewServiceProductBatches(repoPB) // new
+	handler.NewProductBatChesController(r, servicePB)          // new
 
 	wr := r.Group("api/v1/warehouse")
 	wr.GET("/", w.GetAll)
@@ -116,6 +101,7 @@ func main() {
 	buyers.POST("/", hdBuyers.Create())
 	buyers.PATCH("/:id", hdBuyers.Update())
 	buyers.DELETE("/:id", hdBuyers.Delete())
+	handler.NewCarry(r, svcCarries)
 
 	purchase := r.Group("/api/v1/purchase")
 	purchase.GET("/:id", hdPurchase.GetById())
@@ -130,8 +116,8 @@ func connection() (*sql.DB, error) {
 	port := os.Getenv("PORT_DB")
 	host := os.Getenv("HOST_DB")
 	database := os.Getenv("DATABASE")
-	dataSource := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", user, pass, host, port, database)
-	log.Println("conection Success")
+	dataSource := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", user, pass, host, port, database)
+	log.Println("connection successful")
 	conn, err := sql.Open("mysql", dataSource)
 	if err != nil {
 		log.Fatal(err)
