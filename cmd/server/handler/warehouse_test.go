@@ -18,12 +18,12 @@ import (
 )
 
 var (
-	warehouse1                              = warehouse.Warehouse{ID: 1, Address: "Rua 1", Telephone: "11111-1111", Warehouse_code: "W1", Minimum_capacity: 10, Minimum_temperature: 20, Locality_id: 1}
-	warehouse2                              = warehouse.Warehouse{ID: 2, Address: "Rua 2", Telephone: "22222-2222", Warehouse_code: "W2", Minimum_capacity: 20, Minimum_temperature: 30, Locality_id: 2}
-	warehouse3                              = warehouse.Warehouse{ID: 3, Address: "Rua 3", Telephone: "33333-3333", Warehouse_code: "W3", Minimum_capacity: 30, Minimum_temperature: 40, Locality_id: 3}
-	warehouse1Updated warehouse.Warehouse   = warehouse.Warehouse{ID: 1, Address: "Rua 4", Telephone: "11111-1111", Warehouse_code: "W1", Minimum_capacity: 10, Minimum_temperature: 20, Locality_id: 1}
-	warehouse4        warehouse.Warehouse   = warehouse.Warehouse{ID: 4, Address: "Rua 4", Telephone: "11111-1111", Warehouse_code: "W4", Minimum_capacity: 10, Minimum_temperature: 20, Locality_id: 1}
-	warehouseList     []warehouse.Warehouse = []warehouse.Warehouse{warehouse1, warehouse2, warehouse3}
+	warehouse1                            = warehouse.Warehouse{ID: 1, Address: "Rua 1", Telephone: "11111-1111", Warehouse_code: "W1", Minimum_capacity: 10, Minimum_temperature: 20, Locality_id: 1}
+	warehouseCreated                      = warehouse.RequestWarehouseCreate{Address: "Rua 1", Telephone: "11111-1111", Warehouse_code: "W1", Minimum_capacity: 10, Minimum_temperature: 20, Locality_id: 1}
+	warehouse2                            = warehouse.Warehouse{ID: 2, Address: "Rua 2", Telephone: "22222-2222", Warehouse_code: "W2", Minimum_capacity: 20, Minimum_temperature: 30, Locality_id: 2}
+	warehouse3                            = warehouse.Warehouse{ID: 3, Address: "Rua 3", Telephone: "33333-3333", Warehouse_code: "W3", Minimum_capacity: 30, Minimum_temperature: 40, Locality_id: 3}
+	warehouse1Updated warehouse.Warehouse = warehouse.Warehouse{ID: 1, Address: "Rua 4", Telephone: "11111-1111", Warehouse_code: "W1", Minimum_capacity: 10, Minimum_temperature: 20, Locality_id: 1}
+	warehouse4        warehouse.Warehouse = warehouse.Warehouse{ID: 4, Address: "Rua 4", Telephone: "11111-1111", Warehouse_code: "W4", Minimum_capacity: 10, Minimum_temperature: 20, Locality_id: 1}
 )
 
 func createRequestTests(serv *mocks.Service, method string, url string, body string) *httptest.ResponseRecorder {
@@ -237,7 +237,7 @@ func TestControllerCreate(t *testing.T) {
 				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("int")).
-				Return(warehouse1, nil)
+				Return(warehouseCreated, nil)
 			rr := createRequestTests(serviceMock, http.MethodPost, "/api/v1/warehouse/",
 				`{
 					"address": "Rua 1",
@@ -249,12 +249,12 @@ func TestControllerCreate(t *testing.T) {
 				}`)
 			objResp := struct {
 				Code int
-				Data warehouse.Warehouse
+				Data warehouse.RequestWarehouseCreate
 			}{}
 			err := json.Unmarshal(rr.Body.Bytes(), &objResp)
 			assert.Equal(t, 201, rr.Code)
 			assert.Nil(t, err)
-			assert.Equal(t, warehouse1, objResp.Data)
+			assert.Equal(t, warehouseCreated, objResp.Data)
 		})
 
 	t.Run(
@@ -268,7 +268,7 @@ func TestControllerCreate(t *testing.T) {
 				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("int")).
-				Return(warehouse.Warehouse{}, errorMsg)
+				Return(warehouse.RequestWarehouseCreate{}, errorMsg)
 			rr := createRequestTests(serviceMock, http.MethodPost, "/api/v1/warehouse/",
 				`{
 					"address": "Rua 1",
@@ -298,7 +298,7 @@ func TestControllerCreate(t *testing.T) {
 				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("int")).
-				Return(warehouse.Warehouse{}, errorMsg)
+				Return(warehouse.RequestWarehouseCreate{}, errorMsg)
 			rr := createRequestTests(serviceMock, http.MethodPost, "/api/v1/warehouse/",
 				`{
 					"address": "Rua 1",

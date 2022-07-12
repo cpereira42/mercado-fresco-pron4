@@ -13,24 +13,19 @@ import (
 )
 
 var (
-	warehouse1              = warehouse.Warehouse{ID: 1, Address: "Rua 1", Telephone: "11111-1111", Warehouse_code: "W1", Minimum_capacity: 10, Minimum_temperature: 20, Locality_id: 1}
-	warehouse2              = warehouse.Warehouse{ID: 2, Address: "Rua 2", Telephone: "22222-2222", Warehouse_code: "W2", Minimum_capacity: 20, Minimum_temperature: 30, Locality_id: 1}
-	warehouse3              = warehouse.Warehouse{ID: 3, Address: "Rua 3", Telephone: "33333-3333", Warehouse_code: "W3", Minimum_capacity: 30, Minimum_temperature: 40, Locality_id: 1}
-	warehouse1Updated       = warehouse.Warehouse{ID: 1, Address: "Rua 4", Telephone: "11111-1111", Warehouse_code: "W1", Minimum_capacity: 10, Minimum_temperature: 20, Locality_id: 1}
-	warehouseUpdateSameCode = "W3"
+	warehouse1        = warehouse.Warehouse{ID: 1, Address: "Rua 1", Telephone: "11111-1111", Warehouse_code: "W1", Minimum_capacity: 10, Minimum_temperature: 20, Locality_id: 1}
+	warehouseCreate   = warehouse.Warehouse{ID: 1, Address: "Rua 1", Telephone: "11111-1111", Warehouse_code: "W1", Minimum_capacity: 10, Minimum_temperature: 20, Locality_id: 1}
+	warehouse2        = warehouse.Warehouse{ID: 2, Address: "Rua 2", Telephone: "22222-2222", Warehouse_code: "W2", Minimum_capacity: 20, Minimum_temperature: 30, Locality_id: 1}
+	warehouse3        = warehouse.RequestWarehouseCreate{Address: "Rua 3", Telephone: "33333-3333", Warehouse_code: "W3", Minimum_capacity: 30, Minimum_temperature: 40, Locality_id: 1}
+	warehouse1Updated = warehouse.Warehouse{ID: 1, Address: "Rua 4", Telephone: "11111-1111", Warehouse_code: "W1", Minimum_capacity: 10, Minimum_temperature: 20, Locality_id: 1}
 )
 
 func TestServiceCreate(t *testing.T) {
-
-	//	warehouseListSucess := []warehouse.Warehouse{warehouse1, warehouse2}
-	//warehouseListError := []warehouse.Warehouse{warehouse1}
-
 	t.Run(
 		"If all fields are valid, should return a warehouse",
 		func(t *testing.T) {
 			repo := &mocks.Repository{}
 			repo.On("Create",
-				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
@@ -56,22 +51,21 @@ func TestServiceCreate(t *testing.T) {
 			errorMsgWarehouseCodeAlreadyExists := "Warehouse already exists"
 			repo := &mocks.Repository{}
 			repo.On("Create",
-				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("int")).
-				Return(warehouse.Warehouse{}, errors.New(errorMsgWarehouseCodeAlreadyExists))
+				Return(warehouse.RequestWarehouseCreate{}, errors.New(errorMsgWarehouseCodeAlreadyExists))
 
 			service := warehouse.NewService(repo)
 
-			newWarehouse, err := service.Create(warehouse1.Address, warehouse1.Telephone, warehouse1.Warehouse_code, warehouse1.Minimum_capacity, warehouse1.Minimum_temperature, warehouse1.Locality_id)
+			newWarehouse, err := service.Create(warehouseCreate.Address, warehouseCreate.Telephone, warehouseCreate.Warehouse_code, warehouseCreate.Minimum_capacity, warehouseCreate.Minimum_temperature, warehouseCreate.Locality_id)
 			log.Println(err)
 			assert.Error(t, err)
 			assert.EqualError(t, err, errorMsgWarehouseCodeAlreadyExists)
-			assert.ObjectsAreEqual(warehouse.Warehouse{}, newWarehouse)
+			assert.ObjectsAreEqual(warehouse.RequestWarehouseCreate{}, newWarehouse)
 
 		})
 }
@@ -79,8 +73,6 @@ func TestServiceCreate(t *testing.T) {
 func TestServiceGetAll(t *testing.T) {
 
 	warehouseListSucess := []warehouse.Warehouse{warehouse1, warehouse2}
-	//warehouseListError := []warehouse.Warehouse{warehouse1}
-
 	t.Run(
 		"If GetAll is success, should return a list of warehouses",
 		func(t *testing.T) {
