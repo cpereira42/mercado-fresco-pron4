@@ -315,32 +315,25 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`purchase_orders` (
   `order_date` DATETIME NOT NULL,
   `tracking_code` VARCHAR(255) NOT NULL,
   `buyer_id` INT(11) NOT NULL,
-  `carrier_id` INT(11) NOT NULL,
+  `product_record_id` INT(11) NOT NULL,
   `order_status_id` INT(11) NOT NULL,
-  `warehouse_id` INT(10) UNSIGNED NOT NULL,
   PRIMARY KEY (`id`),
-  INDEX `fk_purchase_orders_carries1_idx` (`carrier_id` ASC) VISIBLE,
-  INDEX `fk_purchase_orders_warehouse1_idx` (`warehouse_id` ASC) VISIBLE,
+  INDEX `fk_purchase_orders_product_record1_idx` (`product_record_id` ASC) VISIBLE,
   INDEX `fk_purchase_orders_buyer1_idx` (`buyer_id` ASC) VISIBLE,
   INDEX `fk_purchase_orders_order_status1_idx` (`order_status_id` ASC) VISIBLE,
   CONSTRAINT `fk_purchase_orders_buyer1`
     FOREIGN KEY (`buyer_id`)
     REFERENCES `mercadofresco`.`buyer` (`id`)
+     ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_purchase_orders_product_record1`
+    FOREIGN KEY (`product_record_id`)
+    REFERENCES `mercadofresco`.`product_record` (`id`)   
     ON DELETE CASCADE
-    ON UPDATE CASCADE,
-  CONSTRAINT `fk_purchase_orders_carries1`
-    FOREIGN KEY (`carrier_id`)
-    REFERENCES `mercadofresco`.`carries` (`id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
+    ON UPDATE CASCADE,  
   CONSTRAINT `fk_purchase_orders_order_status1`
     FOREIGN KEY (`order_status_id`)
     REFERENCES `mercadofresco`.`order_status` (`id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
-  CONSTRAINT `fk_purchase_orders_warehouse1`
-    FOREIGN KEY (`warehouse_id`)
-    REFERENCES `mercadofresco`.`warehouse` (`id`)
     ON DELETE CASCADE
     ON UPDATE CASCADE)
 ENGINE = InnoDB
@@ -474,7 +467,7 @@ INSERT INTO `order_status` VALUES
 
 
 INSERT INTO `purchase_orders` VALUES
-(1,'order1','2008-11-11 13:23:44','1521',1,1,1,1);
+(1,'order1','2008-11-11 13:23:44','1521',1,1,1);
 
 
 INSERT INTO `order_details` VALUES
