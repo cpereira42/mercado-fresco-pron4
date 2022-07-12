@@ -12,41 +12,20 @@ type Repository struct {
 	mock.Mock
 }
 
-// CheckLocality provides a mock function with given fields: id
-func (_m *Repository) CheckLocality(id int) (bool, error) {
-	ret := _m.Called(id)
+// Create provides a mock function with given fields: address, telephone, warehouse_code, minimum_capacity, minimum_temperature, locality_id
+func (_m *Repository) Create(address string, telephone string, warehouse_code string, minimum_capacity int, minimum_temperature int, locality_id int) (warehouse.RequestWarehouseCreate, error) {
+	ret := _m.Called(address, telephone, warehouse_code, minimum_capacity, minimum_temperature, locality_id)
 
-	var r0 bool
-	if rf, ok := ret.Get(0).(func(int) bool); ok {
-		r0 = rf(id)
+	var r0 warehouse.RequestWarehouseCreate
+	if rf, ok := ret.Get(0).(func(string, string, string, int, int, int) warehouse.RequestWarehouseCreate); ok {
+		r0 = rf(address, telephone, warehouse_code, minimum_capacity, minimum_temperature, locality_id)
 	} else {
-		r0 = ret.Get(0).(bool)
+		r0 = ret.Get(0).(warehouse.RequestWarehouseCreate)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(int) error); ok {
-		r1 = rf(id)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// Create provides a mock function with given fields: id, address, telephone, warehouse_code, minimum_capacity, minimum_temperature, locality_id
-func (_m *Repository) Create(id int, address string, telephone string, warehouse_code string, minimum_capacity int, minimum_temperature int, locality_id int) (warehouse.Warehouse, error) {
-	ret := _m.Called(id, address, telephone, warehouse_code, minimum_capacity, minimum_temperature, locality_id)
-
-	var r0 warehouse.Warehouse
-	if rf, ok := ret.Get(0).(func(int, string, string, string, int, int, int) warehouse.Warehouse); ok {
-		r0 = rf(id, address, telephone, warehouse_code, minimum_capacity, minimum_temperature, locality_id)
-	} else {
-		r0 = ret.Get(0).(warehouse.Warehouse)
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(int, string, string, string, int, int, int) error); ok {
-		r1 = rf(id, address, telephone, warehouse_code, minimum_capacity, minimum_temperature, locality_id)
+	if rf, ok := ret.Get(1).(func(string, string, string, int, int, int) error); ok {
+		r1 = rf(address, telephone, warehouse_code, minimum_capacity, minimum_temperature, locality_id)
 	} else {
 		r1 = ret.Error(1)
 	}

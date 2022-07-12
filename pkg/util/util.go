@@ -27,6 +27,10 @@ func CheckError(sqlError error) error {
 		return fmt.Errorf(msg)
 	case strings.Contains(sqlError.Error(), "sql: Scan error on column index 0, name \"locality_id\": converting NULL to string is unsupported"):
 		return fmt.Errorf("")
+	case strings.Contains(sqlError.Error(), "Cannot delete or update a parent row"):
+		err := strings.Split(sqlError.Error(), "`")
+		msg := fmt.Sprint("cannot delete the ", err[9], " row because it has a foreign key constraint on the ", err[3], " table")
+		return fmt.Errorf(msg)
 	}
 
 	return sqlError

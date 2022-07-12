@@ -1,10 +1,12 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/cpereira42/mercado-fresco-pron4/internal/warehouse"
+	"github.com/cpereira42/mercado-fresco-pron4/pkg/util"
 	"github.com/cpereira42/mercado-fresco-pron4/pkg/web"
 	"github.com/gin-gonic/gin"
 )
@@ -13,10 +15,15 @@ type Warehouse struct {
 	service warehouse.Service
 }
 
-func NewWarehouse(w warehouse.Service) *Warehouse {
-	return &Warehouse{
-		service: w,
-	}
+func NewWarehouse(ctx *gin.Engine, service warehouse.Service) {
+	w := &Warehouse{service: service}
+
+	wr := ctx.Group("api/v1/warehouse")
+	wr.GET("/", w.GetAll)
+	wr.POST("/", w.Create)
+	wr.PATCH("/:id", w.Update)
+	wr.GET("/:id", w.GetByID)
+	wr.DELETE("/:id", w.Delete)
 }
 
 func (c *Warehouse) GetAll(ctx *gin.Context) {
@@ -59,9 +66,6 @@ func (c *Warehouse) Update(ctx *gin.Context) {
 	if web.CheckIfErrorRequest(ctx, &r) {
 		return
 	}
-	// if err := ctx.ShouldBindJSON(&r); err != nil {
-	// 	ctx.JSON(http.StatusBadRequest, web.NewResponse(http.StatusBadRequest, nil, "Error reading request body"))
-	// }
 
 	w, err := c.service.Update(id, r.Address, r.Telephone, r.Warehouse_code, r.Minimum_capacity, r.Minimum_temperature, r.Locality_id)
 	if err != nil {
@@ -72,19 +76,17 @@ func (c *Warehouse) Update(ctx *gin.Context) {
 }
 
 func (c *Warehouse) GetByID(ctx *gin.Context) {
-	id, err := strconv.Atoi(ctx.Param("id"))
+	id, err := util.IDChecker(ctx)
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, web.NewResponse(http.StatusNotFound, nil, "Invalid ID"))
 		return
 	}
 
-	w, err := c.service.GetByID(id)
-
+	warehouse, err := c.service.GetByID(id)
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, web.NewResponse(http.StatusNotFound, nil, err.Error()))
+		ctx.JSON(http.StatusNotFound, web.NewResponse(http.StatusNotFound, nil, fmt.Sprintf("%v", err)))
 		return
 	}
-	ctx.JSON(http.StatusOK, web.NewResponse(http.StatusOK, w, ""))
+	ctx.JSON(http.StatusOK, web.NewResponse(http.StatusOK, warehouse, ""))
 }
 
 func (c *Warehouse) Delete(ctx *gin.Context) {
