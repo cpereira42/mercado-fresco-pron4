@@ -44,8 +44,8 @@ func (c *PurchaseController) Create() gin.HandlerFunc {
 		}
 
 		purchase, err := c.service.Create(
-			request.Order_number,
 			request.Order_date,
+			request.Order_number,
 			request.Tracking_code,
 			request.Buyer_id,
 			request.Product_record_id,
@@ -57,7 +57,7 @@ func (c *PurchaseController) Create() gin.HandlerFunc {
 			return
 		}
 
-		ctx.JSON(http.StatusCreated, purchase)
+		ctx.JSON(http.StatusCreated, web.NewResponse(http.StatusCreated, purchase, ""))
 
 	}
 }

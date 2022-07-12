@@ -25,17 +25,16 @@ func TestServiceCreateBuyer(t *testing.T) {
 		First_name:     "Maria",
 		Last_name:      "Jose",
 	}
-	bListSuccess := []buyer.Buyer{
+	/*bListSuccess := []buyer.Buyer{
 		buyerObj2,
-	}
+	}*/
 
 	t.Run(
 		"create_ok",
 		func(t *testing.T) {
-			mockRep.On("LastID").Return(1, nil).Once()
-			mockRep.On("GetAll").Return(bListSuccess, nil).Once()
+			/*mockRep.On("LastID").Return(1, nil).Once()
+			mockRep.On("GetAll").Return(bListSuccess, nil).Once()*/
 			mockRep.On("Create",
-				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string")).
@@ -57,14 +56,14 @@ func TestServiceCreateBuyer(t *testing.T) {
 	t.Run(
 		"create_fail_lastID",
 		func(t *testing.T) {
-			mockRep.On("LastID").Return(0, errors.New("error to get last id")).Once()
-			mockRep.On("GetAll").Return(bListSuccess, nil).Maybe()
+			msgError := fmt.Errorf("buyer with id %s, not found", buyerObj.Card_number_ID)
+			/*mockRep.On("LastID").Return(0, errors.New("error to get last id")).Once()
+			mockRep.On("GetAll").Return(bListSuccess, nil).Maybe()*/
 			mockRep.On("Create",
-				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string"),
 				tmock.AnythingOfType("string")).
-				Return(buyerObj, nil).
+				Return(buyer.Buyer{}, msgError).
 				Maybe()
 			service := buyer.NewService(mockRep)
 
@@ -80,8 +79,8 @@ func TestServiceCreateBuyer(t *testing.T) {
 		"create_conflict",
 		func(t *testing.T) {
 			msgError := fmt.Errorf("a buyer with id %s, already exists", buyerObj.Card_number_ID)
-			mockRep.On("LastID").Return(1, nil).Once()
-			mockRep.On("GetAll").Return(bListSuccess, nil).Maybe()
+			/*mockRep.On("LastID").Return(1, nil).Once()
+			mockRep.On("GetAll").Return(bListSuccess, nil).Maybe()*/
 			mockRep.On("Create",
 				tmock.AnythingOfType("int"),
 				tmock.AnythingOfType("string"),

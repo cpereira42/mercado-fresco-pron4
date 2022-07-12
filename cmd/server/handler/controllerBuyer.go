@@ -61,7 +61,7 @@ func (c *BuyerController) Create() gin.HandlerFunc {
 			return
 		}
 
-		ctx.JSON(http.StatusCreated, buyer)
+		ctx.JSON(http.StatusCreated, web.NewResponse(http.StatusCreated, buyer, ""))
 
 	}
 }
@@ -84,7 +84,7 @@ func (c *BuyerController) Update() gin.HandlerFunc {
 			ctx.JSON(http.StatusNotFound, web.NewResponse(http.StatusNotFound, nil, err.Error()))
 			return
 		}
-		ctx.JSON(http.StatusOK, buyer)
+		ctx.JSON(http.StatusOK, web.NewResponse(http.StatusOK, buyer, ""))
 	}
 }
 

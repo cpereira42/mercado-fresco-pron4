@@ -465,7 +465,7 @@ INSERT INTO `order_status` VALUES
 
 
 INSERT INTO `purchase_orders` VALUES
-(1,'order1','2008-11-11 13:23:44','1521',1,1,1,1);
+(1,'order1','2008-11-11 13:23:44','1521',1,1,1);
 
 
 INSERT INTO `order_details` VALUES

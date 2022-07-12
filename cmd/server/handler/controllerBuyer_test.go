@@ -164,6 +164,7 @@ func Test_CreateBuyer(t *testing.T) {
 			Data buyer.Buyer
 		}{}
 
+		//response := buyer.Buyer{}
 		err := json.Unmarshal(rr.Body.Bytes(), &response)
 
 		assert.Nil(t, err)

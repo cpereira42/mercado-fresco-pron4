@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -18,8 +19,8 @@ import (
 var (
 	purchase1 = purchaseorders.Purchase{
 		ID:                1,
-		Order_number:      "1",
 		Order_date:        "2022-07-11",
+		Order_number:      "1",
 		Tracking_code:     "123",
 		Buyer_id:          1,
 		Product_record_id: 1,
@@ -28,8 +29,8 @@ var (
 
 	purchase2 = purchaseorders.Purchase{
 		ID:                2,
-		Order_number:      "2",
 		Order_date:        "2022-07-11",
+		Order_number:      "2",
 		Tracking_code:     "222",
 		Buyer_id:          2,
 		Product_record_id: 2,
@@ -128,11 +129,11 @@ func Test_CreatePurchase(t *testing.T) {
 			Return(purchase2, nil)
 
 		rr := createServerPurchase(servMock, http.MethodPost, "/api/v1/purchase/", `{
-			"order_number": "2",
 			"order_date": "2022-07-11",
+			"order_number": "2",			
 			"tracking_code": "222",
-			"buyer_id": 2
-			"product_record_id": 2
+			"buyer_id": 2,
+			"product_record_id": 2,
 			"order_status_id": 2
 			}`)
 
@@ -140,7 +141,7 @@ func Test_CreatePurchase(t *testing.T) {
 			Code int
 			Data purchaseorders.Purchase
 		}{}
-
+		log.Println(string(rr.Body.Bytes()))
 		err := json.Unmarshal(rr.Body.Bytes(), &response)
 
 		assert.Nil(t, err)
@@ -160,11 +161,11 @@ func Test_CreatePurchase(t *testing.T) {
 			Return(purchaseorders.Purchase{}, fmt.Errorf("create_fail"))
 
 		rr := createServerPurchase(servMock, http.MethodPost, "/api/v1/purchase/", `{
-			"order_number": "2",
 			"order_date": "2022-07-11",
+			"order_number": "2",			
 			"tracking_code": "222",
-			"buyer_id": 2
-			"product_record_id": 2
+			"buyer_id": 2,
+			"product_record_id": 2,
 			"order_status_id": 2
 			}`)
 
@@ -193,11 +194,11 @@ func Test_CreatePurchase(t *testing.T) {
 			Return(purchaseorders.Purchase{}, fmt.Errorf("create_conflict: this purchase order already exists"))
 
 		rr := createServerPurchase(servMock, http.MethodPost, "/api/v1/purchase/", `{
-			"order_number": "2",
 			"order_date": "2022-07-11",
+			"order_number": "2",			
 			"tracking_code": "222",
-			"buyer_id": 2
-			"product_record_id": 2
+			"buyer_id": 2,
+			"product_record_id": 2,
 			"order_status_id": 2
 			}`)
 
