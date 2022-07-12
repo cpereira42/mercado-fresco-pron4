@@ -3,8 +3,6 @@ package main
 import (
 	"database/sql"
 
-	_ "github.com/go-sql-driver/mysql"
-
 	"fmt"
 	"log"
 	"os"
@@ -15,6 +13,7 @@ import (
 	inboundOrders "github.com/cpereira42/mercado-fresco-pron4/internal/inbound_orders"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/productbatch"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/productsRecords"
+	"github.com/cpereira42/mercado-fresco-pron4/internal/purchaseorders"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/section"
 
 	"github.com/cpereira42/mercado-fresco-pron4/cmd/server/handler"
@@ -26,7 +25,6 @@ import (
 
 	"github.com/cpereira42/mercado-fresco-pron4/internal/seller"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/warehouse"
-	"github.com/cpereira42/mercado-fresco-pron4/pkg/store"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -41,10 +39,13 @@ func main() {
 		log.Fatal(err)
 	}
 
-	dbBuyers := store.New(store.FileType, "./internal/repositories/buyer.json")
-	repositoryBuyers := buyer.NewRepository(dbBuyers)
+	repositoryBuyers := buyer.NewRepository(conn)
 	serviceBuyers := buyer.NewService(repositoryBuyers)
 	hdBuyers := handler.NewBuyer(serviceBuyers)
+
+	repositoryPurchase := purchaseorders.NewRepository(conn)
+	servicePurchase := purchaseorders.NewService(repositoryPurchase)
+	hdPurchase := handler.NewPurchase(servicePurchase)
 
 	repoProd := products.NewRepositoryProductsDB(conn)
 	serviceProd := products.NewService(repoProd)
@@ -101,6 +102,10 @@ func main() {
 	buyers.PATCH("/:id", hdBuyers.Update())
 	buyers.DELETE("/:id", hdBuyers.Delete())
 	handler.NewCarry(r, svcCarries)
+
+	purchase := r.Group("/api/v1/purchase")
+	purchase.GET("/:id", hdPurchase.GetById())
+	purchase.POST("/", hdPurchase.Create())
 
 	r.Run()
 }
