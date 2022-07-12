@@ -1,8 +1,7 @@
 package products
 
 import (
-	"fmt"
-
+	"github.com/cpereira42/mercado-fresco-pron4/pkg/util"
 	"github.com/fatih/structs"
 )
 
@@ -12,21 +11,20 @@ type Service interface {
 	Delete(id int) error
 	Create(p RequestProductsCreate) (Product, error)
 	Update(id int, p RequestProductsUpdate) (Product, error)
-	CheckCode(id int, code string) bool
 }
 
 type service struct {
-	repository Repository
+	rep Repository
 }
 
 func NewService(r Repository) Service {
 	return &service{
-		repository: r,
+		rep: r,
 	}
 }
 
 func (s *service) GetAll() ([]Product, error) {
-	ps, err := s.repository.GetAll()
+	ps, err := s.rep.GetAll()
 	if err != nil {
 		return nil, err
 	}
@@ -34,42 +32,21 @@ func (s *service) GetAll() ([]Product, error) {
 }
 
 func (s *service) GetId(id int) (Product, error) {
-	ps, err := s.repository.GetId(id)
+
+	ps, err := s.rep.GetId(id)
+
 	if err != nil {
-		return Product{}, err
+		return Product{}, util.CheckError(err)
 	}
 	return ps, nil
 }
 
 func (s *service) Delete(id int) error {
-	return s.repository.Delete(id)
-}
-
-func (s *service) CheckCode(id int, code string) bool {
-
-	ps, _ := s.repository.GetAll()
-	for i := range ps {
-		if ps[i].ProductCode == code && ps[i].Id != id {
-			return true
-		}
-	}
-	return false
+	return s.rep.Delete(id)
 }
 
 func (s *service) Create(p RequestProductsCreate) (Product, error) {
-
 	var prod Product
-	if s.CheckCode(0, p.ProductCode) {
-		return Product{}, fmt.Errorf("code Product %s already registred", p.ProductCode)
-	}
-
-	lastID, err := s.repository.LastID()
-	if err != nil {
-		return Product{}, err
-	}
-
-	lastID++
-	prod.Id = lastID
 	prod.ProductCode = p.ProductCode
 	prod.Description = p.Description
 	prod.Width = p.Width
@@ -81,9 +58,9 @@ func (s *service) Create(p RequestProductsCreate) (Product, error) {
 	prod.FreezingRate = p.FreezingRate
 	prod.ProductTypeId = p.ProductTypeId
 	prod.SellerId = p.SellerId
-	product, err := s.repository.Create(prod)
+	product, err := s.rep.Create(prod)
 	if err != nil {
-		return Product{}, err
+		return Product{}, util.CheckError(err)
 	}
 
 	return product, nil
@@ -92,13 +69,9 @@ func (s *service) Create(p RequestProductsCreate) (Product, error) {
 func (s *service) Update(id int, p RequestProductsUpdate) (Product, error) {
 
 	list := []string{"ProductCode", "Description", "Width", "Length", "Height", "NetWeight", "ExpirationRate", "RecommendedFreezingTemperature", "FreezingRate", "ProductTypeId", "SellerId"}
-	prodUp, err := s.repository.GetId(id)
+	prodUp, err := s.rep.GetId(id)
 	if err != nil {
-		return Product{}, fmt.Errorf("Product not found")
-	}
-
-	if s.CheckCode(id, p.ProductCode) {
-		return Product{}, fmt.Errorf("code Product %s already registred", p.ProductCode)
+		return Product{}, err
 	}
 
 	m1 := structs.Map(p)
@@ -122,6 +95,6 @@ func (s *service) Update(id int, p RequestProductsUpdate) (Product, error) {
 	prodUp.FreezingRate = m2["FreezingRate"].(float64)
 	prodUp.ProductTypeId = m2["ProductTypeId"].(int)
 	prodUp.SellerId = m2["SellerId"].(int)
-	s.repository.Update(id, prodUp)
+	s.rep.Update(id, prodUp)
 	return prodUp, nil
 }

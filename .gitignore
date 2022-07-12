@@ -27,3 +27,6 @@
 .idea
 
 /MercadoFresco.session.sql
+# .vscode
+.vscode
+coverage.out

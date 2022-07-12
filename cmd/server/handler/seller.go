@@ -13,8 +13,14 @@ type Seller struct {
 	service seller.Service
 }
 
-func NewSeller(s seller.Service) *Seller {
-	return &Seller{service: s}
+func NewSeller(ctx *gin.Engine, service seller.Service) {
+	s := &Seller{service: service}
+	sellers := ctx.Group("/api/v1/sellers")
+	sellers.GET("/", s.GetAll())
+	sellers.GET("/:id", s.GetId())
+	sellers.POST("/", s.Create())
+	sellers.PATCH("/:id", s.Update())
+	sellers.DELETE("/:id", s.Delete())
 }
 
 func (s *Seller) Create() gin.HandlerFunc {

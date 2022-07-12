@@ -2,14 +2,19 @@ package main
 
 import (
 	"database/sql"
+
+	_ "github.com/go-sql-driver/mysql"
+
 	"fmt"
 	"log"
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
 
+	"github.com/cpereira42/mercado-fresco-pron4/internal/carries"
 	inboundOrders "github.com/cpereira42/mercado-fresco-pron4/internal/inbound_orders"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/productbatch"
+	"github.com/cpereira42/mercado-fresco-pron4/internal/productsRecords"
 	"github.com/cpereira42/mercado-fresco-pron4/internal/section"
 
 	"github.com/cpereira42/mercado-fresco-pron4/cmd/server/handler"
@@ -41,20 +46,21 @@ func main() {
 	serviceBuyers := buyer.NewService(repositoryBuyers)
 	hdBuyers := handler.NewBuyer(serviceBuyers)
 
-	dbProd := store.New(store.FileType, "./internal/repositories/products.json")
-	repoProd := products.NewRepositoryProducts(dbProd)
+	repoProd := products.NewRepositoryProductsDB(conn)
 	serviceProd := products.NewService(repoProd)
 
 	repoWarehouse := warehouse.NewRepository(conn)
 	svcWarehouse := warehouse.NewService(repoWarehouse)
 	w := handler.NewWarehouse(svcWarehouse)
 
+	repoCarries := carries.NewRepository(conn)
+	svcCarries := carries.NewService(repoCarries)
+
 	repoSeller := seller.NewRepositorySeller(conn)
 	serviceSeller := seller.NewService(repoSeller)
 
 	repoLocality := locality.NewRepositoryLocality(conn)
 	serviceLocality := locality.NewService(repoLocality)
-	l := handler.NewLocality(serviceLocality)
 
 	repositoryInboundOrders := inboundOrders.NewRepository(conn)
 	serviceInboundOrders := inboundOrders.NewService(repositoryInboundOrders)
@@ -62,27 +68,16 @@ func main() {
 	repositoryEmployees := employee.NewRepository(conn)
 	serviceEmployees := employee.NewService(repositoryEmployees)
 
-	s := handler.NewSeller(serviceSeller)
-	p := handler.NewProduct(serviceProd)
+	repoProdRecord := productsRecords.NewRepositoryProductsRecordsDB(conn)
+	serviceProdRecord := productsRecords.NewService(repoProdRecord)
+
 	r := gin.Default()
-
-	pr := r.Group("/api/v1/products")
-	pr.GET("/", p.GetAll())
-	pr.GET("/:id", p.GetId())
-	pr.DELETE("/:id", p.Delete())
-	pr.POST("/", p.Create())
-	pr.PUT("/:id", p.Update())
-	pr.PATCH("/:id", p.Update())
-
-	sellers := r.Group("/api/v1/sellers")
-	sellers.GET("/", s.GetAll())
-	sellers.GET("/:id", s.GetId())
-	sellers.POST("/", s.Create())
-	sellers.PATCH("/:id", s.Update())
-	sellers.DELETE("/:id", s.Delete())
-
+	handler.NewProduct(r, serviceProd)
+	handler.NewProductRecords(r, serviceProdRecord)
 	handler.NewInboundOrders(r, serviceInboundOrders)
 	handler.NewEmployee(r, serviceEmployees)
+	handler.NewSeller(r, serviceSeller)
+	handler.NewLocality(r, serviceLocality)
 
 	repSection := section.NewRepository(conn)        // new
 	serviceSection := section.NewService(repSection) // new
@@ -105,11 +100,7 @@ func main() {
 	buyers.POST("/", hdBuyers.Create())
 	buyers.PATCH("/:id", hdBuyers.Update())
 	buyers.DELETE("/:id", hdBuyers.Delete())
-
-	localities := r.Group("/api/v1/localities")
-	localities.POST("/", l.Create())
-	localities.GET("/", l.GenerateReportAll())
-	localities.GET("/:id", l.GenerateReportById())
+	handler.NewCarry(r, svcCarries)
 
 	r.Run()
 }

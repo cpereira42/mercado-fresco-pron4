@@ -12,20 +12,6 @@ type Repository struct {
 	mock.Mock
 }
 
-// CheckCode provides a mock function with given fields: code
-func (_m *Repository) CheckCode(code string) error {
-	ret := _m.Called(code)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(string) error); ok {
-		r0 = rf(code)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
 // Create provides a mock function with given fields: p
 func (_m *Repository) Create(p products.Product) (products.Product, error) {
 	ret := _m.Called(p)
@@ -98,27 +84,6 @@ func (_m *Repository) GetId(id int) (products.Product, error) {
 	var r1 error
 	if rf, ok := ret.Get(1).(func(int) error); ok {
 		r1 = rf(id)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// LastID provides a mock function with given fields:
-func (_m *Repository) LastID() (int, error) {
-	ret := _m.Called()
-
-	var r0 int
-	if rf, ok := ret.Get(0).(func() int); ok {
-		r0 = rf()
-	} else {
-		r0 = ret.Get(0).(int)
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func() error); ok {
-		r1 = rf()
 	} else {
 		r1 = ret.Error(1)
 	}
