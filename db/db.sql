@@ -311,8 +311,8 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mercadofresco`.`purchase_orders` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `order_number` VARCHAR(255) NOT NULL,
   `order_date` DATETIME NOT NULL,
+  `order_number` VARCHAR(255) NOT NULL,  
   `tracking_code` VARCHAR(255) NOT NULL,
   `buyer_id` INT(11) NOT NULL,
   `product_record_id` INT(11) NOT NULL,
@@ -324,11 +324,11 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`purchase_orders` (
   CONSTRAINT `fk_purchase_orders_buyer1`
     FOREIGN KEY (`buyer_id`)
     REFERENCES `mercadofresco`.`buyer` (`id`)
-     ON DELETE NO ACTION
+    ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_purchase_orders_product_record1`
     FOREIGN KEY (`product_record_id`)
-    REFERENCES `mercadofresco`.`product_record` (`id`)   
+    REFERENCES `mercadofresco`.`product_records` (`id`)   
     ON DELETE CASCADE
     ON UPDATE CASCADE,  
   CONSTRAINT `fk_purchase_orders_order_status1`
@@ -437,7 +437,6 @@ INSERT INTO `products` VALUES
 INSERT INTO `product_records` VALUES
 (1,'2008-11-11 13:23:44',15.50,15.50,1);
 
-
 INSERT INTO `warehouse` VALUES
 (1,'rua 1','11','1',1,1,2.00);
 
@@ -456,19 +455,14 @@ INSERT INTO `inbound_orders` VALUES
 INSERT INTO `carries` VALUES
 (1,'cid1','Meli','rua 1','11-5541-4120',1);
 
-
-
-
 INSERT INTO `buyer` VALUES
 (1,'123456','Mercado','Livre');
 
 INSERT INTO `order_status` VALUES
 (1,'order1');
 
-
 INSERT INTO `purchase_orders` VALUES
-(1,'order1','2008-11-11 13:23:44','1521',1,1,1);
-
+(1,'2008-11-11 13:23:44','1','1521',1,1,1);
 
 INSERT INTO `order_details` VALUES
 (1,'teste',15,15.00,1,1);

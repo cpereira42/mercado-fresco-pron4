@@ -19,6 +19,13 @@ func NewPurchase(purchase purchaseorders.Service) *PurchaseController {
 	}
 }
 
+func NewRoutePurchase(r *gin.Engine, servicePurchase purchaseorders.Service) {
+	controllerPurchase := NewPurchase(servicePurchase)
+	purchase := r.Group("/api/v1/purchase")
+	purchase.GET("/:id", controllerPurchase.GetById())
+	purchase.POST("/", controllerPurchase.Create())
+}
+
 func (c *PurchaseController) GetById() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id, err := strconv.Atoi(ctx.Param("id"))

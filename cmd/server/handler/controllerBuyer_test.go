@@ -23,27 +23,9 @@ var (
 	buyersList []buyer.Buyer = []buyer.Buyer{buyer1, buyer2, buyer3}
 )
 
-/*func createRequestTestBuyer(
-	method string,
-	url string,
-	body string,
-) (*http.Request, *httptest.ResponseRecorder) {
-	req := httptest.NewRequest(method, url, bytes.NewBuffer([]byte(body)))
-	req.Header.Add("Content-Type", "application/json")
-
-	return req, httptest.NewRecorder()
-}*/
-
 func createServerBuyer(serv *mocks.Service, method string, url string, body string) *httptest.ResponseRecorder {
-	p := handler.NewBuyer(serv)
 	r := gin.Default()
-	pr := r.Group("/api/v1/buyers")
-	pr.GET("/", p.GetAll())
-	pr.GET("/:id", p.GetID())
-	pr.DELETE("/:id", p.Delete())
-	pr.POST("/", p.Create())
-	pr.PUT("/:id", p.Update())
-	pr.PATCH("/:id", p.Update())
+	handler.NewRouteBuyer(r, serv)
 	req, rr := util.CreateRequestTest(method, url, body)
 	r.ServeHTTP(rr, req)
 	return rr

@@ -1,5 +1,7 @@
 package buyer
 
+//import "github.com/gin-gonic/gin"
+
 type Service interface {
 	GetAll() ([]Buyer, error)
 	GetId(id int) (Buyer, error)

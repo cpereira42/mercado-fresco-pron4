@@ -1,10 +1,8 @@
 package handler_test
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -39,23 +37,9 @@ var (
 	}
 )
 
-func createRequestTestPurchase(
-	method string,
-	url string,
-	body string,
-) (*http.Request, *httptest.ResponseRecorder) {
-	req := httptest.NewRequest(method, url, bytes.NewBuffer([]byte(body)))
-	req.Header.Add("Content-Type", "application/json")
-
-	return req, httptest.NewRecorder()
-}
-
 func createServerPurchase(serv *mocks.Service, method string, url string, body string) *httptest.ResponseRecorder {
-	p := handler.NewPurchase(serv)
 	r := gin.Default()
-	pr := r.Group("/api/v1/purchase")
-	pr.GET("/:id", p.GetById())
-	pr.POST("/", p.Create())
+	handler.NewRoutePurchase(r, serv)
 	req, rr := util.CreateRequestTest(method, url, body)
 	r.ServeHTTP(rr, req)
 	return rr
@@ -142,7 +126,7 @@ func Test_CreatePurchase(t *testing.T) {
 			Code int
 			Data purchaseorders.Purchase
 		}{}
-		log.Println(string(rr.Body.Bytes()))
+
 		err := json.Unmarshal(rr.Body.Bytes(), &response)
 
 		assert.Nil(t, err)

@@ -9,7 +9,7 @@ import (
 
 type Repository interface {
 	GetById(id int) (Purchase, error)
-	Create(order_number, order_date, tracking_code string, buyer_id, product_record_id, order_status_id int) (Purchase, error)
+	Create(order_date, order_number, tracking_code string, buyer_id, product_record_id, order_status_id int) (Purchase, error)
 }
 
 type repository struct {
@@ -29,10 +29,10 @@ func (r *repository) GetById(id int) (Purchase, error) {
 		&purchase.ID,
 		&purchase.Order_date,
 		&purchase.Order_number,
-		&purchase.Order_status_id,
-		&purchase.Product_record_id,
 		&purchase.Tracking_code,
 		&purchase.Buyer_id,
+		&purchase.Product_record_id,
+		&purchase.Order_status_id,
 	)
 
 	if err != nil {
@@ -43,15 +43,15 @@ func (r *repository) GetById(id int) (Purchase, error) {
 }
 
 func (r *repository) Create(
-	order_number,
 	order_date,
+	order_number,
 	tracking_code string,
 	buyer_id,
 	product_record_id,
 	order_status_id int) (Purchase, error) {
 	purchase := Purchase{
-		Order_number:      order_number,
 		Order_date:        order_date,
+		Order_number:      order_number,
 		Tracking_code:     tracking_code,
 		Buyer_id:          buyer_id,
 		Product_record_id: product_record_id,
@@ -59,8 +59,8 @@ func (r *repository) Create(
 	}
 
 	stmt, err := r.db.Exec(CREATE_PURCHASE,
-		order_number,
 		order_date,
+		order_number,
 		tracking_code,
 		buyer_id,
 		product_record_id,
