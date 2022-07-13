@@ -120,7 +120,7 @@ func TestControllerUpdate(t *testing.T) {
 			err := json.Unmarshal(rr.Body.Bytes(), &objResp)
 			assert.Equal(t, 404, rr.Code)
 			assert.Nil(t, err)
-			assert.Equal(t, "Warehouse Not Found", objResp.Error)
+			assert.Equal(t, "invalid ID", objResp.Error)
 		})
 	t.Run(
 		"Test Update - Invalid JSON", func(t *testing.T) {
@@ -152,6 +152,38 @@ func TestControllerUpdate(t *testing.T) {
 			assert.Nil(t, err)
 			assert.Equal(t, "invalid character '\"' after object key:value pair", objResp.Error)
 		})
+	t.Run("Test Update - Less Field - should fail and return 422 and new Error", func(t *testing.T) {
+		serviceMock := new(mocks.Service)
+		errorMsg := fmt.Errorf("invalid ID")
+		serviceMock.On("Update",
+			tmock.AnythingOfType("int"),
+			tmock.AnythingOfType("string"),
+			tmock.AnythingOfType("string"),
+			tmock.AnythingOfType("string"),
+			tmock.AnythingOfType("int"),
+			tmock.AnythingOfType("int"),
+			tmock.AnythingOfType("int")).Return(warehouse.RequestWarehouseUpdate{}, errorMsg)
+
+		rr := createRequestTests(serviceMock, http.MethodPatch, "/api/v1/warehouse/1",
+			`{
+				"address": "Rua 4",
+				"telephone": "11111111",
+				"minimum_capacity": 10,
+				"minimum_temperature": 20
+				"locality_id": 1
+			}`)
+
+		objResp := struct {
+			Code  int
+			Error string
+		}{}
+		err := json.Unmarshal(rr.Body.Bytes(), &objResp)
+
+		assert.Equal(t, 422, objResp.Code)
+		assert.Nil(t, err)
+
+	})
+
 }
 
 func TestControllerDelete(t *testing.T) {
@@ -224,6 +256,24 @@ func TestControllerGetByID(t *testing.T) {
 			assert.Nil(t, err)
 			assert.Equal(t, "Warehouse Not Found", objResp.Error)
 		})
+	t.Run("Test GetByID - Wrong ID  'A' - should return 404 and error", func(t *testing.T) {
+		serviceMock := new(mocks.Service)
+		errorMsg := fmt.Errorf("invalid ID")
+		serviceMock.On("GetByID", tmock.AnythingOfType("int")).Return(warehouse.Warehouse{}, errorMsg)
+
+		rr := createRequestTests(serviceMock, http.MethodGet, "/api/v1/warehouse/A", "")
+
+		objResp := struct {
+			Code  int
+			Error string
+		}{}
+		err := json.Unmarshal(rr.Body.Bytes(), &objResp)
+
+		assert.Equal(t, 404, objResp.Code)
+		assert.Nil(t, err)
+		assert.Equal(t, "invalid ID", objResp.Error)
+
+	})
 }
 
 func TestControllerCreate(t *testing.T) {
@@ -317,4 +367,38 @@ func TestControllerCreate(t *testing.T) {
 			assert.Nil(t, err)
 			assert.Equal(t, "Error to save", objResp.Error)
 		})
+
+	t.Run("Test Create - Less Field - should fail and return 422 and new Error", func(t *testing.T) {
+		serviceMock := new(mocks.Service)
+		errorMsg := fmt.Errorf("Warehouse already Exists")
+		serviceMock.On("Create",
+			tmock.AnythingOfType("string"),
+			tmock.AnythingOfType("string"),
+			tmock.AnythingOfType("string"),
+			tmock.AnythingOfType("int"),
+			tmock.AnythingOfType("int"),
+			tmock.AnythingOfType("int")).
+			Return(warehouse.RequestWarehouseCreate{}, errorMsg)
+
+		rr := createRequestTests(serviceMock, http.MethodPost, "/api/v1/warehouse/",
+			`{
+				"address": "Rua 1",
+				"telephone": "11111111",
+				"warehouse_code": "W1",
+				"minimum_capacity": 10,
+				"minimum_temperature": 20,
+				
+			}`)
+
+		objResp := struct {
+			Code  int
+			Error string
+		}{}
+		err := json.Unmarshal(rr.Body.Bytes(), &objResp)
+
+		assert.Equal(t, 422, objResp.Code)
+		assert.Nil(t, err)
+
+	})
+
 }
