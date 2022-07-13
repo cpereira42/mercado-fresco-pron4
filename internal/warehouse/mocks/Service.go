@@ -13,14 +13,14 @@ type Service struct {
 }
 
 // Create provides a mock function with given fields: address, telephone, warehouse_code, minimum_capacity, minimum_temperature, locality_id
-func (_m *Service) Create(address string, telephone string, warehouse_code string, minimum_capacity int, minimum_temperature int, locality_id int) (warehouse.Warehouse, error) {
+func (_m *Service) Create(address string, telephone string, warehouse_code string, minimum_capacity int, minimum_temperature int, locality_id int) (warehouse.RequestWarehouseCreate, error) {
 	ret := _m.Called(address, telephone, warehouse_code, minimum_capacity, minimum_temperature, locality_id)
 
-	var r0 warehouse.Warehouse
-	if rf, ok := ret.Get(0).(func(string, string, string, int, int, int) warehouse.Warehouse); ok {
+	var r0 warehouse.RequestWarehouseCreate
+	if rf, ok := ret.Get(0).(func(string, string, string, int, int, int) warehouse.RequestWarehouseCreate); ok {
 		r0 = rf(address, telephone, warehouse_code, minimum_capacity, minimum_temperature, locality_id)
 	} else {
-		r0 = ret.Get(0).(warehouse.Warehouse)
+		r0 = ret.Get(0).(warehouse.RequestWarehouseCreate)
 	}
 
 	var r1 error
