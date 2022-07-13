@@ -14,8 +14,8 @@ import (
 var (
 	purchase1 = purchaseorders.Purchase{
 		ID:                1,
-		Order_number:      "1",
 		Order_date:        "2022-07-11",
+		Order_number:      "1",
 		Tracking_code:     "123",
 		Buyer_id:          1,
 		Product_record_id: 1,

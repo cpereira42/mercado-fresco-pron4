@@ -19,6 +19,16 @@ func NewBuyer(buyer buyer.Service) *BuyerController {
 	}
 }
 
+func NewRouteBuyer(r *gin.Engine, serviceBuyer buyer.Service) {
+	controllerBuyer := NewBuyer(serviceBuyer)
+	buyers := r.Group("/api/v1/buyers")
+	buyers.GET("/", controllerBuyer.GetAll())
+	buyers.GET("/:id", controllerBuyer.GetID())
+	buyers.POST("/", controllerBuyer.Create())
+	buyers.PATCH("/:id", controllerBuyer.Update())
+	buyers.DELETE("/:id", controllerBuyer.Delete())
+}
+
 func (c *BuyerController) GetAll() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		buyer, err := c.service.GetAll()
