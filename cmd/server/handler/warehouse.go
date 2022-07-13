@@ -56,9 +56,8 @@ func (c *Warehouse) Create(ctx *gin.Context) {
 }
 
 func (c *Warehouse) Update(ctx *gin.Context) {
-	id, err := strconv.Atoi(ctx.Param("id"))
+	id, err := util.IDChecker(ctx)
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, web.NewResponse(http.StatusNotFound, nil, "Warehouse Not Found"))
 		return
 	}
 
