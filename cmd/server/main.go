@@ -44,7 +44,6 @@ func main() {
 
 	repositoryPurchase := purchaseorders.NewRepository(conn)
 	servicePurchase := purchaseorders.NewService(repositoryPurchase)
-	hdPurchase := handler.NewPurchase(servicePurchase)
 
 	repoProd := products.NewRepositoryProductsDB(conn)
 	serviceProd := products.NewService(repoProd)
@@ -77,8 +76,10 @@ func main() {
 	handler.NewEmployee(r, serviceEmployees)
 	handler.NewSeller(r, serviceSeller)
 	handler.NewLocality(r, serviceLocality)
-  handler.NewRouteBuyer(r, serviceBuyers)
-  handler.NewWarehouse(r, svcWarehouse)
+	handler.NewWarehouse(r, svcWarehouse)
+	handler.NewRouteBuyer(r, serviceBuyers)
+	handler.NewPurchase(servicePurchase)
+	handler.NewCarry(r, svcCarries)
 
 	repSection := section.NewRepository(conn)        // new
 	serviceSection := section.NewService(repSection) // new
@@ -87,12 +88,6 @@ func main() {
 	repoPB := productbatch.NewRepositoryProductBatches(conn)   // new
 	servicePB := productbatch.NewServiceProductBatches(repoPB) // new
 	handler.NewProductBatChesController(r, servicePB)          // new
-
-	handler.NewCarry(r, svcCarries)
-
-	purchase := r.Group("/api/v1/purchase")
-	purchase.GET("/:id", hdPurchase.GetById())
-	purchase.POST("/", hdPurchase.Create())
 
 	r.Run()
 }
