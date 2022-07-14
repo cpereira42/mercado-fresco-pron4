@@ -33,25 +33,24 @@ func CheckError(sqlError error) error {
 		return fmt.Errorf(msg)
 	}
 
-	return sqlError*/
-	func CheckError(sqlError error) error {
-		switch {
-		case strings.Contains(sqlError.Error(), "no rows in result set"):
-			return fmt.Errorf("data not found")
-		case strings.Contains(sqlError.Error(), "Duplicate entry"):
-			err := strings.Split(sqlError.Error(), "'")
-			msg := fmt.Sprint(err[3], " is unique, and ", err[1], " already registered")
-			return fmt.Errorf(msg)
-		case strings.Contains(sqlError.Error(), "1452"):
-			err := strings.Split(sqlError.Error(), "`")
-			msg := fmt.Sprint(err[7], " is not registered on ", err[9])
-			return fmt.Errorf(msg)
-		case strings.Contains(sqlError.Error(), "Cannot add or update a child row: a foreign key constraint fails"):
-			msg := "foreign key constraint fails"
-			return fmt.Errorf(msg)
-		}
-		return sqlError
+	return sqlError
+	func CheckError(sqlError error) error {*/
+	switch {
+	case strings.Contains(sqlError.Error(), "no rows in result set"):
+		return fmt.Errorf("data not found")
+	case strings.Contains(sqlError.Error(), "Duplicate entry"):
+		err := strings.Split(sqlError.Error(), "'")
+		msg := fmt.Sprint(err[3], " is unique, and ", err[1], " already registered")
+		return fmt.Errorf(msg)
+	case strings.Contains(sqlError.Error(), "1452"):
+		err := strings.Split(sqlError.Error(), "`")
+		msg := fmt.Sprint(err[7], " is not registered on ", err[9])
+		return fmt.Errorf(msg)
+	case strings.Contains(sqlError.Error(), "Cannot add or update a child row: a foreign key constraint fails"):
+		msg := "foreign key constraint fails"
+		return fmt.Errorf(msg)
 	}
+	return sqlError
 }
 
 func GetCurrentDateTime() string {
