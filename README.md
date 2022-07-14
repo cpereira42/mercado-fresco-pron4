@@ -30,11 +30,21 @@ The objective of the “Final Project” is to implement a REST API within the s
 apply the contents worked during BOOTCAMP-GO MELI. (Git, GO, Storage and Quality).
 
 ## Features
-<br>
-<br>
-<br><br>
-<br>
-<br>
+
+The following routes are found in the API:
+
+>- [Seller](docs/SELLER.md)
+>- [Warehouse](docs/WAREHOUSE.md)
+>- [Section](docs/SECTION.md)
+>- [Product](docs/PRODUCT.md)
+>- [Employee](docs/EMPLOYEE.md)
+>- [Buyer](docs/BUYER.md)
+>- [Locality](docs/LOCALITY.md)
+>- [Carry](docs/CARRIES.md)
+>- [Product Batch](docs/PRODUCTBATCHS.md)
+>- [Product Record](docs/PRODUCTRECORDS.md)
+>- [Inbound Order](docs/INBOUNDORDERS.md)
+>- [Purchase Order](docs/PURCHASEORDERS.md)
 
 
 ## Technologies
