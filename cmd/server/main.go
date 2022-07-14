@@ -78,7 +78,7 @@ func main() {
 	handler.NewLocality(r, serviceLocality)
 	handler.NewWarehouse(r, svcWarehouse)
 	handler.NewRouteBuyer(r, serviceBuyers)
-	handler.NewPurchase(servicePurchase)
+	handler.NewRoutePurchase(r, servicePurchase)
 	handler.NewCarry(r, svcCarries)
 
 	repSection := section.NewRepository(conn)        // new
