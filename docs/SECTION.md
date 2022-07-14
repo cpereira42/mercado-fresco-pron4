@@ -51,7 +51,7 @@
 }
 ```
 
-### [PATCH] /sections/1
+#### [PATCH] /sections/1
 ```json
 {
     "section_number": 8,
@@ -64,6 +64,6 @@
 ```
 
 #### [DELETE] /sections/1
-```json
-status 204 no content
+```shell
+  status 204 no content
 ```

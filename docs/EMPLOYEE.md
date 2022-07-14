@@ -40,7 +40,7 @@
 }
 ```
 
-### [PATCH] /employees/1
+#### [PATCH] /employees/1
 ```json
 {
     "card_number_id": "2",
@@ -50,6 +50,6 @@
 ```
 
 #### [DELETE] /employees/1
-```json
-status 204 no content
+```shell
+  status 204 no content
 ```

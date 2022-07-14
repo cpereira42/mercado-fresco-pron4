@@ -42,7 +42,7 @@
 }
 ```
 
-### [PATCH] /sellers/1
+#### [PATCH] /sellers/1
 ```json
 {
     "cid": "cid2",
@@ -53,6 +53,6 @@
 ```
 
 #### [DELETE] /sellers/1
-```json
-status 204 no content
+```shell
+  status 204 no content
 ```
