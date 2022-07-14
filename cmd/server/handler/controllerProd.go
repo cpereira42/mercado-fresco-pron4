@@ -70,8 +70,6 @@ func (c *Product) Create() gin.HandlerFunc {
 
 		p, err := c.service.Create(request)
 		if err != nil {
-			fmt.Println(err)
-
 			if err.Error() == "Product "+request.ProductCode+" already registred" {
 
 				ctx.JSON(409, web.NewResponse(409, nil, err.Error()))

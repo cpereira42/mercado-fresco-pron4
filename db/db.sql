@@ -248,15 +248,15 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`inbound_orders` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `order_date` DATETIME NOT NULL,
   `order_number` VARCHAR(255) NOT NULL,
-  `employe_id` INT(10) UNSIGNED NOT NULL,
+  `employee_id` INT(10) UNSIGNED NOT NULL,
   `product_batch_id` INT(11) NOT NULL,
   `warehouse_id` INT(10) UNSIGNED NOT NULL,
   PRIMARY KEY (`id`),
   INDEX `fk_inbound_details_products_batches1_idx` (`product_batch_id` ASC) VISIBLE,
-  INDEX `fk_inbound_details_employees1_idx` (`employe_id` ASC) VISIBLE,
+  INDEX `fk_inbound_details_employees1_idx` (`employee_id` ASC) VISIBLE,
   INDEX `fk_inbound_details_warehouse1_idx` (`warehouse_id` ASC) VISIBLE,
   CONSTRAINT `fk_inbound_details_employees1`
-    FOREIGN KEY (`employe_id`)
+    FOREIGN KEY (`employee_id`)
     REFERENCES `mercadofresco`.`employees` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
