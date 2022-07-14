@@ -77,7 +77,6 @@ func (c *Product) Create() gin.HandlerFunc {
 
 		p, err := c.service.Create(request)
 		if err != nil {
-			fmt.Println(err)
 			if err.Error() == "product_code is unique, and "+request.ProductCode+" already registered" {
 				ctx.JSON(http.StatusConflict, web.NewResponse(http.StatusConflict, nil, err.Error()))
 			} else {
