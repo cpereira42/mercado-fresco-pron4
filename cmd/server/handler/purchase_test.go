@@ -167,6 +167,39 @@ func Test_CreatePurchase(t *testing.T) {
 		assert.Equal(t, "create_fail", response.Error)
 	})
 
+	t.Run("Test fail ", func(t *testing.T) {
+		servMock := new(mocks.Service)
+		servMock.On("Create",
+			purchase2.Order_date,
+			purchase2.Order_number,
+			purchase2.Tracking_code,
+			purchase2.Buyer_id,
+			purchase2.Product_record_id,
+			purchase2.Order_status_id).
+			Return(purchaseorders.Purchase{}, fmt.Errorf("create_conflict: this purchase order already exists"))
+
+		rr := createServerPurchase(servMock, http.MethodPost, "/api/v1/purchase/", `{
+            "order_date": "2022-07-11",
+            "order_number": 2,            
+            "tracking_code": "222",
+            "buyer_id": 2,
+            "product_record_id": 2,
+            "order_status_id": 2
+            }`)
+
+		assert.Equal(t, http.StatusUnprocessableEntity, rr.Code)
+
+		response := struct {
+			Code  int
+			Error string
+		}{}
+
+		err := json.Unmarshal(rr.Body.Bytes(), &response)
+
+		assert.Nil(t, err)
+		assert.Equal(t, "", response.Error)
+	})
+
 	t.Run("Test create_conflict", func(t *testing.T) {
 		servMock := new(mocks.Service)
 		servMock.On("Create",

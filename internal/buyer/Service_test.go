@@ -236,6 +236,29 @@ func TestServiceUpdateBuyer(t *testing.T) {
 
 		mockRep.AssertExpectations(t)
 	})
+
+	t.Run("update fail", func(t *testing.T) {
+		var mockRep = new(mocks.Repository)
+
+		mockRep.On("Update",
+			tmock.AnythingOfType("int"),
+			tmock.AnythingOfType("string"),
+			tmock.AnythingOfType("string"),
+			tmock.AnythingOfType("string"),
+		).
+			Return(buyer.Buyer{}, fmt.Errorf("Fail to update")).
+			Once()
+
+		service := buyer.NewService(mockRep)
+
+		result, err := service.Update(9, buyerUpdate.Card_number_ID, buyerUpdate.First_name, buyerUpdate.Last_name)
+
+		assert.Error(t, err)
+		assert.Equal(t, buyer.Buyer{}, result)
+		assert.Equal(t, "Fail to update", err.Error())
+
+		mockRep.AssertExpectations(t)
+	})
 }
 
 func TestServiceDeleteBuyer(t *testing.T) {
