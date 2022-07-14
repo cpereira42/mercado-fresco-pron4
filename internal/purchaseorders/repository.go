@@ -21,11 +21,17 @@ func NewRepository(db *sql.DB) Repository {
 }
 
 func (r *repository) GetById(id int) (Purchase, error) {
-	row := r.db.QueryRow(GET_PURCHASE_BY_ID)
+	stmt, err := r.db.Prepare(GET_PURCHASE_BY_ID)
+
+	if err != nil {
+		return Purchase{}, fmt.Errorf("fail to prepare query")
+	}
+
+	defer stmt.Close()
 
 	purchase := Purchase{}
 
-	err := row.Scan(
+	err = stmt.QueryRow(id).Scan(
 		&purchase.ID,
 		&purchase.Order_date,
 		&purchase.Order_number,

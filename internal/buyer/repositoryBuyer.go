@@ -50,11 +50,17 @@ func (r *repository) GetAll() ([]Buyer, error) {
 }
 
 func (r *repository) GetId(id int) (Buyer, error) {
-	row := r.db.QueryRow(GET_BUYER_BY_ID)
+	stmt, err := r.db.Prepare(GET_BUYER_BY_ID)
+
+	if err != nil {
+		return Buyer{}, fmt.Errorf("fail to prepare query")
+	}
+
+	defer stmt.Close()
 
 	buyer := Buyer{}
 
-	err := row.Scan(
+	err = stmt.QueryRow(id).Scan(
 		&buyer.ID,
 		&buyer.Card_number_ID,
 		&buyer.First_name,
