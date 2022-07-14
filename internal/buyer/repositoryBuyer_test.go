@@ -63,6 +63,15 @@ func TestGetAll(t *testing.T) {
 
 		assert.Error(t, err)
 	})
+
+	t.Run("Find all Prepare", func(t *testing.T) {
+		mock.ExpectQuery(buyer.GET_ALL_BUYERS).WillReturnError(fmt.Errorf("fail prepare"))
+		_, err = buyerRepo.GetAll()
+
+		assert.Error(t, err)
+		assert.Equal(t, "fail prepare", err.Error())
+
+	})
 }
 
 func TestGetById(t *testing.T) {
@@ -145,6 +154,17 @@ func TestCreate(t *testing.T) {
 		assert.NotNil(t, err)
 		assert.Equal(t, fmt.Errorf("fail to create"), err)
 	})
+
+	t.Run("Create not effect", func(t *testing.T) {
+		mock.ExpectExec(regexp.QuoteMeta(buyer.CREATE_BUYER)).WithArgs(
+			buyer1.Card_number_ID,
+			buyer1.First_name,
+			buyer1.Last_name,
+		).WillReturnResult(sqlmock.NewResult(0, 0))
+		buyerRepo := buyer.NewRepository(db)
+		_, err := buyerRepo.Create(buyer1.Card_number_ID, buyer1.First_name, buyer1.Last_name)
+		assert.Error(t, err)
+	})
 }
 
 func TestUpdate(t *testing.T) {
@@ -206,4 +226,17 @@ func TestDelete(t *testing.T) {
 		assert.NotNil(t, err)
 	})
 
+	t.Run("Delete prepare", func(t *testing.T) {
+		db, mock, err := sqlmock.New()
+		assert.NoError(t, err)
+		defer db.Close()
+
+		buyerRepo := buyer.NewRepository(db)
+		mock.ExpectExec(regexp.QuoteMeta(buyer.DELETE_BUYER)).WillReturnError(fmt.Errorf("Fail to delete"))
+
+		err = buyerRepo.Delete(buyer1.ID)
+
+		assert.Error(t, err)
+		assert.NotNil(t, err)
+	})
 }

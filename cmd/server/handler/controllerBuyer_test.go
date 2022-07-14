@@ -208,6 +208,33 @@ func Test_CreateBuyer(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, "create_conflict: this buyer already exists", response.Error)
 	})
+
+	t.Run("Test fail checker", func(t *testing.T) {
+		servMock := new(mocks.Service)
+		servMock.On("Create",
+			buyer4.Card_number_ID,
+			buyer4.First_name,
+			buyer4.Last_name).
+			Return(buyer4, nil)
+
+		rr := createServerBuyer(servMock, http.MethodPost, "/api/v1/buyers/", `{
+            "card_number_id": 444,
+            "first_namerrrr": "Ana",
+            "last_name": "Banana"            
+            }`)
+
+		response := struct {
+			Code int
+			Data buyer.Buyer
+		}{}
+
+		//response := buyer.Buyer{}
+		err := json.Unmarshal(rr.Body.Bytes(), &response)
+
+		assert.Nil(t, err)
+		assert.Equal(t, buyer.Buyer{}, response.Data)
+		assert.Equal(t, 422, rr.Code)
+	})
 }
 
 func Test_UpdateBuyer(t *testing.T) {
@@ -291,6 +318,35 @@ func Test_UpdateBuyer(t *testing.T) {
 		assert.Equal(t, "not_found", response.Error)
 		assert.Equal(t, http.StatusNotFound, rr.Code)
 	})
+
+	t.Run("Test fail checker", func(t *testing.T) {
+		servMock := new(mocks.Service)
+		servMock.On("Update",
+			buyer4.ID,
+			buyer4.Card_number_ID,
+			buyer4.First_name,
+			buyer4.Last_name).
+			Return(buyer.Buyer{}, fmt.Errorf("not_found"))
+
+		rr := createServerBuyer(servMock, http.MethodPatch, "/api/v1/buyers/4", `{
+            "id": 4,
+            "card_number_id": 444,
+            "last_name": "Banana",
+            "first_name": "Ana"
+            }`)
+
+		response := struct {
+			Code  int
+			Error string
+		}{}
+
+		err := json.Unmarshal(rr.Body.Bytes(), &response)
+
+		assert.Nil(t, err)
+		assert.Equal(t, "", response.Error)
+		assert.Equal(t, 422, rr.Code)
+	})
+
 }
 
 func Test_DeleteBuyer(t *testing.T) {
