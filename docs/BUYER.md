@@ -37,7 +37,7 @@
 }
 ```
 
-### [PATCH] /buyers/:id
+#### [PATCH] /buyers/:id
 ```json
 {
     "card_number_id": "402",
@@ -47,5 +47,7 @@
 
 #### [DELETE] /buyers/:id
 ```json
-status 204 no content
+!!!status 204 no content
 ```
+>
+
