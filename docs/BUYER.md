@@ -16,7 +16,7 @@
     ]
 }
 ```
-#### [GET] /buyers/:id
+#### [GET] /buyers/1
 ```json
 {
     "code": 200,
@@ -37,7 +37,7 @@
 }
 ```
 
-### [PATCH] /buyers/:id
+#### [PATCH] /buyers/1
 ```json
 {
     "card_number_id": "402",
@@ -45,7 +45,8 @@
 }
 ```
 
-#### [DELETE] /buyers/:id
-```json
-status 204 no content
+#### [DELETE] /buyers/1
+```shell
+  status 204 no content
 ```
+

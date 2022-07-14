@@ -45,7 +45,7 @@
 }
 ```
 
-### [PATCH] /warehouse/1
+#### [PATCH] /warehouse/1
 ```json
 {
     "address": "rua 4",
@@ -57,6 +57,6 @@
 ```
 
 #### [DELETE] /warehouse/1
-```json
-status 204 no content
+```shell
+  status 204 no content
 ```

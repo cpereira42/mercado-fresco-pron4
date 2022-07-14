@@ -60,7 +60,7 @@
 }
 ```
 
-### [PATCH] /warehouse/1
+#### [PATCH] /warehouse/1
 ```json
 {
     "width": 1.1,
@@ -76,6 +76,6 @@
 ```
 
 #### [DELETE] /warehouse/1
-```json
-status 204 no content
+```shell
+  status 204 no content
 ```
