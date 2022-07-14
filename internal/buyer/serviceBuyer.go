@@ -1,6 +1,6 @@
 package buyer
 
-import "fmt"
+//import "github.com/gin-gonic/gin"
 
 type Service interface {
 	GetAll() ([]Buyer, error)
@@ -11,17 +11,17 @@ type Service interface {
 }
 
 type service struct {
-	repositoryBuyer Repository
+	repository Repository
 }
 
 func NewService(r Repository) Service {
 	return &service{
-		repositoryBuyer: r,
+		repository: r,
 	}
 }
 
 func (s *service) GetAll() ([]Buyer, error) {
-	buyers, err := s.repositoryBuyer.GetAll()
+	buyers, err := s.repository.GetAll()
 	if err != nil {
 		return nil, err
 	}
@@ -29,7 +29,7 @@ func (s *service) GetAll() ([]Buyer, error) {
 }
 
 func (s *service) GetId(id int) (Buyer, error) {
-	buyer, err := s.repositoryBuyer.GetId(id)
+	buyer, err := s.repository.GetId(id)
 	if err != nil {
 		return Buyer{}, err
 	}
@@ -37,37 +37,16 @@ func (s *service) GetId(id int) (Buyer, error) {
 }
 
 func (s *service) Create(card_number_ID, first_name, last_name string) (Buyer, error) {
-	lastId, err := s.repositoryBuyer.LastID()
-	if err != nil {
-		return Buyer{}, err
-	}
-	lastId++
-	buyers, err := s.repositoryBuyer.GetAll()
+	buyer, err := s.repository.Create(card_number_ID, first_name, last_name)
 	if err != nil {
 		return Buyer{}, err
 	}
 
-	buyer = Buyer{lastId, card_number_ID, first_name, last_name}
-	exists := false
-	for i := range buyers {
-		if buyers[i].Card_number_ID == card_number_ID {
-			exists = true
-		}
-	}
-
-	if exists {
-		return Buyer{}, fmt.Errorf("a buyer with id %s, already exists", card_number_ID)
-	}
-	buyer, err := s.repositoryBuyer.Create(lastId, card_number_ID, first_name, last_name)
-
-	if err != nil {
-		return Buyer{}, err
-	}
 	return buyer, nil
 }
 
 func (s *service) Update(id int, card_number_ID, first_name, last_name string) (Buyer, error) {
-	buyer, err := s.repositoryBuyer.Update(id, card_number_ID, first_name, last_name)
+	buyer, err := s.repository.Update(id, card_number_ID, first_name, last_name)
 	if err != nil {
 		return Buyer{}, err
 	}
@@ -76,7 +55,7 @@ func (s *service) Update(id int, card_number_ID, first_name, last_name string) (
 }
 
 func (s *service) Delete(id int) error {
-	err := s.repositoryBuyer.Delete(id)
+	err := s.repository.Delete(id)
 	if err != nil {
 		return err
 	}

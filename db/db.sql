@@ -60,8 +60,8 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`carries` (
   CONSTRAINT `fk_carries_localities1`
     FOREIGN KEY (`locality_id`)
     REFERENCES `mercadofresco`.`localities` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 
@@ -84,8 +84,8 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`warehouse` (
   CONSTRAINT `fk_warehouse_localities1`
     FOREIGN KEY (`locality_id`)
     REFERENCES `mercadofresco`.`localities` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 
@@ -106,8 +106,8 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`employees` (
   CONSTRAINT `fk_employees_warehouse1`
     FOREIGN KEY (`warehouse_id`)
     REFERENCES `mercadofresco`.`warehouse` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 
@@ -139,8 +139,8 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`sellers` (
   CONSTRAINT `fk_sellers_localities1`
     FOREIGN KEY (`locality_id`)
     REFERENCES `mercadofresco`.`localities` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 
@@ -162,18 +162,19 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`products` (
   `product_type_id` INT(11) NOT NULL,
   `seller_id` INT(11) NOT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE INDEX `product_code` (`product_code` ASC) VISIBLE,
   INDEX `fk_product_sellers1_idx` (`seller_id` ASC) VISIBLE,
   INDEX `fk_product_products_types1_idx` (`product_type_id` ASC) VISIBLE,
   CONSTRAINT `fk_product_products_types1`
     FOREIGN KEY (`product_type_id`)
     REFERENCES `mercadofresco`.`products_types` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
   CONSTRAINT `fk_product_sellers1`
     FOREIGN KEY (`seller_id`)
     REFERENCES `mercadofresco`.`sellers` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
 
@@ -197,13 +198,13 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`sections` (
   CONSTRAINT `fk_section_products_types1`
     FOREIGN KEY (`product_type_id`)
     REFERENCES `mercadofresco`.`products_types` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
   CONSTRAINT `fk_section_warehouse1`
     FOREIGN KEY (`warehouse_id`)
     REFERENCES `mercadofresco`.`warehouse` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 
@@ -230,13 +231,13 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`products_batches` (
   CONSTRAINT `fk_products_batches_product1`
     FOREIGN KEY (`product_id`)
     REFERENCES `mercadofresco`.`products` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
   CONSTRAINT `fk_products_batches_section1`
     FOREIGN KEY (`section_id`)
     REFERENCES `mercadofresco`.`sections` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 
@@ -258,18 +259,18 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`inbound_orders` (
   CONSTRAINT `fk_inbound_details_employees1`
     FOREIGN KEY (`employee_id`)
     REFERENCES `mercadofresco`.`employees` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
   CONSTRAINT `fk_inbound_details_products_batches1`
     FOREIGN KEY (`product_batch_id`)
     REFERENCES `mercadofresco`.`products_batches` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
   CONSTRAINT `fk_inbound_details_warehouse1`
     FOREIGN KEY (`warehouse_id`)
     REFERENCES `mercadofresco`.`warehouse` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 
@@ -288,8 +289,8 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`product_records` (
   CONSTRAINT `fk_product_records_product1`
     FOREIGN KEY (`product_id`)
     REFERENCES `mercadofresco`.`products` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 
@@ -310,16 +311,14 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mercadofresco`.`purchase_orders` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `order_number` VARCHAR(255) NOT NULL,
   `order_date` DATETIME NOT NULL,
+  `order_number` VARCHAR(255) NOT NULL,  
   `tracking_code` VARCHAR(255) NOT NULL,
   `buyer_id` INT(11) NOT NULL,
-  `carrier_id` INT(11) NOT NULL,
+  `product_record_id` INT(11) NOT NULL,
   `order_status_id` INT(11) NOT NULL,
-  `warehouse_id` INT(10) UNSIGNED NOT NULL,
   PRIMARY KEY (`id`),
-  INDEX `fk_purchase_orders_carries1_idx` (`carrier_id` ASC) VISIBLE,
-  INDEX `fk_purchase_orders_warehouse1_idx` (`warehouse_id` ASC) VISIBLE,
+  INDEX `fk_purchase_orders_product_record1_idx` (`product_record_id` ASC) VISIBLE,
   INDEX `fk_purchase_orders_buyer1_idx` (`buyer_id` ASC) VISIBLE,
   INDEX `fk_purchase_orders_order_status1_idx` (`order_status_id` ASC) VISIBLE,
   CONSTRAINT `fk_purchase_orders_buyer1`
@@ -327,21 +326,16 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`purchase_orders` (
     REFERENCES `mercadofresco`.`buyer` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_purchase_orders_carries1`
-    FOREIGN KEY (`carrier_id`)
-    REFERENCES `mercadofresco`.`carries` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_purchase_orders_product_record1`
+    FOREIGN KEY (`product_record_id`)
+    REFERENCES `mercadofresco`.`product_records` (`id`)   
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,  
   CONSTRAINT `fk_purchase_orders_order_status1`
     FOREIGN KEY (`order_status_id`)
     REFERENCES `mercadofresco`.`order_status` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_purchase_orders_warehouse1`
-    FOREIGN KEY (`warehouse_id`)
-    REFERENCES `mercadofresco`.`warehouse` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 
@@ -363,13 +357,13 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`order_details` (
   CONSTRAINT `fk_order_details_product_records1`
     FOREIGN KEY (`product_record_id`)
     REFERENCES `mercadofresco`.`product_records` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
   CONSTRAINT `fk_order_details_purchase_orders1`
     FOREIGN KEY (`purchase_order_id`)
     REFERENCES `mercadofresco`.`purchase_orders` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 
@@ -409,13 +403,13 @@ CREATE TABLE IF NOT EXISTS `mercadofresco`.`user_rol` (
   CONSTRAINT `fk_user_rol_rol1`
     FOREIGN KEY (`rol_id`)
     REFERENCES `mercadofresco`.`rol` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
   CONSTRAINT `fk_user_rol_users1`
     FOREIGN KEY (`user_id`)
     REFERENCES `mercadofresco`.`users` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 
@@ -443,7 +437,6 @@ INSERT INTO `products` VALUES
 INSERT INTO `product_records` VALUES
 (1,'2008-11-11 13:23:44',15.50,15.50,1);
 
-
 INSERT INTO `warehouse` VALUES
 (1,'rua 1','11','1',1,1,2.00);
 
@@ -462,38 +455,16 @@ INSERT INTO `inbound_orders` VALUES
 INSERT INTO `carries` VALUES
 (1,'cid1','Meli','rua 1','11-5541-4120',1);
 
-
-
-
 INSERT INTO `buyer` VALUES
 (1,'123456','Mercado','Livre');
 
 INSERT INTO `order_status` VALUES
 (1,'order1');
 
-
 INSERT INTO `purchase_orders` VALUES
-(1,'order1','2008-11-11 13:23:44','1521',1,1,1,1);
-
+(1,'2008-11-11 13:23:44','1','1521',1,1,1);
 
 INSERT INTO `order_details` VALUES
 (1,'teste',15,15.00,1,1);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

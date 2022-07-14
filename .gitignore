@@ -5,8 +5,10 @@
 *.so
 *.dylib
 .DS_Store
-*.vscode
- 
+.vscode
+.env
+
+
 # Pre-commit-config
 .pre-commit-config.yaml
 
@@ -16,12 +18,14 @@
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
-.env
-
 # .data
 /db/.data 
 
+
+# .ideal diretorio especifico do Golang IDE
+.idea
+
+/MercadoFresco.session.sql
 # .vscode
 .vscode
-
-.pre-commit-config.yaml
+coverage.out

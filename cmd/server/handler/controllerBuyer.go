@@ -19,6 +19,16 @@ func NewBuyer(buyer buyer.Service) *BuyerController {
 	}
 }
 
+func NewRouteBuyer(r *gin.Engine, serviceBuyer buyer.Service) {
+	controllerBuyer := NewBuyer(serviceBuyer)
+	buyers := r.Group("/api/v1/buyers")
+	buyers.GET("/", controllerBuyer.GetAll())
+	buyers.GET("/:id", controllerBuyer.GetID())
+	buyers.POST("/", controllerBuyer.Create())
+	buyers.PATCH("/:id", controllerBuyer.Update())
+	buyers.DELETE("/:id", controllerBuyer.Delete())
+}
+
 func (c *BuyerController) GetAll() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		buyer, err := c.service.GetAll()
@@ -61,7 +71,7 @@ func (c *BuyerController) Create() gin.HandlerFunc {
 			return
 		}
 
-		ctx.JSON(http.StatusCreated, buyer)
+		ctx.JSON(http.StatusCreated, web.NewResponse(http.StatusCreated, buyer, ""))
 
 	}
 }
@@ -84,7 +94,7 @@ func (c *BuyerController) Update() gin.HandlerFunc {
 			ctx.JSON(http.StatusNotFound, web.NewResponse(http.StatusNotFound, nil, err.Error()))
 			return
 		}
-		ctx.JSON(http.StatusOK, buyer)
+		ctx.JSON(http.StatusOK, web.NewResponse(http.StatusOK, buyer, ""))
 	}
 }
 
